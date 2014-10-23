@@ -26,7 +26,7 @@ class CountryTest < ActiveSupport::TestCase
     dominican_republic = Country.create(:name => 'Dominican Republic', :wiki_url => wikipedia_url)
     assert dominican_republic.wiki_description.present?
 
-    expected_description = "The Dominican Republic (i/dəˌmɪnɨkən rɨˈpʌblɪk/; Spanish: República Dominicana [reˈpuβlika ðominiˈkana]) is a nation on the island of Hispaniola, part of the Greater Antilles archipelago in the Caribbean region. The western three-eighths of the island is occupied by the nation of Haiti, making Hispaniola one of two Caribbean islands, along with Saint Martin, that are shared by two countries. Both by area and population, the Dominican Republic is the second largest Caribbean nation (after Cuba), with 48,445 square kilometres (18,705 sq mi) and an estimated 10 million people, one million of which live in the capital city, Santo Domingo."
+    expected_description = "The Dominican Republic (i/dəˌmɪnɨkən rɨˈpʌblɪk/; Spanish: República Dominicana [reˈpuβlika ðominiˈkana]) is a nation on the island of Hispaniola, part of the Greater Antilles archipelago in the Caribbean region. The western three-eighths of the island is occupied by the nation of Haiti, making Hispaniola one of two Caribbean islands, along with Saint Martin, that are shared by two countries. Both by area and population, the Dominican Republic is the second largest Caribbean nation (after Cuba), with 48,445 square kilometres (18,705 sq mi) and nearly 10 million people, one million of which live in the capital city, Santo Domingo."
 
     assert_match expected_description, dominican_republic.wiki_description
   end

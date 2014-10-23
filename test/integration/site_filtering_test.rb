@@ -13,16 +13,17 @@ class SiteFilteringTest < ActionController::IntegrationTest
     get "/"
     assert_response :success
     assert_equal global_site, assigns(:site)
-    
+
     host!(site1.url)
-    get "/donors/#{donor.id}", force_site_id: site1.id
+    get "/", force_site_id: site1.id
     assert_response :success
     assert_equal site1, assigns(:site)
-    
+
     host!(site2.url)
-    get "/donors/#{donor.id}", force_site_id: site2.id
+    get "/", force_site_id: site2.id
     assert_response :success
     assert_equal site2, assigns(:site)
+
   end
   
 end
