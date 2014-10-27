@@ -12,6 +12,7 @@ public/system
 bin/
 install/
 config/app_config.yml
+config/database.yml
 update/
 
 # front-end
