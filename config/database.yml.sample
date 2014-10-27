@@ -1,0 +1,38 @@
+development:
+  adapter: postgis
+  host: localhost
+  database: iom_development
+  username: 
+  password: 
+
+test:
+  adapter: postgis
+  host: localhost
+  database: iom_test
+  username: 
+  password: 
+
+staging:
+  adapter: postgis
+  template: template_postgis
+  encoding: unicode
+  database: iom_production
+  username: postgres
+  password:
+
+smbtc:
+  adapter: postgis
+  template: template_postgis
+  encoding: unicode
+  database: iom_production
+  username: postgres
+  password:
+
+production:
+  adapter: postgis
+  template: template_postgis
+  encoding: unicode
+  host: localhost
+  database: iom_production
+  username: postgres
+  password:
