@@ -1,5 +1,6 @@
 .DS_Store
 .bundle
+.powrc
 .ruby-version
 doc/
 db/*.sqlite3
