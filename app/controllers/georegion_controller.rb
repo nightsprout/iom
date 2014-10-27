@@ -11,7 +11,7 @@ class GeoregionController < ApplicationController
     geo_ids << params[:location_id] if params[:location_id].present?
     geo_ids << params[:location2_id] if params[:location2_id].present?
     geo_ids << params[:id] if params[:id].present?
-    
+
     @empty_layer = false
     @empty_layer = true if geo_ids.count > 1
 
@@ -122,8 +122,7 @@ class GeoregionController < ApplicationController
       # If we are in the main level whe only show the projects of
       # this level
       if @area.level == @site.levels_for_region.max
-        sql="select *,(select the_geom_geojson from regions where id=subq.id) as geojson
-          from(
+        sql="select * from(
           select r.id,count(distinct(ps.project_id)) as count,r.name,r.center_lon as lon,r.center_lat as lat
           from (projects_regions as pr
             inner join projects_sites as ps on pr.project_id=ps.project_id and site_id=#{@site.id})
@@ -132,9 +131,14 @@ class GeoregionController < ApplicationController
             #{category_join}
           group by r.id,r.name,lon,lat) as subq"
       else
-        sql="select *,(select the_geom_geojson from regions where id=subq.id) as geojson
-          from(
-          select r.id,count(distinct(ps.project_id)) as count,r.name,r.center_lon as lon,r.center_lat as lat
+        sql="select * from(
+          select r.id,count(distinct(ps.project_id)) as count,r.name,r.center_lon as lon,r.center_lat as lat,
+          CASE WHEN count(distinct ps.project_id) > 1 THEN
+              '/location/'||r.path
+          ELSE
+              '/projects/'||(array_to_string(array_agg(ps.project_id),''))
+          END as url,
+          r.code, 'region' as type
           from (projects_regions as pr
             inner join projects_sites as ps on pr.project_id=ps.project_id and site_id=#{@site.id})
             inner join projects as p on ps.project_id=p.id and (p.end_date is null OR p.end_date > now())
@@ -172,10 +176,18 @@ class GeoregionController < ApplicationController
             r['url'] = uri.to_s
             r
           end.to_json
-          @map_type = 'administrative_map'
+        elsif @area.is_a?(Region) && @site.navigate_by_regions?
+          @map_data = result.map do |r|
+
+            uri = URI.parse(r['url'])
+            params = Hash[uri.query.split('&').map{|p| p.split('=')}] rescue {}
+            params['force_site_id'] = @site.id unless @site.published?
+            uri.query = params.to_a.map{|p| p.join('=')}.join('&')
+            r['url'] = uri.to_s
+            r
+          end.to_json
         else
           @map_data = ([result.first || {'id' => nil, 'lat' => nil, 'lon' => nil, 'count' => nil, 'geojson' => nil}]).to_json
-          @map_type = 'georegion'
         end
 
         areas= []

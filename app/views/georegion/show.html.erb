@@ -14,7 +14,7 @@
       var map_type = "georegion";
     <% end  %>
     var last_level = "<%= @area.is_a?(Country) && @site.navigate_by_regions? ? "false" : "true" %>";
-    var show_regions_with_one_project = "<%= @area.is_a?(Country) && @site.navigate_by_regions? ? "true" : "false" %>";
+    var show_regions_with_one_project = "true";
     var map_data = <%=raw(@map_data)%>;
     var max_count = <%=@map_data_max_count%>;
     var area_stroke_color = "<%=@georegion_map_stroke_color%>";
