@@ -41,6 +41,7 @@ Iom::Application.routes.draw do
   
   resources :location, :controller => 'georegion' do
     get ':id', :to => 'georegion#show'
+    get ':location2_id/:id', :to => 'georegion#show'
   end
 
   # clusters and sector work through the same controller and view

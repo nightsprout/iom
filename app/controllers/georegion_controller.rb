@@ -6,20 +6,20 @@ class GeoregionController < ApplicationController
   skip_before_filter :set_site, :only => [:list_regions1_from_country,:list_regions2_from_country,:list_regions3_from_country]
 
   def show
-    ids = params[:ids]
-    ids ||= params[:id]
-    raise NotFound unless ids =~ /([\d|\/]+)/
-    raise NotFound unless $1.size == ids.size
 
-    geo_ids = ids.split('/')
+    geo_ids = []
+    geo_ids << params[:location_id] if params[:location_id].present?
+    geo_ids << params[:location2_id] if params[:location2_id].present?
+    geo_ids << params[:id] if params[:id].present?
+    
     @empty_layer = false
     @empty_layer = true if geo_ids.count > 1
 
 
     @breadcrumb = []
 
-    @country = @area = country = Country.find(geo_ids[0], :select => Country.custom_fields)
-    raise NotFound unless country
+    @country = country = Country.find(geo_ids[0], :select => Country.custom_fields)
+    @area = (geo_ids.last == geo_ids[0]) ? country : Region.find( geo_ids.last )
 
     @breadcrumb << country if @site.navigate_by_country?
 

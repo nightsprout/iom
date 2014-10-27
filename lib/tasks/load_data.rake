@@ -2,7 +2,7 @@ namespace :db do
 
   # IGNORE THESE THINGS
   # Current proper order is (run each line separately, only combine ones combined on one line):
-  # db:drop db:create iom:postgis_init db:migrate  
+  # db:drop db:create iom:postgis_init iom:tiger_init db:migrate  
   # iom:data:load_regions_0
   # iom:data:load_regions_1
   # iom:data:load_regions_2
@@ -398,7 +398,9 @@ namespace :iom do
             p.save!
 
           end
-        rescue
+        rescue Exception => e
+          Rails.logger.info "Exception: #{e}"
+
           nil
         end
       end
@@ -460,6 +462,9 @@ namespace :iom do
       p "VAIndia.csv loaded"
 
       load_project_files( csv_projs )
+
+      s = Site.find_by_name "global"
+
 
     end
 

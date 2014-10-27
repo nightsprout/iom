@@ -23,6 +23,7 @@ class Region < ActiveRecord::Base
 
   belongs_to :country
   belongs_to :region, :foreign_key => :parent_region_id, :class_name => 'Region'
+  has_many :regions, :foreign_key => :parent_region_id, :class_name => 'Region'
 
   has_and_belongs_to_many :projects
 

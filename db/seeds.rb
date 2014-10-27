@@ -15,7 +15,7 @@ User.find_or_create_by_email(
 settings = Settings.find_or_create_by_id(1)
 data = HashWithIndifferentAccess.new
 data[:main_site_host] = 'iom.dev'
-data[:main_site_host] = 'task-force-prod.herokuapp.com' if Rails.env.production?
+data[:main_site_host] = 'partnersmap.org' if Rails.env.production?
 settings.data = data
 settings.save!
 
@@ -643,22 +643,3 @@ Audience.find_or_create_by_name :name => 'Academia'
 Audience.find_or_create_by_name :name => 'Policymakers'
 Audience.find_or_create_by_name :name => 'Donors'
 
-
-
-####################################################################
-#
-# CENTROIDS UPDATE
-#
-####################################################################
-
-philipines = Country.find_or_initialize_by_name('Philipines')
-philipines.update_attributes(
-  :center_lat => 11.1682658,
-  :center_lon => 122.8132091
-)
-
-usa = Country.find_or_initialize_by_name('United States')
-usa.update_attributes(
-  :center_lat => 39.503926,
-  :center_lon => -100.885364
-)
