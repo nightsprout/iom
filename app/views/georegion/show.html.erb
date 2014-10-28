@@ -8,12 +8,13 @@
     var chld = "<%=@chld%>";
     var chd = "<%=@chd%>";
     var marker_source = "<%=@georegion_map_marker_source%>";
-    <% if @area.is_a?(Country) && @site.navigate_by_regions? %>
+    <% if (@area.is_a?(Country) && @site.navigate_by_regions?) || (@area.is_a?(Region) && @area.level < @site.levels_for_region.max) %>
       var map_type = "administrative_map";
+      var last_level = "false";
     <% else %>
       var map_type = "georegion";
+      var last_level = "true";
     <% end  %>
-    var last_level = "<%= @area.is_a?(Country) && @site.navigate_by_regions? ? "false" : "true" %>";
     var show_regions_with_one_project = "true";
     var map_data = <%=raw(@map_data)%>;
     var max_count = <%=@map_data_max_count%>;

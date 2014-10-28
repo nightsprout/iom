@@ -39,6 +39,13 @@ class Region < ActiveRecord::Base
     (columns.map{ |c| c.name } - ['the_geom']).map{ |c| "#{self.table_name}.#{c}" }
   end
 
+  # Something to do with the "the_geom" field drastically slows down finds.
+  # This special method shoud speed things up for cases where its not required
+  # to have "the_geom"
+  def self.fast
+    select( self.custom_fields.join(", ") )
+  end
+
   # Array of arrays
   # [[cluster, count], [cluster, count]]
   def projects_clusters_sectors(site)

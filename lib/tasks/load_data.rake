@@ -94,10 +94,10 @@ namespace :iom do
       
       results = DB.select_rows "SELECT * from tmp_countries"
       results.each do |row|
-        country = Country.find_by_name_insensitive row[1]
+        country = Country.fast.find_by_name_insensitive row[1]
         if country.nil?
           DB.execute "INSERT INTO countries( name, center_lat, center_lon, the_geom, the_geom_geojson ) SELECT name0, st_y( ST_Centroid(the_geom) ), st_x( ST_Centroid(the_geom) ), the_geom, ST_AsGeoJSON(the_geom,6) from tmp_countries where gid=#{row[0]}"
-          country = Country.find_by_name row[1]
+          country = Country.fast.find_by_name row[1]
           country.name = country.name.titleize
           country.save!
         end
@@ -110,7 +110,7 @@ namespace :iom do
       DB = ActiveRecord::Base.connection
 
       countries = {}
-      Country.all.each{|c| countries[c.name] = c }
+      Country.fast.all.each{|c| countries[c.name] = c }
       
       unless File.exists? "#{Rails.root}/db/data/admin1_regions.sql"
         open("#{Rails.root}/db/data/admin1_regions.sql", "wb") do |file|
@@ -140,17 +140,17 @@ namespace :iom do
         results.each do |row|
 
           country = countries[ row[1] ]
-          country = Country.find_by_name_insensitive row[1] if country.nil?
+          country = Country.fast.find_by_name_insensitive row[1] if country.nil?
           if country.nil?
             country = Country.create!( :name => row[1].titleize )
           end
 
           next if row[2].nil?
 
-          region = country.regions.find_by_name_insensitive row[2]        
+          region = country.regions.fast.find_by_name_insensitive row[2]        
           if region.nil?
             DB.execute "INSERT INTO regions(country_id, level, name, center_lat, center_lon, the_geom, the_geom_geojson ) SELECT #{country.id}, 1, name1, st_y( ST_Centroid(the_geom) ), st_x( ST_Centroid(the_geom) ), the_geom, ST_AsGeoJSON(the_geom,6) from tmp_countries where gid=#{row[0]}"
-            region = country.regions.find_by_name row[2]
+            region = country.regions.fast.find_by_name row[2]
             region.name = region.name.titleize
             region.save!
           end
@@ -168,7 +168,7 @@ namespace :iom do
       
       # cache countries because this seems to be a bottleneck
       countries = {}
-      Country.all.each{|c| countries[c.name] = c }
+      Country.fast.all.each{|c| countries[c.name] = c }
 
       unless File.exists? "#{Rails.root}/db/data/admin2_regions.sql"
         open("#{Rails.root}/db/data/admin2_regions.sql", "wb") do |file|
@@ -193,10 +193,10 @@ namespace :iom do
       results = DB.select_rows "SELECT * from tmp_countries where name1 = '.' and name2 = '.'"
       results.each do |row|
         country = countries[ row[2].titleize ]
-        country = Country.find_by_name_insensitive row[2] if country.nil?
+        country = Country.fast.find_by_name_insensitive row[2] if country.nil?
         if country.nil?
           DB.execute "INSERT INTO countries( name, code, center_lat, center_lon, iso3_code, the_geom, the_geom_geojson ) SELECT name0, iso, st_y( ST_Centroid(the_geom) ), st_x( ST_Centroid(the_geom) ), iso, the_geom, ST_AsGeoJSON(the_geom,6) from tmp_countries where gid=#{row[0]}"
-          country = Country.find_by_name_insensitive row[2]
+          country = Country.fast.find_by_name_insensitive row[2]
           country.name = country.name.titleize
           country.save!
         end
@@ -207,7 +207,7 @@ namespace :iom do
       results = DB.select_rows "SELECT * from tmp_countries where name1 != '.' and name2 = '.'"
       results.each do |row|
         country = countries[ row[2].titleize ]
-        country = Country.find_by_name_insensitive row[2] if country.nil?
+        country = Country.fast.find_by_name_insensitive row[2] if country.nil?
         if country.nil?
           country = Country.create!(:name => row[2].titleize, :code => row[8], :iso3_code => row[8])
         else
@@ -215,10 +215,10 @@ namespace :iom do
         end
 
 
-        region = country.regions.find_by_name_insensitive row[3].titleize     
+        region = country.regions.fast.find_by_name_insensitive row[3].titleize     
         if region.nil?
           DB.execute "INSERT INTO regions(country_id, level, name, center_lat, center_lon, the_geom, the_geom_geojson, code ) SELECT #{country.id}, 1, name1, st_y( ST_Centroid(the_geom) ), st_x( ST_Centroid(the_geom) ), the_geom, ST_AsGeoJSON(the_geom,6), hasc from tmp_countries where gid=#{row[0]}"
-          region = country.regions.find_by_name_insensitive row[3]
+          region = country.regions.fast.find_by_name_insensitive row[3]
           region.name = region.name.titleize
           region.save!
         end
@@ -234,7 +234,7 @@ namespace :iom do
 
         results.each do |row|
           country = countries[ row[2].titleize ] 
-          country = Country.find_by_name_insensitive row[2] if country.nil?
+          country = Country.fast.find_by_name_insensitive row[2] if country.nil?
           if country.nil?
             country = Country.create!(:name => row[2].titleize, :code => row[8], :iso3_code => row[8])
           else
@@ -243,15 +243,15 @@ namespace :iom do
           end
           countries[ country.name ] = country if countries[ country.name ].nil?
 
-          parent_region = country.regions.find_by_name_insensitive row[3]
+          parent_region = country.regions.fast.find_by_name_insensitive row[3]
           if parent_region.nil?
             parent_region = Region.create!(:name => row[3].titleize, :country_id => country.id, :level => 1)
           end
 
-          region = Region.where(:parent_region_id => parent_region.id, :country_id => country.id).find_by_name_insensitive( row[4] )
+          region = Region.where(:parent_region_id => parent_region.id, :country_id => country.id).fast.find_by_name_insensitive( row[4] )
           if region.nil?
             DB.execute "INSERT INTO regions(country_id, parent_region_id, level, name, center_lat, center_lon, the_geom, the_geom_geojson, code ) SELECT #{country.id}, #{parent_region.id}, 2, name2, st_y( ST_Centroid(the_geom) ), st_x( ST_Centroid(the_geom) ), the_geom, ST_AsGeoJSON(the_geom,6), hasc from tmp_countries where gid=#{row[0]}"
-            region = Region.where(:name => row[4], :parent_region_id => parent_region.id, :country_id => country.id).first 
+            region = Region.fast.where(:name => row[4], :parent_region_id => parent_region.id, :country_id => country.id).first 
             region.name = region.name.titleize
             region.save!
           end
@@ -314,17 +314,17 @@ namespace :iom do
                 loc_array = loc.split(">").map(&:strip)
 
                 if loc_array[0].present?
-                  c = Country.find_by_name loc_array[0]
+                  c = Country.fast.find_by_name loc_array[0]
                   next if c.nil?
                   p.countries << c
 
                   if loc_array[1].present?
-                    r = c.regions.find_by_name loc_array[1]
+                    r = c.regions.fast.find_by_name loc_array[1]
                     next if r.nil?
                     p.regions << r
 
                     if loc_array[2].present?
-                      r2 = Region.where(:country_id => c.id, :parent_region_id => r.id).first
+                      r2 = Region.fast.where(:country_id => c.id, :parent_region_id => r.id).first
                       next if r2.nil?
                       p.regions << r2
                     end
@@ -414,7 +414,7 @@ namespace :iom do
       unless File.exists? "#{Rails.root}/db/data/VitaminAngelsMappingData.csv"
         open("#{Rails.root}/db/data/VitaminAngelsMappingData.csv", "wb") do |file|
           open("https://s3.amazonaws.com/filehost/VitaminAngelsMappingData.csv") do |uri|
-             file.write(uri.read)
+            file.write(uri.read)
           end
         end
       end
@@ -432,7 +432,7 @@ namespace :iom do
       unless File.exists? "#{Rails.root}/db/data/VAAmericas.csv"
         open("#{Rails.root}/db/data/VAAmericas.csv", "wb") do |file|
           open("https://s3.amazonaws.com/filehost/VAAmericas.csv") do |uri|
-             file.write(uri.read)
+            file.write(uri.read)
           end
         end
       end
@@ -450,7 +450,7 @@ namespace :iom do
       unless File.exists? "#{Rails.root}/db/data/VAIndia.csv"
         open("#{Rails.root}/db/data/VAIndia.csv", "wb") do |file|
           open("https://s3.amazonaws.com/filehost/VAIndia.csv") do |uri|
-             file.write(uri.read)
+            file.write(uri.read)
           end
         end
       end
