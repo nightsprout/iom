@@ -107,11 +107,11 @@ class GeoregionController < ApplicationController
     if @area.is_a?(Region)
 
       projects_custom_find_options = {
-        :region => @area.id,
-        :level => @site.levels_for_region,
+        :region   => @area.id,
+        :level    => @site.levels_for_region,
         :per_page => 10,
-        :page => params[:page],
-        :order => 'created_at DESC',
+        :page     => params[:page],
+        :order    => 'created_at DESC',
         :start_in_page => params[:start_in_page]
       }
       projects_custom_find_options[:region_category_id] = @filter_by_category if @filter_by_category.present?
@@ -121,9 +121,16 @@ class GeoregionController < ApplicationController
 
       # If we are in the main level whe only show the projects of
       # this level
+      Rails.logger.debug "========"
+      Rails.logger.debug [@area.level, @site.levels_for_region.max]
       if @area.level == @site.levels_for_region.max
         sql="select * from(
-          select r.id,count(distinct(ps.project_id)) as count,r.name,r.center_lon as lon,r.center_lat as lat
+          select r.id,count(distinct(ps.project_id)) as count,r.name,r.center_lon as lon,r.center_lat as lat,
+          CASE WHEN count(distinct ps.project_id) > 1 THEN
+              '/location/'||r.path
+          ELSE
+              '/projects/'||(array_to_string(array_agg(ps.project_id),''))
+          END as url
           from (projects_regions as pr
             inner join projects_sites as ps on pr.project_id=ps.project_id and site_id=#{@site.id})
             inner join projects as p on ps.project_id=p.id and (p.end_date is null OR p.end_date > now())
@@ -176,7 +183,7 @@ class GeoregionController < ApplicationController
             r['url'] = uri.to_s
             r
           end.to_json
-        elsif @area.is_a?(Region) && @site.navigate_by_regions?
+        else
           @map_data = result.map do |r|
 
             uri = URI.parse(r['url'])
@@ -186,8 +193,6 @@ class GeoregionController < ApplicationController
             r['url'] = uri.to_s
             r
           end.to_json
-        else
-          @map_data = ([result.first || {'id' => nil, 'lat' => nil, 'lon' => nil, 'count' => nil, 'geojson' => nil}]).to_json
         end
 
         areas= []

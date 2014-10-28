@@ -688,6 +688,13 @@ SQL
     ActiveRecord::Base.connection.execute(sql)
     #Work on the denormalization
 
+    set_cached_projects_by_level( 1 ) if navigate_by_level1?
+    set_cached_projects_by_level( 2 ) if navigate_by_level2?
+    set_cached_projects_by_level( 3 ) if navigate_by_level3?
+  end
+
+  def set_cached_projects_by_level(level)
+
     sql="insert into data_denormalization(project_id,project_name,project_description,organization_id,organization_name,start_date,end_date,regions,regions_ids,countries,countries_ids,sectors,sector_ids,clusters,cluster_ids,donors_ids,activities,activities_ids,audiences,audiences_ids,diseases,diseases_ids,is_active,site_id,created_at)
     select  * from
            (SELECT p.id as project_id, p.name as project_name, p.description as project_description,
@@ -716,7 +723,7 @@ SQL
            INNER JOIN organizations as o ON p.primary_organization_id=o.id
            INNER JOIN projects_sites as ps ON p.id=ps.project_id
            LEFT JOIN projects_regions as pr ON pr.project_id=p.id
-           LEFT JOIN regions as r ON pr.region_id=r.id and r.level=#{self.level_for_region}
+           LEFT JOIN regions as r ON pr.region_id=r.id and r.level=#{level}
            LEFT JOIN countries_projects as cp ON cp.project_id=p.id
            LEFT JOIN countries as c ON c.id=cp.country_id OR c.id = r.country_id
            LEFT JOIN clusters_projects as cpro ON cpro.project_id=p.id

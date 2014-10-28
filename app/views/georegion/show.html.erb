@@ -8,7 +8,7 @@
     var chld = "<%=@chld%>";
     var chd = "<%=@chd%>";
     var marker_source = "<%=@georegion_map_marker_source%>";
-    <% if (@area.is_a?(Country) && @site.navigate_by_regions?) || (@area.is_a?(Region) && @area.level < @site.levels_for_region.max) %>
+    <% if ( @area.is_a?(Country) && @site.navigate_by_regions? ) || ( @area.is_a?(Region) && @area.level < @site.levels_for_region.max ) %>
       var map_type = "administrative_map";
       var last_level = "false";
     <% else %>
