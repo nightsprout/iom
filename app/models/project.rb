@@ -144,10 +144,11 @@ class Project < ActiveRecord::Base
   end
 
   def date_provided=(value)
+    Rails.logger.debug value
     if value.present?
       value = case value
               when String
-                Date.parse(value)
+                Date.strptime(value, "%m/%d/%Y")
               when Date, Time, DateTime
                 value
               end
@@ -159,7 +160,7 @@ class Project < ActiveRecord::Base
     if value.present?
       value = case value
               when String
-                Date.parse(value)
+                Date.strptime(value, "%m/%d/%Y")
               when Date, Time, DateTime
                 value
               end
@@ -1092,7 +1093,7 @@ SQL
                       when Date, DateTime, Time
                         start_date
                       when String
-                        Date.parse(start_date) rescue self.errors.add(:start_date, "Start date is invalid")
+                        Date.strptime(start_date, "%m/%d/%Y") rescue self.errors.add(:start_date, "Start date is invalid")
                       else
                         self.errors.add(:start_date, "Start date is invalid")
                       end if start_date.present?
@@ -1101,7 +1102,7 @@ SQL
                     when Date, DateTime, Time
                       end_date
                     when String
-                      Date.parse(end_date) rescue self.errors.add(:end_date, "End date is invalid")
+                      Date.strptime(end_date, "%m/%d/%Y") rescue self.errors.add(:end_date, "End date is invalid")
                     else
                       self.errors.add(:end_date, "End date is invalid")
                     end if end_date.present?
@@ -1263,8 +1264,8 @@ SQL
 
   def self.report(params = {})
     # FORM Params
-    start_date = Date.parse(params[:start_date]['day']+"-"+params[:start_date]['month']+"-"+params[:start_date]['year'])
-    end_date = Date.parse(params[:end_date]['day']+"-"+params[:end_date]['month']+"-"+params[:end_date]['year'])
+    start_date = Date.strptime(params[:start_date]['day']+"-"+params[:start_date]['month']+"-"+params[:start_date]['year'], "%m/%d/%Y")
+    end_date = Date.strptime(params[:end_date]['day']+"-"+params[:end_date]['month']+"-"+params[:end_date]['year'], "%m/%d/%Y")
     countries = params[:country] if params[:country]
     donors = params[:donor] if params[:donor]
     sectors = params[:sector] if params[:sector]
@@ -1512,8 +1513,8 @@ SQL
     ## FILTERING >>
     ###########################
 
-    start_date = Date.parse(params[:start_date]['day']+"-"+params[:start_date]['month']+"-"+params[:start_date]['year'])
-    end_date = Date.parse(params[:end_date]['day']+"-"+params[:end_date]['month']+"-"+params[:end_date]['year'])
+    start_date = Date.strptime(params[:start_date]['day']+"-"+params[:start_date]['month']+"-"+params[:start_date]['year'], "%m/%d/%Y")
+    end_date = Date.strptime(params[:end_date]['day']+"-"+params[:end_date]['month']+"-"+params[:end_date]['year'], "%m/%d/%Y")
     countries = params[:country] if params[:country]
     donors = params[:donor] if params[:donor]
     sectors = params[:sector] if params[:sector]
@@ -1771,8 +1772,8 @@ SQL
   end
 
   def self.get_list(params={})
-    start_date = Date.parse(params[:start_date]['day']+"-"+params[:start_date]['month']+"-"+params[:start_date]['year']) if params[:start_date]
-    end_date = Date.parse(params[:end_date]['day']+"-"+params[:end_date]['month']+"-"+params[:end_date]['year']) if params[:end_date]
+    start_date = Date.strptime(params[:start_date]['day']+"-"+params[:start_date]['month']+"-"+params[:start_date]['year'], "%m/%d/%Y") if params[:start_date]
+    end_date = Date.strptime(params[:end_date]['day']+"-"+params[:end_date]['month']+"-"+params[:end_date]['year'], "%m/%d/%Y") if params[:end_date]
     countries = params[:country] if params[:country]
     donors = params[:donor] if params[:donor]
     sectors = params[:sector] if params[:sector]
