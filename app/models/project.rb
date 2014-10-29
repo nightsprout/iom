@@ -540,7 +540,7 @@ SQL
     }
     options = default_options.merge(options)
     options[:page] ||= 1
-    level = options[:level] ? options[:level] : site.levels_for_region.max
+    level = options[:level] ? options[:level] : 1
 
     sql = ""
     if options[:region]
@@ -553,7 +553,7 @@ SQL
           where << "sector_ids && '{#{options[:region_category_id]}}'"
         end
       end
-
+      where << "level = #{level}"
       sql="select * from data_denormalization where #{where.join(' and ')}"
     elsif options[:country]
       where = []
@@ -566,20 +566,21 @@ SQL
         end
       end
 
+      where << "level = #{level}"
       sql="select * from data_denormalization where #{where.join(' and ')}"
     elsif options[:cluster]
       where = []
       where << "cluster_ids && '{#{options[:cluster]}}' and site_id=#{site.id} and (end_date is null OR end_date > now())"
       where << "regions_ids && '{#{options[:cluster_region_id]}}'" if options[:cluster_region_id]
       where << "countries_ids && '{#{options[:cluster_country_id]}}'" if options[:cluster_country_id]
-
+      where << "level = #{level}"
       sql="select * from data_denormalization where #{where.join(' and ')}"
     elsif options[:sector]
       where = []
       where << "sector_ids && '{#{options[:sector]}}' and site_id=#{site.id} and (end_date is null OR end_date > now())"
       where << "regions_ids && '{#{options[:sector_region_id]}}'" if options[:sector_region_id]
       where << "countries_ids && '{#{options[:sector_country_id]}}'" if options[:sector_country_id]
-
+      where << "level = #{level}"
       sql="select * from data_denormalization where #{where.join(' and ')}"
     elsif options[:organization]
       where = []
@@ -595,7 +596,7 @@ SQL
 
       where << "regions_ids && '{#{options[:organization_region_id]}}'::integer[]" if options[:organization_region_id]
       where << "countries_ids && '{#{options[:organization_country_id]}}'::integer[]" if options[:organization_country_id]
-
+      where << "level = #{level}"
       sql="select * from data_denormalization where #{where.join(' and ')}"
     elsif options[:donor_id]
       where = []
@@ -611,15 +612,16 @@ SQL
         where << "sector_ids && '{#{options[:category_id]}}'"
       end
       where << "donors_ids && '{#{options[:donor_id]}}' and site_id=#{site.id} and (end_date is null OR end_date > now())"
+      where << "level = #{level}"
       sql="select * from data_denormalization where #{where.join(' and ')}"
     elsif options[:activity]
-      sql="select * from data_denormalization where activities_ids && '{#{options[:activity]}}' and site_id=#{site.id} and (end_date is null OR end_date > now())"
+      sql="select * from data_denormalization where activities_ids && '{#{options[:activity]}}' and site_id=#{site.id} and (end_date is null OR end_date > now()) and level = #{level}"
     elsif options[:audience]
-      sql="select * from data_denormalization where activities_ids && '{#{options[:audience]}}' and site_id=#{site.id} and (end_date is null OR end_date > now())"
+      sql="select * from data_denormalization where activities_ids && '{#{options[:audience]}}' and site_id=#{site.id} and (end_date is null OR end_date > now()) and level = #{level}"
     elsif options[:disease]
-      sql="select * from data_denormalization where activities_ids && '{#{options[:disease]}}' and site_id=#{site.id} and (end_date is null OR end_date > now())"
+      sql="select * from data_denormalization where activities_ids && '{#{options[:disease]}}' and site_id=#{site.id} and (end_date is null OR end_date > now()) and level = #{level}"
     else
-      sql="select * from data_denormalization where site_id=#{site.id} and (end_date is null OR end_date > now())"
+      sql="select * from data_denormalization where site_id=#{site.id} and (end_date is null OR end_date > now()) and level = #{level}"
     end
 
     total_entries = ActiveRecord::Base.connection.execute("select count(*) as count from (#{sql}) as q").first['count'].to_i
