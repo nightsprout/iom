@@ -41,6 +41,7 @@ GEM
     aws-sdk-v1 (1.57.0)
       json (~> 1.4)
       nokogiri (>= 1.4.4)
+    browser (0.7.0)
     builder (3.0.4)
     capistrano (2.15.5)
       highline
@@ -265,6 +266,7 @@ DEPENDENCIES
   activerecord-postgis-adapter
   annotate
   aws-sdk
+  browser
   capistrano
   capistrano-ext
   capybara (~> 2.2.0)
