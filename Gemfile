@@ -17,6 +17,7 @@ gem 'newrelic_rpm'
 gem 'will_paginate', '~> 3.0'
 gem 'sanitize', '~> 3.0.2'
 gem 'paperclip', '~> 2.7'
+gem 'aws-sdk'
 gem 'garb'
 gem 'csv-mapper'
 gem 'fastercsv'
@@ -41,6 +42,7 @@ group :development do
   gem 'capistrano-ext'
   gem 'wirble'
   gem 'railroady'
+  gem 'dotenv'
 #  gem 'mail_view', :git => 'https://github.com/37signals/mail_view.git'
 end
 

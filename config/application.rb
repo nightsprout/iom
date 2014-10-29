@@ -4,6 +4,8 @@ require 'rails/all'
 
 Bundler.require(:default, Rails.env) if defined?(Bundler)
 
+Dotenv.load if defined?(Dotenv)
+
 module Iom
   class Application < Rails::Application
     config.action_view.javascript_expansions[:defaults] = %w()
