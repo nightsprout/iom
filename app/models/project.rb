@@ -542,6 +542,7 @@ SQL
     options = default_options.merge(options)
     options[:page] ||= 1
     level = options[:level] ? options[:level] : 1
+    level = level[0] if level.is_a?(Array)
 
     sql = ""
     if options[:region]
