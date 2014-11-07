@@ -77,7 +77,7 @@ class Project < ActiveRecord::Base
   #end)
 
   after_create :generate_intervention_id
-  after_save{ Rails.logger.debug "PROJECT 3"; Resque.enqueue(CacheProject, self.id) }
+  after_save{ Resque.enqueue(CacheProject, self.id) }
   after_destroy :remove_cached_sites
   before_validation :strip_urls
 
@@ -144,7 +144,6 @@ class Project < ActiveRecord::Base
   end
 
   def date_provided=(value)
-    Rails.logger.debug value
     if value.present?
       value = case value
               when String
@@ -756,7 +755,6 @@ SQL
   end
 
   def set_cached_sites
-    Rails.logger.debug "PROJECT NO"
     #We also update its geometry
     sql = <<-SQL
       UPDATE projects p SET the_geom = geoms.the_geom
@@ -922,14 +920,12 @@ SQL
   end
 
   def generate_intervention_id
-    Rails.logger.debug "PROJECT 1"
     Project.where(:id => id).update_all(:intervention_id => [
       primary_organization.try(:organization_id).presence || 'XXXX',
       countries.first.try(:iso2_code).presence || 'XX',
       start_date.strftime('%y'),
       id
     ].join('-'))
-    Rails.logger.debug "PROJECT 2"
   end
 
   def create_intervention_id
@@ -1243,13 +1239,11 @@ SQL
   end
 
   def add_to_country(region)
-    Rails.logger.debug "PROJECT 5"
     return if self.new_record?
     count = ActiveRecord::Base.connection.execute("select count(*) as count from countries_projects where project_id=#{self.id} AND country_id=#{region.country_id}").first['count'].to_i
     if count == 0
       ActiveRecord::Base.connection.execute("INSERT INTO countries_projects (project_id, country_id) VALUES (#{self.id},#{region.country_id})")
     end
-    Rails.logger.debug "PROJECT 6"
   end
 
   def remove_from_country(region)
