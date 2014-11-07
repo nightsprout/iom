@@ -1,3 +1,4 @@
+require 'resque/server'
 Iom::Application.routes.draw do
 
   # Home
@@ -123,4 +124,6 @@ Iom::Application.routes.draw do
 #  if Rails.env.development?
 #    mount AlertsMailer::Preview => 'mail_view'
 #  end
+
+  mount Resque::Server.new, :at => "/resque"
 end

@@ -103,7 +103,7 @@ class Site < ActiveRecord::Base
   attr_accessor :geographic_context, :project_context, :show_blog, :geographic_boundary_box
 
   before_save :set_project_context, :set_project_context_tags_ids
-  after_save :set_cached_projects
+  after_save{ Resque.enqueue(CacheSite, self.id) } 
   after_create :create_pages
   after_destroy :remove_cached_projects
 
@@ -299,57 +299,65 @@ class Site < ActiveRecord::Base
   # Array of arrays
   # [[cluster, count], [cluster, count]]
   def projects_clusters
-    sql="select c.id,c.name,count(ps.*) as count from clusters as c
-    inner join clusters_projects as cp on c.id=cp.cluster_id
-    inner join projects_sites as ps on cp.project_id=ps.project_id and ps.site_id=#{self.id}
-    inner join projects as p on ps.project_id=p.id and (p.end_date is null OR p.end_date > now())
-    group by c.id,c.name order by count desc limit 20"
-    Cluster.find_by_sql(sql).map do |c|
-      [c,c.count.to_i]
+    Rails.cache.fetch("site_#{self.id}_projects_clusters", {:expires_in => 1.day}) do 
+      sql="select c.id,c.name,count(ps.*) as count from clusters as c
+      inner join clusters_projects as cp on c.id=cp.cluster_id
+      inner join projects_sites as ps on cp.project_id=ps.project_id and ps.site_id=#{self.id}
+      inner join projects as p on ps.project_id=p.id and (p.end_date is null OR p.end_date > now())
+      group by c.id,c.name order by count desc limit 20"
+      Cluster.find_by_sql(sql).map do |c|
+        [c,c.count.to_i]
+      end
     end
   end
 
   # Array of arrays
   # [[sector, count], [sector, count]]
   def projects_sectors
-    sql = <<-SQL
-    select s.id, s.name, count(distinct(p.*)) as count
-      from sectors as s, projects_sectors as prs, projects_sites as ps, projects as p
-        where  ps.site_id=#{self.id}
-          and ps.project_id = p.id
-          and prs.project_id = p.id
-          and prs.sector_id = s.id
-          and prs.project_id = p.id
-          and p.end_date >= current_date
-          and p.end_date is not null
-        group by s.id,s.name
-        order by count desc
-        limit 20
-    SQL
-    Sector.find_by_sql(sql).map do |s|
-      [s,s.count.to_i]
+    Rails.cache.fetch("site_#{self.id}_projects_sectors", {:expires_in => 1.day}) do 
+      sql = <<-SQL
+      select s.id, s.name, count(distinct(p.*)) as count
+        from sectors as s, projects_sectors as prs, projects_sites as ps, projects as p
+          where  ps.site_id=#{self.id}
+            and ps.project_id = p.id
+            and prs.project_id = p.id
+            and prs.sector_id = s.id
+            and prs.project_id = p.id
+            and p.end_date >= current_date
+            and p.end_date is not null
+          group by s.id,s.name
+          order by count desc
+          limit 20
+      SQL
+      Sector.find_by_sql(sql).map do |s|
+        [s,s.count.to_i]
+      end
     end
   end
 
   # Array of arrays
   # [[region, count], [region, count]]
   def projects_regions
-    sql="select #{Region.custom_fields.join(',')},count(ps.*) as count from regions
-      inner join projects_regions as pr on regions.id=pr.region_id and regions.level=#{self.level_for_region}
-      inner join projects_sites as ps on pr.project_id=ps.project_id and ps.site_id=#{self.id}
-      inner join projects as p on ps.project_id=p.id and (p.end_date is null OR p.end_date > now())
-      group by #{Region.custom_fields.join(',')} order by count DESC"
-    Region.find_by_sql(sql).map do |r|
-      [r,r.count.to_i]
+    Rails.cache.fetch("site_#{self.id}_projects_regions", {:expires_in => 1.day}) do 
+      sql="select #{Region.custom_fields.join(',')},count(ps.*) as count from regions
+        inner join projects_regions as pr on regions.id=pr.region_id and regions.level=#{self.level_for_region}
+        inner join projects_sites as ps on pr.project_id=ps.project_id and ps.site_id=#{self.id}
+        inner join projects as p on ps.project_id=p.id and (p.end_date is null OR p.end_date > now())
+        group by #{Region.custom_fields.join(',')} order by count DESC"
+      Region.find_by_sql(sql).map do |r|
+        [r,r.count.to_i]
+      end
     end
   end
 
   def total_regions
-    sql="select count(distinct(regions.id)) as count from regions
-      inner join projects_regions as pr on pr.region_id=regions.id and regions.level=#{self.level_for_region}
-      inner join projects_sites as ps on pr.project_id=ps.project_id and ps.site_id=#{self.id}
-      inner join projects as p on ps.project_id=p.id and (p.end_date is null OR p.end_date > now());"
-    ActiveRecord::Base.connection.execute(sql).first['count'].to_i
+    Rails.cache.fetch("site_#{self.id}_total_regions", {:expires_in => 1.day}) do 
+      sql="select count(distinct(regions.id)) as count from regions
+        inner join projects_regions as pr on pr.region_id=regions.id and regions.level=#{self.level_for_region}
+        inner join projects_sites as ps on pr.project_id=ps.project_id and ps.site_id=#{self.id}
+        inner join projects as p on ps.project_id=p.id and (p.end_date is null OR p.end_date > now());"
+      ActiveRecord::Base.connection.execute(sql).first['count'].to_i
+    end
   end
 
   def total_countries
@@ -384,25 +392,29 @@ class Site < ActiveRecord::Base
   # Array of arrays
   # [[country, count], [country, count]]
   def projects_countries
-    sql="select #{Country.custom_fields.join(',')},count(distinct ps.project_id) as count from countries
-      inner join countries_projects as pr on pr.country_id=countries.id
-      inner join projects_sites as ps on pr.project_id=ps.project_id and ps.site_id=#{self.id}
-      inner join projects as p on ps.project_id=p.id and (p.end_date is null OR p.end_date > now())
-      group by #{Country.custom_fields.join(',')} order by count DESC"
-    Country.find_by_sql(sql).map do |c|
-      [c,c.count.to_i]
+    Rails.cache.fetch("site_#{self.id}_projects_countries", {:expires_in => 1.day}) do 
+      sql="select #{Country.custom_fields.join(',')},count(distinct ps.project_id) as count from countries
+        inner join countries_projects as pr on pr.country_id=countries.id
+        inner join projects_sites as ps on pr.project_id=ps.project_id and ps.site_id=#{self.id}
+        inner join projects as p on ps.project_id=p.id and (p.end_date is null OR p.end_date > now())
+        group by #{Country.custom_fields.join(',')} order by count DESC"
+      Country.find_by_sql(sql).map do |c|
+        [c,c.count.to_i]
+      end
     end
   end
   # Array of arrays
   # [[organization, count], [organization, count]]
   def projects_organizations
-    sql="select o.id,o.name,count(distinct ps.project_id) as count from organizations as o
-      inner join projects as p on o.id=p.primary_organization_id
-      inner join projects_sites as ps on p.id=ps.project_id and ps.site_id=#{self.id}
-      inner join projects as pr on ps.project_id=pr.id and (pr.end_date is null OR pr.end_date > now())
-      group by o.id,o.name order by count DESC"
-    Organization.find_by_sql(sql).map do |o|
-        [o,o.count.to_i]
+    Rails.cache.fetch("site_#{self.id}_projects_organizations", {:expires_in => 1.day}) do 
+      sql="select o.id,o.name,count(distinct ps.project_id) as count from organizations as o
+        inner join projects as p on o.id=p.primary_organization_id
+        inner join projects_sites as ps on p.id=ps.project_id and ps.site_id=#{self.id}
+        inner join projects as pr on ps.project_id=pr.id and (pr.end_date is null OR pr.end_date > now())
+        group by o.id,o.name order by count DESC"
+      Organization.find_by_sql(sql).map do |o|
+          [o,o.count.to_i]
+      end
     end
   end
 
@@ -412,9 +424,11 @@ class Site < ActiveRecord::Base
   end
 
   def total_projects(options = {})
-    sql = "select count(distinct projects_sites.project_id) as count from projects_sites, projects where projects_sites.site_id = #{self.id}
-                  and projects_sites.project_id = projects.id and (projects.end_date is null OR projects.end_date > now())"
-    ActiveRecord::Base.connection.execute(sql).first['count'].to_i
+    Rails.cache.fetch("site_#{self.id}_total_projects", {:expires_in => 1.day}) do 
+      sql = "select count(distinct projects_sites.project_id) as count from projects_sites, projects where projects_sites.site_id = #{self.id}
+                    and projects_sites.project_id = projects.id and (projects.end_date is null OR projects.end_date > now())"
+      ActiveRecord::Base.connection.execute(sql).first['count'].to_i
+    end
   end
 
   def projects_ids

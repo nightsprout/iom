@@ -13,6 +13,9 @@ gem 'puma'
 
 gem 'annotate'
 
+gem 'redis-rails'
+gem 'resque', "~> 1.25"
+
 gem 'newrelic_rpm'
 gem 'will_paginate', '~> 3.0'
 gem 'sanitize', '~> 3.0.2'

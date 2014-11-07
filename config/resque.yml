@@ -1,0 +1,3 @@
+development: localhost:6379
+test: localhost:6379
+production: redis://redistogo:8990b33055b0a23e0eb5811c0c3543c8@greeneye.redistogo.com:11248/
