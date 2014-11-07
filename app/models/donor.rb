@@ -47,6 +47,10 @@ class Donor < ActiveRecord::Base
 
   validates_presence_of :name
 
+  def self.find_by_name_ilike( name )
+    where("name ilike ?", "%#{name}%" ).first
+  end
+
   def donated_projects_count(site, options = nil)
     if options[:organization_id]
       sql = "select count(distinct(d.project_id)) from donations d

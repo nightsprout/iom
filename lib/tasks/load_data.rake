@@ -314,12 +314,12 @@ namespace :iom do
                 loc_array = loc.split(">").map(&:strip)
 
                 if loc_array[0].present?
-                  c = Country.fast.find_by_name loc_array[0]
+                  c = Country.fast.find_by_name_insensitive loc_array[0]
                   next if c.nil?
                   p.countries << c
 
                   if loc_array[1].present?
-                    r = c.regions.fast.find_by_name loc_array[1]
+                    r = c.regions.fast.find_by_name_insensitive loc_array[1]
                     next if r.nil?
                     p.regions << r
 
@@ -336,9 +336,9 @@ namespace :iom do
 
             unless row.sectors.blank?
               row.sectors.split("|").map(&:strip).each do |sec|
-                sect = Sector.find_by_name sec
+                sect = Sector.find_by_name_ilike sec.titleize
                 if sect.nil?
-                  sect = Sector.create(:name => sec)
+                  sect = Sector.create(:name => sec.titleize)
                 end
                 p.sectors << sect
               end
@@ -346,9 +346,9 @@ namespace :iom do
 
             unless row.target_groups.blank?
               row.target_groups.split("|").map(&:strip).each do |aud|
-                a = Audience.find_by_name aud
+                a = Audience.find_by_name_ilike aud.titleize
                 if a.nil?
-                  a = Audience.create(:name => aud)
+                  a = Audience.create(:name => aud.titleize)
                 end
                 p.audiences << a
               end
@@ -356,9 +356,9 @@ namespace :iom do
 
             unless row.activities.blank?
               row.activities.split("|").map(&:strip).each do |aud|
-                a = Activity.find_by_name aud
+                a = Activity.find_by_name_ilike aud.titleize
                 if a.nil?
-                  a = Activity.create(:name => aud)
+                  a = Activity.create(:name => aud.titleize)
                 end
                 p.activities << a
               end
@@ -366,9 +366,9 @@ namespace :iom do
 
             unless row.diseases.blank?
               row.diseases.split("|").map(&:strip).each do |aud|
-                a = Disease.find_by_name aud
+                a = Disease.find_by_name_ilike aud.titleize
                 if a.nil?
-                  a = Disease.create(:name => aud)
+                  a = Disease.create(:name => aud.titleize)
                 end
                 p.diseases << a
               end
@@ -376,9 +376,9 @@ namespace :iom do
 
             unless row.medicine.blank?
               row.medicine.split("|").map(&:strip).each do |aud|
-                a = Medicine.find_by_name aud
+                a = Medicine.find_by_name_ilike aud.titleize
                 if a.nil?
-                  a = Medicine.create(:name => aud)
+                  a = Medicine.create(:name => aud.titleize)
                 end
                 p.medicines << a
               end
@@ -387,9 +387,9 @@ namespace :iom do
 
             unless row.donors.blank?
               row.donors.split("|").map(&:strip).each do |don|
-                donor = Donor.where("name ilike ?",don).first
+                donor = Donor.find_by_name_ilike don.titleize
                 if donor.nil?
-                  donor = Donor.create!(:name => don)
+                  donor = Donor.create!(:name => don.titleize)
                 end
                 p.donations << Donation.new( :project => p, :donor => donor)
               end

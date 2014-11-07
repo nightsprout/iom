@@ -22,6 +22,11 @@ class Sector < ActiveRecord::Base
   def self.custom_fields
     columns.map{ |c| c.name }
   end
+
+  def self.find_by_name_ilike( name )
+    where("name ilike ?", "%#{name}%" ).first
+  end
+
   # Array of arrays
   # [[region, count], [region, count]]
   def projects_regions(site)
