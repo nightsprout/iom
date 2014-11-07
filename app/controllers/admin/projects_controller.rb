@@ -96,17 +96,26 @@ class Admin::ProjectsController < Admin::AdminController
   end
 
   def create
-    @project = new_project(params[:project])
+    @project = new_project( params[:project] )
+    Rails.logger.debug "CREATE 1"
     @project.intervention_id = nil
+    Rails.logger.debug "CREATE 2"
     @project.updated_by = current_user
+    Rails.logger.debug "CREATE 3"
     if @project.save
+      Rails.logger.debug "CREATE 4"
       flash[:notice] = "Project created! Now you can <a href='#{donations_admin_project_path(@project)}'>provide the donor information</a> for this project."
       redirect_to edit_admin_project_path(@project), :flash => {:success => 'Project has been created successfully'}
     else
+      Rails.logger.debug "CREATE 5"
       @organizations_ids   = organizations_ids
+      Rails.logger.debug "CREATE 6"
       @countries_iso_codes = countries_iso_codes
+      Rails.logger.debug "CREATE 7"
       @countries = @project.country_ids.map{|id| Country.find(id)}
+      Rails.logger.debug "CREATE 8"
       @regions = @project.region_ids.map{|id| Region.find(id)}
+      Rails.logger.debug "CREATE 9"
       render :action => 'new'
     end
   end
