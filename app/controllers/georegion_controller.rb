@@ -8,9 +8,15 @@ class GeoregionController < ApplicationController
   def show
 
     geo_ids = []
-    geo_ids << params[:location_id] if params[:location_id].present?
-    geo_ids << params[:location2_id] if params[:location2_id].present?
-    geo_ids << params[:id] if params[:id].present?
+    [:location_id, :location2_id, :id].each do |key|
+      if params[key].present?
+        if params[key].is_a?(Array)
+          geo_ids += params[key]
+        else
+          geo_ids << params[key].gsub(/[\[\]]/, "")
+        end
+      end
+    end
 
     @empty_layer = false
     @empty_layer = true if geo_ids.count > 1
@@ -18,7 +24,7 @@ class GeoregionController < ApplicationController
 
     @breadcrumb = []
 
-    @country = country = Country.find(geo_ids[0], :select => Country.custom_fields)
+    @country = country = Country.find( geo_ids[0], :select => Country.custom_fields )
     @area = (geo_ids.last == geo_ids[0]) ? country : Region.find( geo_ids.last )
 
     @breadcrumb << country if @site.navigate_by_country?
