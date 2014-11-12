@@ -3,4 +3,3 @@ rails_env = ENV['RAILS_ENV'] || 'development'
 
 resque_config = YAML.load_file(rails_root + '/config/resque.yml')
 Resque.redis = resque_config[rails_env]
-Iom::Application.config.cache_store = :redis_store, resque_config[rails_env]
