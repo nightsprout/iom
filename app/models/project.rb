@@ -618,9 +618,9 @@ SQL
     elsif options[:activity]
       sql="select * from data_denormalization where activities_ids && '{#{options[:activity]}}' and site_id=#{site.id} and (end_date is null OR end_date > now()) and level = #{level}"
     elsif options[:audience]
-      sql="select * from data_denormalization where activities_ids && '{#{options[:audience]}}' and site_id=#{site.id} and (end_date is null OR end_date > now()) and level = #{level}"
+      sql="select * from data_denormalization where audiences_ids && '{#{options[:audience]}}' and site_id=#{site.id} and (end_date is null OR end_date > now()) and level = #{level}"
     elsif options[:disease]
-      sql="select * from data_denormalization where activities_ids && '{#{options[:disease]}}' and site_id=#{site.id} and (end_date is null OR end_date > now()) and level = #{level}"
+      sql="select * from data_denormalization where diseases_ids && '{#{options[:disease]}}' and site_id=#{site.id} and (end_date is null OR end_date > now()) and level = #{level}"
     else
       sql="select * from data_denormalization where site_id=#{site.id} and (end_date is null OR end_date > now()) and level = #{level}"
     end
