@@ -218,7 +218,7 @@ global_site.update_attributes(
   # :aid_map_image => File.open(File.join(Rails.root, '/public/images/sites/food_img_example.jpg')),
   :navigate_by_country => true,
   :navigate_by_level1 => true,
-  :word_for_regions => "Country"
+  :word_for_regions => "Regions"
 )
 
 
