@@ -82,8 +82,12 @@ SQL
   end
 
   def total_projects(site, location_id = nil)
+    if not location_id.is_a? Array
+      location_id = [location_id]
+    end
+
     if location_id.present?
-      if site.navigate_by_country
+      if location_id.length == 1 and site.navigate_by_country
         location_join = "inner join countries_projects cp on cp.project_id = p.id and cp.country_id = #{location_id.first}"
       else
         location_join = "inner join projects_regions as pr on pr.project_id = p.id and pr.region_id = #{location_id.last}"
