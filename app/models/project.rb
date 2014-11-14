@@ -533,7 +533,7 @@ SQL
   end
 
   def self.custom_find(site, options = {})
-    return [] if site.nil?    
+    return [] if site.nil?
     default_options = {
       :order => 'project_id DESC',
       :random => true,
@@ -616,11 +616,32 @@ SQL
       where << "level = #{level}"
       sql="select * from data_denormalization where #{where.join(' and ')}"
     elsif options[:activity]
-      sql="select * from data_denormalization where activities_ids && '{#{options[:activity]}}' and site_id=#{site.id} and (end_date is null OR end_date > now()) and level = #{level}"
+      where = ["activities_ids && '{#{options[:activity]}}'",
+              "site_id=#{site.id}",
+              "(end_date is null OR end_date > now())",
+              "level = #{level}"]
+      where << "regions_ids && '{#{options[:region_id]}}'" if options[:region_id]
+      where << "countries_ids && '{#{options[:country_id]}}'" if options[:country_id]
+
+      sql="select * from data_denormalization where #{where.join(' and ')}"
     elsif options[:audience]
-      sql="select * from data_denormalization where activities_ids && '{#{options[:audience]}}' and site_id=#{site.id} and (end_date is null OR end_date > now()) and level = #{level}"
+      where = ["audiences_ids && '{#{options[:audience]}}'",
+              "site_id=#{site.id}",
+              "(end_date is null OR end_date > now())",
+              "level = #{level}"]
+      where << "regions_ids && '{#{options[:region_id]}}'" if options[:region_id]
+      where << "countries_ids && '{#{options[:country_id]}}'" if options[:country_id]
+
+      sql="select * from data_denormalization where #{where.join(' and ')}"
     elsif options[:disease]
-      sql="select * from data_denormalization where activities_ids && '{#{options[:disease]}}' and site_id=#{site.id} and (end_date is null OR end_date > now()) and level = #{level}"
+      where = ["diseases_ids && '{#{options[:disease]}}'",
+              "site_id=#{site.id}",
+              "(end_date is null OR end_date > now())",
+              "level = #{level}"]
+      where << "regions_ids && '{#{options[:region_id]}}'" if options[:region_id]
+      where << "countries_ids && '{#{options[:country_id]}}'" if options[:country_id]
+
+      sql="select * from data_denormalization where #{where.join(' and ')}"
     else
       sql="select * from data_denormalization where site_id=#{site.id} and (end_date is null OR end_date > now()) and level = #{level}"
     end

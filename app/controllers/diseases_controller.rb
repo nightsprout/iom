@@ -24,21 +24,22 @@ class DiseasesController < ApplicationController
     @data = Disease.find params[:id]
 
     projects_custom_find_options = {
-      :disease      => @data.id,
+      :disease       => @data.id,
       :per_page      => 10,
       :page          => params[:page],
       :order         => 'created_at DESC',
       :start_in_page => params[:start_in_page]
     }
 
-    if @filter_by_location.present? && @site.navigate_by_regions? && @filter_by_location.size > 1
-      projects_custom_find_options[:cluster_region_id] = @filter_by_location[1..-1].join(',').last
-    elsif @filter_by_location.present? && @site.navigate_by_country? && @filter_by_location.size >= 1
-      projects_custom_find_options[:cluster_country_id] = @filter_by_location.first
+    if @filter_by_location.present? && @filter_by_location.size > 1      
+      projects_custom_find_options[:region_id] = @filter_by_location.last
+    elsif @filter_by_location.present? && @site.navigate_by_country? && @filter_by_location.size == 1
+      projects_custom_find_options[:country_id] = @filter_by_location.first
+    elsif @filter_by_location.present? && @site.navigate_by_region? && @filter_by_location.size == 1
+      projects_custom_find_options[:region_id] = @filter_by_location.first
     end
 
-
-    @projects = Project.custom_find @site, projects_custom_find_options
+    @projects = Project.custom_find(@site, projects_custom_find_options)
 
     @disease_project_count = @data.total_projects(@site, @filter_by_location)
 

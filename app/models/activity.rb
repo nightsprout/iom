@@ -71,7 +71,9 @@ class Activity < ActiveRecord::Base
 
   def total_projects(site, location_id = nil)
     if location_id.present?
-      if site.navigate_by_country
+      location_id = [location_id] unless location_id.is_a? Array
+      
+      if location_id.length == 1 and site.navigate_by_country?
         location_join = "inner join countries_projects cp on cp.project_id = p.id and cp.country_id = #{location_id.first}"
       else
         location_join = "inner join projects_regions as pr on pr.project_id = p.id and pr.region_id = #{location_id.last}"

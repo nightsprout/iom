@@ -18,9 +18,9 @@
         <% elsif @data.is_a? Disease %>
         <strong><%= CGI.unescapeHTML(@data.name) %></strong>, <%= link_to raw(@filter_name), disease_path(@data), :class => 'filter' %>        
         <% elsif @site.navigate_by_cluster? %>
-        <strong><%= CGI.unescapeHTML(@data.name) %></strong>, <%= link_to raw(@filter_name), cluster_path(params[:category_id]), :class => 'filter' %>
+        <strong><%= CGI.unescapeHTML(@data.name) %></strong>, <%= link_to raw(@filter_name), cluster_path(params[:id]), :class => 'filter' %>
         <% else @site.navigate_by_sector? %>
-        <strong><%= CGI.unescapeHTML(@data.name) %></strong>, <%= link_to raw(@filter_name), sector_path(params[:category_id]), :class => 'filter' %>
+        <strong><%= CGI.unescapeHTML(@data.name) %></strong>, <%= link_to raw(@filter_name), sector_path(params[:id]), :class => 'filter' %>
         <% end %>
       </p>
       <% elsif title != @site.name %>

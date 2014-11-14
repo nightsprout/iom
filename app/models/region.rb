@@ -50,22 +50,29 @@ class Region < ActiveRecord::Base
   # [[cluster, count], [cluster, count]]
   def projects_clusters_sectors(site)
     if site.navigate_by_cluster?
-      sql="select c.id,c.name,count(c.id) as count from clusters_projects as cp
-          inner join projects_sites as ps on cp.project_id=ps.project_id and ps.site_id=#{site.id}
-          inner join projects as p on ps.project_id=p.id and (p.end_date is null OR p.end_date > now())
-          inner join clusters as c on cp.cluster_id=c.id
-          inner join projects_regions as pr on ps.project_id=pr.project_id and region_id=#{self.id}
-          group by c.id,c.name order by count DESC"
+      sql="select subq.id, subq.name, count(subq.id) from
+           (select distinct c.id as id, c.name as name, p.id as project_id
+            from clusters_projects as cp
+            inner join projects_sites as ps on cp.project_id=ps.project_id and ps.site_id=#{site.id}
+            inner join projects as p on ps.project_id=p.id and (p.end_date is null OR p.end_date > now())
+            inner join clusters as c on cp.cluster_id=c.id
+            inner join projects_regions as pr on ps.project_id=pr.project_id and region_id=#{self.id}
+            ) as subq
+          group by subq.id,subq.name order by count desc"
       Cluster.find_by_sql(sql).map do |c|
           [c,c.count.to_i]
       end
     else
-      sql="select s.id,s.name,count(s.id) as count from projects_sectors as pjs
-          inner join projects_sites as ps on pjs.project_id=ps.project_id and ps.site_id=#{site.id}
-          inner join projects as p on ps.project_id=p.id and (p.end_date is null OR p.end_date > now())
-          inner join sectors as s on pjs.sector_id=s.id
-          inner join projects_regions as pr on ps.project_id=pr.project_id and region_id=#{self.id}
-          group by s.id,s.name order by count DESC"
+      sql="select subq.id,subq.name,count(subq.id) from
+           (select distinct s.id as id, s.name as name, p.id as project_id 
+            from projects_sectors as pjs
+            inner join projects_sites as ps on pjs.project_id=ps.project_id and ps.site_id=#{site.id}
+            inner join projects as p on ps.project_id=p.id and (p.end_date is null OR p.end_date > now())
+            inner join sectors as s on pjs.sector_id=s.id
+            inner join projects_regions as pr on ps.project_id=pr.project_id and region_id=#{self.id}
+            ) as subq
+          group by subq.id,subq.name order by count desc"
+
       Sector.find_by_sql(sql).map do |s|
           [s,s.count.to_i]
       end
@@ -75,11 +82,14 @@ class Region < ActiveRecord::Base
   # Array of arrays
   # [[organization, count], [organization, count]]
   def projects_organizations(site)
-    sql="select o.id,o.name,count(o.id) as count from projects_sites as ps
-    inner join projects as p on ps.project_id=p.id and ps.site_id=#{site.id} and (p.end_date is null OR p.end_date > now())
-    inner join organizations as o on p.primary_organization_id=o.id
-    inner join projects_regions as pr on ps.project_id=pr.project_id and region_id=#{self.id}
-    group by o.id,o.name order by count DESC"
+    sql="select subq.id,subq.name,count(subq.id) from
+         (select distinct o.id,o.name,p.id
+          from projects_sites as ps
+          inner join projects as p on ps.project_id=p.id and ps.site_id=#{site.id} and (p.end_date is null OR p.end_date > now())
+          inner join organizations as o on p.primary_organization_id=o.id
+          inner join projects_regions as pr on ps.project_id=pr.project_id and region_id=#{self.id}
+         ) as subq
+        group by subq.id,subq.name order by count desc"
     Organization.find_by_sql(sql).map do |o|
         [o,o.count.to_i]
     end
