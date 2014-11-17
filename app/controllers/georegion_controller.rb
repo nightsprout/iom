@@ -76,7 +76,7 @@ class GeoregionController < ApplicationController
                   UNION
                   select c.id,count(distinct cp.project_id) as count,c.name,c.center_lon as lon, c.center_lat as lat,c.name,
                   CASE WHEN count(distinct ps.project_id) > 1 THEN
-                  '/countries/'||c.id
+                  '/location/'||c.id
                   ELSE
                   '/projects/'||(array_to_string(array_agg(ps.project_id),''))
                   END as url,
