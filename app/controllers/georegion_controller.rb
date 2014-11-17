@@ -181,6 +181,7 @@ class GeoregionController < ApplicationController
         result = ActiveRecord::Base.connection.execute(sql)
         if @area.is_a?(Country) && @site.navigate_by_regions?
           @map_data = result.map do |r|
+            next if r['count'] == "0"
 
             uri = URI.parse(r['url'])
             params = Hash[uri.query.split('&').map{|p| p.split('=')}] rescue {}
@@ -188,9 +189,10 @@ class GeoregionController < ApplicationController
             uri.query = params.to_a.map{|p| p.join('=')}.join('&')
             r['url'] = uri.to_s
             r
-          end.to_json
+          end.compact.to_json
         else
           @map_data = result.map do |r|
+            next if r['count'] == "0"
 
             uri = URI.parse(r['url'])
             params = Hash[uri.query.split('&').map{|p| p.split('=')}] rescue {}
@@ -198,13 +200,15 @@ class GeoregionController < ApplicationController
             uri.query = params.to_a.map{|p| p.join('=')}.join('&')
             r['url'] = uri.to_s
             r
-          end.to_json
+          end.compact.to_json
         end
 
         areas= []
         data = []
         @map_data_max_count=0
         result.each do |c|
+          next if c["count"] == "0"
+
           areas << c["code"]
           data  << c["count"]
           if(@map_data_max_count < c["count"].to_i)
