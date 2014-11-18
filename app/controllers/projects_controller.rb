@@ -64,29 +64,30 @@ class ProjectsController < ApplicationController
         # entries which are parents of other entries
         location_country_ids = @locations.map { |l| l["country_id"] }.uniq.compact
         location_parent_region_ids = @locations.map { |l| l["parent_region_id"] }.uniq.compact
-        @terminal_locations  = @locations.select do |data|
+        
+        @terminal_locations = []
+        @nested_locations = {}
+        @locations.each do |data|
           if data["level"] == "0" and location_country_ids.include? data["id"]
             false
           elsif location_parent_region_ids.include? data["id"]
             false
           else
-            true
+            if data["parent_region_id"].present?
+              parent_region = @locations.select { |l| l["level"] != "0" and l["id"] == data["parent_region_id"] }.first
+              if parent_region.present?
+                data["full_region_name"] = "#{data["name"]}, #{parent_region["name"]}"
+              end
+            elsif data["name"].present? and data["country_name"].present?
+              data["full_region_name"] = "#{data["name"]}"
+            end       
+
+            @terminal_locations << data
+            @nested_locations[data["country_name"]] ||= []
+            @nested_locations[data["country_name"]] << data
           end            
         end
 
-        # But we want to display the 'full' name for each terminal location
-        @terminal_locations.each do |location|
-          if location["parent_region_id"].present?
-            parent_region = @locations.select { |l| l["level"] != "0" and l["id"] == location["parent_region_id"] }.first
-            if parent_region.present?
-              location["full_name"] = "#{location["name"]}, #{parent_region["name"]}, #{location["country_name"]}"
-            end
-          elsif location["name"].present? and location["country_name"].present?
-            location["full_name"] = "#{location["name"]}, #{location["country_name"]}"
-          else
-            location["full_name"] = "#{location["country_name"]}"
-          end            
-        end
         @map_data = @terminal_locations.to_json
 
         @overview_map_chco = @site.theme.data[:overview_map_chco]

@@ -220,8 +220,13 @@
                   <%= @terminal_locations.count == 1 ? 'Location' : 'Locations' %>
                 </h2>
                 <ul>
-                  <% @terminal_locations.each do |location| %>
-                  <li><%= location["full_name"] %></li>
+                  <% @nested_locations.each_pair do |country_name, regions| %>
+                  <li><strong><%= country_name %></strong></li>
+                  <ul>
+                    <% regions.each do |region| %>
+                      <li><%= region["full_region_name"] %></li>
+                    <% end %>
+                  </ul>
                   <% end %>
                 </ul>
               <%end%>
