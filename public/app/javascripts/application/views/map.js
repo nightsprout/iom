@@ -111,7 +111,7 @@ define(['underscore', 'backbone', 'pluralize', 'underscoreString'], function(_, 
       this.map_ = map;
       this.name = info.name || info.region_name;
       this.countryName = info.country_name;
-      this.tooltipName = info.tooltip_name;
+      this.tooltipName = info.full_name;
 
       if (document.URL.indexOf('force_site_id=3') >= 0) {
         if (this.count < 5) {

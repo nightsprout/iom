@@ -217,15 +217,11 @@
             <section>
               <%if @locations.present? && @locations.to_a.join.present? %>
                 <h2 class="<%= (@project.activities.blank? && @project.additional_information.blank? && @project.cross_cutting_issues.blank?)? 'first':''%>">
-                  <%= @locations.count == 1 ? 'Location' : 'Locations' %>
+                  <%= @terminal_locations.count == 1 ? 'Location' : 'Locations' %>
                 </h2>
                 <ul>
-                  <% @locations.each do |location| %>
-                    <% if @site.navigate_by_country? && location['country_id'].present? %>
-                      <li><%= location['name'] + ', ' if location['name'] and location['name'] != '' %> <%= Country.find(location['country_id'], :select => 'name').name %></li>
-                    <% else %>
-                      <li><%= location['name'] %></li>
-                    <% end %>
+                  <% @terminal_locations.each do |location| %>
+                  <li><%= location["full_name"] %></li>
                   <% end %>
                 </ul>
               <%end%>
