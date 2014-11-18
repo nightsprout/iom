@@ -60,9 +60,10 @@ class ProjectsController < ApplicationController
           @locations = ActiveRecord::Base.connection.execute(sql)
         end
 
+        # We want to pare the list down to the most specific locations by filtering out
+        # entries which are parents of other entries
         location_country_ids = @locations.map { |l| l["country_id"] }.uniq.compact
         location_parent_region_ids = @locations.map { |l| l["parent_region_id"] }.uniq.compact
-
         @terminal_locations  = @locations.select do |data|
           if data["level"] == "0" and location_country_ids.include? data["id"]
             false
@@ -73,6 +74,7 @@ class ProjectsController < ApplicationController
           end            
         end
 
+        # But we want to display the 'full' name for each terminal location
         @terminal_locations.each do |location|
           if location["parent_region_id"].present?
             parent_region = @locations.select { |l| l["level"] != "0" and l["id"] == location["parent_region_id"] }.first
