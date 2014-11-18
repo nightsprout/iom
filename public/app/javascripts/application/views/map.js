@@ -111,6 +111,7 @@ define(['underscore', 'backbone', 'pluralize', 'underscoreString'], function(_, 
       this.map_ = map;
       this.name = info.name || info.region_name;
       this.countryName = info.country_name;
+      this.tooltipName = info.tooltip_name;
 
       if (document.URL.indexOf('force_site_id=3') >= 0) {
         if (this.count < 5) {
@@ -321,13 +322,7 @@ define(['underscore', 'backbone', 'pluralize', 'underscoreString'], function(_, 
             var _top_hidden = document.createElement('div');
             _top_hidden.className = 'map-top-tooltip';
 
-            var locationName = this.name;
-
-            if (this.countryName && this.name) {
-              locationName = this.name + ', ' + this.countryName;
-            } else if (!locationName) {
-              locationName = this.countryName;
-            }
+            var locationName = this.tooltipName;
 
             $(_top_hidden).html('<strong>' + locationName + '</strong>');
 

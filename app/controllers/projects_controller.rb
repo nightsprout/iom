@@ -62,6 +62,7 @@ class ProjectsController < ApplicationController
 
         location_country_ids = @locations.map { |l| l["country_id"] }.compact
         location_parent_region_ids = @locations.map { |l| l["parent_region_id"] }.compact
+
         @map_data  = @locations.select do |data|
           if data["level"] == 0 and location_country_ids.include? data["id"]
             false
@@ -70,7 +71,22 @@ class ProjectsController < ApplicationController
           else
             true
           end            
-        end.to_json
+        end
+
+        @map_data.each do |pin|
+          if pin["parent_region_id"].present?
+            parent_region = @locations.select { |l| l["level"] != "0" and l["id"] == pin["parent_region_id"] }.first
+            if parent_region.present?
+              pin["tooltip_name"] = "#{pin["name"]}, #{parent_region["name"]}, #{pin["country_name"]}"
+            end
+          elsif pin["name"].present? and pin["country_name"].present?
+            pin["tooltip_name"] = "#{pin["name"]}, #{pin["country_name"]}"
+          else
+            pin["tooltip_name"] = "#{pin["country_name"]}"
+          end            
+        end
+
+        @map_data = @map_data.to_json
 
         @overview_map_chco = @site.theme.data[:overview_map_chco]
         @overview_map_chf = @site.theme.data[:overview_map_chf]
