@@ -77,7 +77,12 @@ class Organization < ActiveRecord::Base
                                         :format => 'jpg'
                                       }
                                     },
-                            :url => "/system/:attachment/:id/:style.:extension"
+                                    :storage => :s3,
+                                    :s3_credentials => {
+                                      :bucket             => ENV['S3_BUCKET_NAME'],
+                                      :access_key_id      => ENV['AWS_ACCESS_KEY_ID'],
+                                      :secret_access_key  => ENV['AWS_SECRET_ACCESS_KEY']
+                                    }
 
   has_many :sites, :foreign_key => :project_context_organization_id
   has_many :donations, :through => :projects
