@@ -276,7 +276,7 @@ namespace :iom do
 
           p = o.projects.where(:name => row.project_name, :intervention_id => row.org_intervention_id).first
           if p.nil?
-            p = Project.create({
+            p = Project.new({
               :primary_organization_id  => o.id,
               :intervention_id          => row.org_intervention_id,
               :name                     => row.project_name.present? ? row.project_name.gsub(/\|/, ", ") : nil,
@@ -411,19 +411,37 @@ namespace :iom do
     task :load_vitamin => :environment do    
 
 
-      unless File.exists? "#{Rails.root}/db/data/VitaminAngelsMappingData.csv"
-        open("#{Rails.root}/db/data/VitaminAngelsMappingData.csv", "wb") do |file|
-          open("https://s3.amazonaws.com/filehost/VitaminAngelsMappingData.csv") do |uri|
+      unless File.exists? "#{Rails.root}/db/data/HKI.csv"
+        open("#{Rails.root}/db/data/HKI.csv", "wb") do |file|
+          open("https://s3.amazonaws.com/filehost/HKI.csv") do |uri|
             file.write(uri.read)
           end
         end
       end
 
-      csv_projs = CsvMapper.import("#{Rails.root}/db/data/VitaminAngelsMappingData.csv") do
+      csv_projs = CsvMapper.import("#{Rails.root}/db/data/HKI.csv") do
         read_attributes_from_file
       end
 
-      p "VitaminAngelsMappingData.csv loaded"
+      p "HKI.csv loaded"
+
+      load_project_files( csv_projs )
+
+      GC.start
+
+      unless File.exists? "#{Rails.root}/db/data/EvidenceAction.csv"
+        open("#{Rails.root}/db/data/EvidenceAction.csv", "wb") do |file|
+          open("https://s3.amazonaws.com/filehost/EvidenceAction.csv") do |uri|
+            file.write(uri.read)
+          end
+        end
+      end
+
+      csv_projs = CsvMapper.import("#{Rails.root}/db/data/EvidenceAction.csv") do
+        read_attributes_from_file
+      end
+
+      p "EvidenceAction.csv loaded"
 
       load_project_files( csv_projs )
 
@@ -464,6 +482,7 @@ namespace :iom do
       load_project_files( csv_projs )
 
       s = Site.find_by_name "global"
+      s.set_cached_projects
 
 
     end
