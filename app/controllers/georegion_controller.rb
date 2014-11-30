@@ -114,7 +114,7 @@ class GeoregionController < ApplicationController
 
       projects_custom_find_options = {
         :region   => @area.id,
-        :level    => @site.levels_for_region.max,
+        :level    => @site.levels_for_region & [@area.level],
         :per_page => 10,
         :page     => params[:page],
         :order    => 'created_at DESC',
