@@ -114,13 +114,14 @@ class GeoregionController < ApplicationController
 
       projects_custom_find_options = {
         :region   => @area.id,
-        :level    => @site.levels_for_region,
+        :level    => @site.levels_for_region.max,
         :per_page => 10,
         :page     => params[:page],
         :order    => 'created_at DESC',
         :start_in_page => params[:start_in_page]
       }
       projects_custom_find_options[:region_category_id] = @filter_by_category if @filter_by_category.present?
+
       @projects = Project.custom_find @site, projects_custom_find_options
 
       @area_parent = country.name
