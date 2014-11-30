@@ -33,7 +33,7 @@
         <% elsif @cluster_sector_projects_count  %>
         <strong><%= CGI.unescapeHTML(@data.name) %></strong>, <%= @cluster_sector_projects_count %> <% if @cluster_sector_projects_count === 1 %>project<% else %>projects<% end %>
         <% elsif @georegion_projects_count %>
-        <strong><%= CGI.unescapeHTML(@area.name) %><%= ", " + @area_parent if @area_parent.present? %></strong>, <%= @georegion_projects_count %> <% if @georegion_projects_count === 1 %>project<% else %>projects<% end %>
+        <strong><%= @breadcrumb.reverse.join(", ") %></strong>, <%= @georegion_projects_count %> <% if @georegion_projects_count === 1 %>project<% else %>projects<% end %>
         <% elsif @project %>
         <strong><%= @project.name %></strong>
         <% else %>

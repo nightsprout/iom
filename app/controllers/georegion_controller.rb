@@ -27,7 +27,7 @@ class GeoregionController < ApplicationController
     @country = country = Country.find( geo_ids[0], :select => Country.custom_fields )
     @area = (geo_ids.last == geo_ids[0]) ? country : Region.find( geo_ids.last )
 
-    @breadcrumb << country if @site.navigate_by_country?
+    @breadcrumb << country.name if @site.navigate_by_country?
 
     @filter_by_category = params[:category_id]
 
@@ -102,7 +102,7 @@ class GeoregionController < ApplicationController
       geo_ids[1..-1].each do |geo_id|
         region = Region.find geo_id
         raise NotFound unless region
-        @breadcrumb << region unless !@site.send("navigate_by_level#{level}?".to_sym)
+        @breadcrumb << region.name unless !@site.send("navigate_by_level#{level}?".to_sym)
         @area = region
         level += 1
       end
@@ -218,8 +218,6 @@ class GeoregionController < ApplicationController
         end
         @chld = areas.join("|")
         @chd  = "t:"+data.join(",")
-
-        @breadcrumb.pop
       end
       format.js do
         render :update do |page|
