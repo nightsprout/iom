@@ -75,7 +75,12 @@ class Site < ActiveRecord::Base
                                         :format => 'jpg'
                                       }
                                     },
-                            :url => "/system/:attachment/:id/:style.:extension"
+                                    :storage => :s3,
+                                    :s3_credentials => {
+                                      :bucket             => ENV['S3_BUCKET_NAME'],
+                                      :access_key_id      => ENV['AWS_ACCESS_KEY_ID'],
+                                      :secret_access_key  => ENV['AWS_SECRET_ACCESS_KEY']
+                                    }
 
   has_attached_file :aid_map_image, :styles => {
                                       :small => {
@@ -90,8 +95,12 @@ class Site < ActiveRecord::Base
                                     :convert_options => {
                                       :all => "-quality 90"
                                     },
-                                    :url => "/system/:attachment/:id/:style.:extension",
-                                    :default_url => "/images/no_aid_map_image_huge.jpg"
+                                    :storage => :s3,
+                                    :s3_credentials => {
+                                      :bucket             => ENV['S3_BUCKET_NAME'],
+                                      :access_key_id      => ENV['AWS_ACCESS_KEY_ID'],
+                                      :secret_access_key  => ENV['AWS_SECRET_ACCESS_KEY']
+                                    }
 
   scope :published, where(:status => true)
   scope :draft,     where(:status => false)

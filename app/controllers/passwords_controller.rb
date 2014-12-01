@@ -10,6 +10,7 @@ class PasswordsController < ApplicationController
     if user.present?
       user.send_password_reset
     else
+      flash[:alert] = "No User with that Email exists"
       render :new
     end
   end
@@ -24,7 +25,7 @@ class PasswordsController < ApplicationController
     if @user.password_reset_sent_at < 2.hours.ago
       redirect_to new_password_reset_path, :alert => "Password reset has expired."
     elsif @user.update_password(params[:password], params[:password_confirmation])
-      if @user.not_blocked?
+      if @user.enabled?
         self.current_user = @user
         new_cookie_flag = (params[:remember_me] == "1")
         handle_remember_cookie! new_cookie_flag
