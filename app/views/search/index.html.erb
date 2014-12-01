@@ -105,10 +105,12 @@
           <h1>Search projects</h1>
         </header>
         <div class="mod-search">
-          <% if @projects.present? and @projects.any? %>
-            <p>Showing results for: <strong>'<%= params[:q] %>'</strong></p>
+          <% if @projects.present? and @projects.any? and params[:q].present? %>
+            <p>Showing <%= @total_projects %> results for: <strong>'<%= params[:q] %>'</strong></p>
+          <% elsif @projects.present? and @projects.any? %>
+            <p>Showing <%= @total_projects %> results</p>
           <% else %>
-            <p>No projects were found for <strong>'<%= params[:q] %>'</strong></p>
+            <p>No projects were found for <strong>'<%= @query %>'</strong></p>
           <% end %>
         </div>
 

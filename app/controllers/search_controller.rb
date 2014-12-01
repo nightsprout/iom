@@ -9,8 +9,6 @@ class SearchController < ApplicationController
     @clusters = @regions = @filtered_regions = @filtered_sectors = @filtered_clusters = @filtered_organizations = @filtered_donors = []
     @navigate_by_cluster = @site.navigate_by_cluster?
 
-    p params[:regions_ids]
-
     if params[:regions_ids].present?
       @filtered_regions = Region.find_by_sql("select r.id, r.name as title, c.name as subtitle from regions as r inner join countries as c on c.id = r.country_id where r.id in (#{params[:regions_ids].join(",")})")
       filtered_regions_where = "where r.id not in (#{params[:regions_ids].join(",")})"

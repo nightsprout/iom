@@ -37,6 +37,18 @@ class Country < ActiveRecord::Base
     select( self.custom_fields.join(", ") )
   end
 
+  def level
+    0
+  end
+
+  def name_to_level(level)
+    if (level < 1)
+      self.name
+    else
+      ""
+    end
+  end
+
   # Array of arrays
   # [[cluster, count], [cluster, count]]
   def projects_clusters_sectors(site)

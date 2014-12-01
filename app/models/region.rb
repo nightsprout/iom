@@ -193,6 +193,22 @@ SQL
     end
   end
 
+  def name_to_level(level)
+    region = self
+    names = []
+    while region.level >= level
+      names << region.name
+      if region.parent_region_id.present?
+        region = Region.find(region.parent_region_id)
+      else
+        break
+      end        
+    end
+    names << region.country.name if region.country.present? and level < 1
+
+    names.join(", ")
+  end
+
   def projects_count(site, category_id = nil)
     if category_id.present?
       if site.navigate_by_cluster?

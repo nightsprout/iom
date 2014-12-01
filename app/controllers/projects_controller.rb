@@ -28,11 +28,12 @@ class ProjectsController < ApplicationController
                r.code,
                r.country_id,
                c.name       AS country_name,
+               r.parent_region_id,
                r.level
         FROM   (projects AS p
                 INNER JOIN projects_regions AS pr ON pr.project_id = p.id AND p.id = #{@project.id}
                 INNER JOIN countries_projects as cp ON cp.project_id = p.id AND p.id = #{@project.id})
-                INNER JOIN regions AS r   ON pr.region_id = r.id  AND r.level = 1
+                INNER JOIN regions AS r   ON pr.region_id = r.id
                 INNER JOIN countries AS c ON r.country_id = c.id
         UNION
         SELECT c.id,
@@ -42,13 +43,16 @@ class ProjectsController < ApplicationController
                c.code,
                c.id,
                c.name       AS country_name,
-               null as level
+               null as parent_region_id,
+               0 as level
         FROM   (projects AS p
                 INNER JOIN countries_projects as cp ON cp.project_id = p.id AND p.id = #{@project.id})
                 INNER JOIN countries AS c ON cp.country_id = c.id
+        ORDER BY level
         SQL
 
         @locations = ActiveRecord::Base.connection.execute(sql)
+
         if @locations.count == 0
           sql="select c.id,c.center_lon as lon,c.center_lat as lat,c.name,c.code
           from (projects as p inner join countries_projects as cp on cp.project_id=p.id and p.id=#{@project.id})
@@ -56,7 +60,35 @@ class ProjectsController < ApplicationController
           @locations = ActiveRecord::Base.connection.execute(sql)
         end
 
-        @map_data  = @locations.to_json
+        # We want to pare the list down to the most specific locations by filtering out
+        # entries which are parents of other entries
+        location_country_ids = @locations.map { |l| l["country_id"] }.uniq.compact
+        location_parent_region_ids = @locations.map { |l| l["parent_region_id"] }.uniq.compact
+        
+        @terminal_locations = []
+        @nested_locations = {}
+        @locations.each do |data|
+          if data["level"] == "0" and location_country_ids.include? data["id"]
+            false
+          elsif location_parent_region_ids.include? data["id"]
+            false
+          else
+            if data["parent_region_id"].present?
+              parent_region = @locations.select { |l| l["level"] != "0" and l["id"] == data["parent_region_id"] }.first
+              if parent_region.present?
+                data["full_region_name"] = "#{data["name"]}, #{parent_region["name"]}"
+              end
+            elsif data["name"].present? and data["country_name"].present?
+              data["full_region_name"] = "#{data["name"]}"
+            end       
+
+            @terminal_locations << data
+            @nested_locations[data["country_name"]] ||= []
+            @nested_locations[data["country_name"]] << data
+          end            
+        end
+
+        @map_data = @terminal_locations.to_json
 
         @overview_map_chco = @site.theme.data[:overview_map_chco]
         @overview_map_chf = @site.theme.data[:overview_map_chf]

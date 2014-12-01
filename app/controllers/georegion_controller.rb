@@ -27,7 +27,7 @@ class GeoregionController < ApplicationController
     @country = country = Country.find( geo_ids[0], :select => Country.custom_fields )
     @area = (geo_ids.last == geo_ids[0]) ? country : Region.find( geo_ids.last )
 
-    @breadcrumb << country if @site.navigate_by_country?
+    @breadcrumb << country.name if @site.navigate_by_country?
 
     @filter_by_category = params[:category_id]
 
@@ -76,7 +76,7 @@ class GeoregionController < ApplicationController
                   UNION
                   select c.id,count(distinct cp.project_id) as count,c.name,c.center_lon as lon, c.center_lat as lat,c.name,
                   CASE WHEN count(distinct ps.project_id) > 1 THEN
-                  '/countries/'||c.id
+                  '/location/'||c.id
                   ELSE
                   '/projects/'||(array_to_string(array_agg(ps.project_id),''))
                   END as url,
@@ -102,7 +102,7 @@ class GeoregionController < ApplicationController
       geo_ids[1..-1].each do |geo_id|
         region = Region.find geo_id
         raise NotFound unless region
-        @breadcrumb << region unless !@site.send("navigate_by_level#{level}?".to_sym)
+        @breadcrumb << region.name unless !@site.send("navigate_by_level#{level}?".to_sym)
         @area = region
         level += 1
       end
@@ -114,13 +114,14 @@ class GeoregionController < ApplicationController
 
       projects_custom_find_options = {
         :region   => @area.id,
-        :level    => @site.levels_for_region,
+        :level    => @site.levels_for_region & [@area.level],
         :per_page => 10,
         :page     => params[:page],
         :order    => 'created_at DESC',
         :start_in_page => params[:start_in_page]
       }
       projects_custom_find_options[:region_category_id] = @filter_by_category if @filter_by_category.present?
+
       @projects = Project.custom_find @site, projects_custom_find_options
 
       @area_parent = country.name
@@ -181,6 +182,7 @@ class GeoregionController < ApplicationController
         result = ActiveRecord::Base.connection.execute(sql)
         if @area.is_a?(Country) && @site.navigate_by_regions?
           @map_data = result.map do |r|
+            next if r['count'] == "0"
 
             uri = URI.parse(r['url'])
             params = Hash[uri.query.split('&').map{|p| p.split('=')}] rescue {}
@@ -188,9 +190,10 @@ class GeoregionController < ApplicationController
             uri.query = params.to_a.map{|p| p.join('=')}.join('&')
             r['url'] = uri.to_s
             r
-          end.to_json
+          end.compact.to_json
         else
           @map_data = result.map do |r|
+            next if r['count'] == "0"
 
             uri = URI.parse(r['url'])
             params = Hash[uri.query.split('&').map{|p| p.split('=')}] rescue {}
@@ -198,13 +201,15 @@ class GeoregionController < ApplicationController
             uri.query = params.to_a.map{|p| p.join('=')}.join('&')
             r['url'] = uri.to_s
             r
-          end.to_json
+          end.compact.to_json
         end
 
         areas= []
         data = []
         @map_data_max_count=0
         result.each do |c|
+          next if c["count"] == "0"
+
           areas << c["code"]
           data  << c["count"]
           if(@map_data_max_count < c["count"].to_i)
@@ -213,8 +218,6 @@ class GeoregionController < ApplicationController
         end
         @chld = areas.join("|")
         @chd  = "t:"+data.join(",")
-
-        @breadcrumb.pop
       end
       format.js do
         render :update do |page|

@@ -135,6 +135,7 @@ class AudienceController < ApplicationController
         result = ActiveRecord::Base.connection.execute(sql)
 
         @map_data = result.map do |r|
+          next if r['count'] == "0"
           next if r['url'].blank?
           uri = URI.parse(r['url'])
           params = Hash[uri.query.split('&').map{|p| p.split('=')}] rescue {}
@@ -151,6 +152,8 @@ class AudienceController < ApplicationController
         data = []
         @map_data_max_count=0
         result.each do |c|
+          next if c["count"] == "0"
+
           areas << c["code"]
           data  << c["count"]
           if(@map_data_max_count < c["count"].to_i)
