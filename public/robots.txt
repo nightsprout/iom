@@ -6,3 +6,12 @@
 
 User-Agent: *
 Disallow: /admin
+
+User-Agent: *
+Disallow: /*.csv$
+
+User-Agent: *
+Disallow: /*.xls$
+
+User-Agent: *
+Disallow: /*.kml$
