@@ -259,7 +259,7 @@ class GeoregionController < ApplicationController
   end
 
   def list_regions1_from_country
-    country = Country.find(params[:id])
+    country = Country.fast.find(params[:id])
     regions = country.regions.select("id,name").where(:level => 1).order("name ASC")
     respond_to do |format|
       format.json do

@@ -21,7 +21,7 @@ class Admin::ProjectsController < Admin::AdminController
         end
       end
       unless params[:country].blank? || params[:country] == "0"
-        if country = Country.find_by_id(params[:country])
+        if country = Country.fast.find_by_id(params[:country])
           @conditions[country.name] = {'country' => params[:country]}
           from << 'countries_projects'
           projects = projects.from(from.join(',')).where("countries_projects.country_id = #{country.id} AND countries_projects.project_id = projects.id")
