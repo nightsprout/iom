@@ -112,9 +112,9 @@ class Admin::ProjectsController < Admin::AdminController
       Rails.logger.debug "CREATE 6"
       @countries_iso_codes = countries_iso_codes
       Rails.logger.debug "CREATE 7"
-      @countries = @project.country_ids.map{|id| Country.find(id)}
+      @countries = @project.country_ids.map{|id| Country.fast.find(id)}
       Rails.logger.debug "CREATE 8"
-      @regions = @project.region_ids.map{|id| Region.find(id)}
+      @regions = @project.region_ids.map{|id| Region.fast.find(id)}
       Rails.logger.debug "CREATE 9"
       render :action => 'new'
     end

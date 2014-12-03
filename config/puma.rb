@@ -1,4 +1,4 @@
-workers Integer(ENV['PUMA_WORKERS'] || 3)
+workers Integer(ENV['PUMA_WORKERS'] || 2)
 threads Integer(1), Integer(1) # Not threadsafe currently
 
 preload_app!
