@@ -815,7 +815,7 @@ SQL
     GC.start
     
     Site.all.each do |site|
-      Resque.enqueue( CacheSite, self.id )
+      Resque.enqueue( CacheSite, site.id )
     end
 
     Rails.cache.clear
