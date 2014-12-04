@@ -818,8 +818,6 @@ SQL
       Resque.enqueue( CacheSite, site.id )
     end
 
-    Rails.cache.clear
-
   end
 
 

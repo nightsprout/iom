@@ -400,15 +400,15 @@ class Site < ActiveRecord::Base
 
   # Array of arrays
   # [[country, count], [country, count]]
-  def projects_countries
-    Rails.cache.fetch("site_#{self.id}_projects_countries", {:expires_in => 1.day}) do 
+  def projects_countries(force = false)
+    Rails.cache.fetch("site_#{self.id}_projects_countries", {:expires_in => 30.days, :force => force}) do 
       sql="select #{Country.custom_fields.join(',')},count(distinct ps.project_id) as count from countries
         inner join countries_projects as pr on pr.country_id=countries.id
         inner join projects_sites as ps on pr.project_id=ps.project_id and ps.site_id=#{self.id}
         inner join projects as p on ps.project_id=p.id and (p.end_date is null OR p.end_date > now())
         group by #{Country.custom_fields.join(',')} order by count DESC"
       Country.find_by_sql(sql).map do |c|
-        [c,c.count.to_i]
+        [c, c.count.to_i]
       end
     end
   end
@@ -711,6 +711,8 @@ SQL
     set_cached_projects_by_level( 1 ) if navigate_by_level1?
     set_cached_projects_by_level( 2 ) if navigate_by_level2?
     set_cached_projects_by_level( 3 ) if navigate_by_level3?
+
+    projects_countries( true )
   end
 
   def set_cached_projects_by_level(level)
