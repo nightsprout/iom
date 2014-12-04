@@ -718,7 +718,7 @@ SQL
 
   def set_cached_projects_by_level(level)
 
-    Project.find_in_batches do |batch|
+    Project.find_in_batches(batch_size: 100) do |batch|
       batch.each do |project|
         # Delete what we're about to insert
         ActiveRecord::Base.connection.execute("DELETE FROM data_denormalization WHERE site_id = #{self.id} and project_id = #{project.id} and level = #{level} ")

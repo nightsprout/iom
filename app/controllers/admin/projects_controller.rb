@@ -119,8 +119,8 @@ class Admin::ProjectsController < Admin::AdminController
   def edit
     @project              = find_project(params[:id])
     @project.date_updated = Time.now
-    @organizations_ids   = organizations_ids
-    @countries_iso_codes = countries_iso_codes
+    @organizations_ids    = organizations_ids
+    @countries_iso_codes  = countries_iso_codes
   end
 
   def update
