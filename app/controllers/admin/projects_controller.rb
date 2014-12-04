@@ -4,7 +4,7 @@ class Admin::ProjectsController < Admin::AdminController
   before_filter :get_organizations_list
 
   def index
-    @total_projects_count = current_user.admin?? Project.count : current_user.organization.projects.count
+    @total_projects_count = current_user.admin? ? Project.count : current_user.organization.projects.count
     @conditions = {}
 
     if params[:q]
@@ -57,7 +57,7 @@ class Admin::ProjectsController < Admin::AdminController
       @projects = projects.paginate :per_page => 20, :order => 'name asc', :page => params[:page]
     elsif params[:organization_id]
       template      = 'admin/organizations/projects'
-      @organization = current_user.admin?? Organization.find(params[:organization_id]) : current_user.organization
+      @organization = current_user.admin? ? Organization.find( params[:organization_id] ) : current_user.organization
       projects      = @organization.projects
       @projects     = projects.paginate :per_page => 20, :order => 'name asc', :page => params[:page]
     else

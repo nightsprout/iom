@@ -27,7 +27,7 @@
                     </span>
                   </td>
                   <td width="150" class="odd center">
-                    <p><%= project.countries.first.try(:name) %></p>
+                    <p><%= project.countries.fast.first.try(:name) %></p>
                   </td>
                 </tr>
               <% end -%>
