@@ -812,6 +812,8 @@ SQL
     SQL
     ActiveRecord::Base.connection.execute(sql)
 
+    GC.start
+    
     Site.all.each do |site|
       Resque.enqueue( CacheSite, self.id )
     end
