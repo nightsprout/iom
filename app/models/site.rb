@@ -402,11 +402,12 @@ class Site < ActiveRecord::Base
   # [[country, count], [country, count]]
   def projects_countries(force = false)
     Rails.cache.fetch("site_#{self.id}_projects_countries", {:expires_in => 30.days, :force => force}) do 
-      sql="select #{Country.custom_fields.join(',')},count(distinct ps.project_id) as count from countries
+      fields = Country.custom_fields - ["countries.the_geom_geojson"]
+      sql="select #{fields.join(',')},count(distinct ps.project_id) as count from countries
         inner join countries_projects as pr on pr.country_id=countries.id
         inner join projects_sites as ps on pr.project_id=ps.project_id and ps.site_id=#{self.id}
         inner join projects as p on ps.project_id=p.id and (p.end_date is null OR p.end_date > now())
-        group by #{(Country.custom_fields - ["countries.the_geom_geojson"]).join(',') - } order by count DESC"
+        group by countries.id order by count DESC"
       Country.find_by_sql(sql).map do |c|
         [c, c.count.to_i]
       end
