@@ -600,7 +600,7 @@ SQL
       )
     else
       if geographic_context_region_id.blank?
-        Country.find(self.geographic_context_country_id, :select => Country.custom_fields)
+        Country.fast.find(self.geographic_context_country_id, :select => Country.custom_fields)
       else
         nil
       end
@@ -703,12 +703,9 @@ SQL
   end
 
   def set_cached_projects
-    remove_cached_projects
 
-    #Insert into the relation all the sites that belong to the site.
-    sql="insert into projects_sites
-    select subsql.id as project_id, #{self.id} as site_id from (#{projects_sql({ :limit => nil, :offset => nil }).to_sql}) as subsql"
-    ActiveRecord::Base.connection.execute(sql)
+    ActiveRecord::Base.connection.execute("DELETE FROM projects_sites WHERE site_id = #{self.id}")
+    ActiveRecord::Base.connection.execute("insert into projects_sites select subsql.id as project_id, #{self.id} as site_id from (#{projects_sql({ :limit => nil, :offset => nil }).to_sql}) as subsql")
     #Work on the denormalization
 
     set_cached_projects_by_level( 1 ) if navigate_by_level1?
@@ -720,6 +717,9 @@ SQL
 
     Project.find_in_batches do |batch|
       batch.each do |project|
+        # Delete what we're about to insert
+        ActiveRecord::Base.connection.execute("DELETE FROM data_denormalization WHERE site_id = #{self.id} and project_id = #{project.id} and level = #{level} ")
+
         sql="insert into data_denormalization(project_id,level,project_name,project_description,organization_id,organization_name,start_date,end_date,regions,regions_ids,countries,countries_ids,sectors,sector_ids,clusters,cluster_ids,donors_ids,activities,activities_ids,audiences,audiences_ids,diseases,diseases_ids,is_active,site_id,created_at)
               select * from
                (SELECT p.id as project_id, #{level} as level, p.name as project_name, p.description as project_description,
@@ -768,11 +768,6 @@ SQL
         ActiveRecord::Base.connection.execute(sql)
       end
     end
-    
-
-    GC.start
-
-    Rails.cache.clear
 
   end
 

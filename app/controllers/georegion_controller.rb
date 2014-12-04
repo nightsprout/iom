@@ -24,7 +24,7 @@ class GeoregionController < ApplicationController
 
     @breadcrumb = []
 
-    @country = country = Country.find( geo_ids[0], :select => Country.custom_fields )
+    @country = country = Country.fast.find( geo_ids[0], :select => Country.custom_fields )
     @area = (geo_ids.last == geo_ids[0]) ? country : Region.find( geo_ids.last )
 
     @breadcrumb << country.name if @site.navigate_by_country?
