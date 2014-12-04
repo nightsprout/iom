@@ -8,10 +8,10 @@ User-Agent: *
 Disallow: /admin
 
 User-Agent: *
-Disallow: /*.csv$
+Disallow: /*.csv
 
 User-Agent: *
-Disallow: /*.xls$
+Disallow: /*.xls
 
 User-Agent: *
-Disallow: /*.kml$
+Disallow: /*.kml
