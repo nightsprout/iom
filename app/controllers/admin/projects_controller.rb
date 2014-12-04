@@ -129,9 +129,9 @@ class Admin::ProjectsController < Admin::AdminController
     @project.attributes = params[:project]
     @project.updated_by = current_user
     if params[:project][:sector_ids].nil? && !@project.sectors.empty?
-        @organizations_ids   = organizations_ids
-        @countries_iso_codes = countries_iso_codes
-        @project.sectors = @sectors
+        @organizations_ids    = organizations_ids
+        @countries_iso_codes  = countries_iso_codes
+        @project.sectors      = @sectors
         flash.now[:error] = 'Sorry, you can\'t remove all sectors'
         render :action => 'edit'
     else
