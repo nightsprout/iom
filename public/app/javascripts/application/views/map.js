@@ -323,7 +323,7 @@ define(['underscore', 'backbone', 'pluralize', 'underscoreString'], function(_, 
             
             var locationName;
             if (this.name) {
-              locationName = this.name + ", " + this.countryName;
+              locationName = this.name + ', ' + this.countryName;
             } else {
               locationName = this.countryName;
             }
