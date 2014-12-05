@@ -24,9 +24,9 @@
   </li>
   <% end -%>
   <li <%= selected_if_current_page(admin_organization_resources_path(@organization)) %>>
-        <div class="bottom_selected">
-          <%= link_to("Resources", admin_organization_resources_path(@organization)) %><% if !@organization.resources.empty? %> <p><span><%=@organization.resources.count%></span></p><% end %>
-        </div>
+      <div class="bottom_selected">
+        <%= link_to("Resources", admin_organization_resources_path(@organization)) %><% if !@organization.resources.empty? %> <p><span><%=@organization.resources.count%></span></p><% end %>
+      </div>
   </li>
 
   <% if current_user.admin? -%>

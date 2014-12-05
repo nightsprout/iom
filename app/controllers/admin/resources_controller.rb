@@ -4,7 +4,7 @@ class Admin::ResourcesController < ApplicationController
   before_filter :set_element
 
   def index
-    @resource = @element.resources.new
+    @resource = Resource.new
   end
 
   def create
