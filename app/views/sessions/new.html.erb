@@ -6,7 +6,9 @@
 <div class="row">
   <div class="grid-6 offset-3">
     <div class="mod-login">
-      <h1>Login</h1>
+      <h2 style="color: black; font-size: 30px;">Log In</h2>
+      <br />
+      <br />
       <%= form_tag session_path do -%>
 
           <%= label_tag 'email' %>
@@ -17,7 +19,8 @@
             <%= raw flash[:alert] %>
           <% end %>
           <%= submit_tag 'Sign in', :id=>'sign-in' %>
-          <%= link_to 'Forgot your password?', new_passwords_path, :class=> 'forgot-pass'%>
+          <%= link_to 'Forgot your password?', new_passwords_path, :class=> 'forgot-pass'%><br /><br />
+          <%= link_to 'Need an account? Register here!', registration_path, :class=> 'forgot-pass'%>
       <% end -%>
       <div class="footer"></div>
     </div>

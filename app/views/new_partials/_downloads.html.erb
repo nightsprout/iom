@@ -1,4 +1,5 @@
 <div class="mod-downloads" id="downloadsView">
+  <% if current_user.present? %>
   <span>Download this list: </span>
   <ul>
     <li><%= link_to 'CSV', csv_path, :class => 'csv' %></li>
@@ -6,4 +7,7 @@
     <li><%= link_to 'KML', kml_path, :class => 'kml' %></li>
     <li><%= link_to 'Embed this map', '#embedMapView', :class => 'embebed', :id => 'embedMapBtn' %></li>
   </ul>
+  <% else %>
+  <span>Please <a href="/session/new" style="position: inherit;background: inherit;display: inline;text-decoration: underline;padding: 0px;">Log In</a> to Download Project Export Files</span>
+  <% end %>
 </div>
