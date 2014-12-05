@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <title><% unless CGI.unescapeHTML(title).empty? %><%= CGI.unescapeHTML(title) %><% else %>Welcome<% end %> · NTD Partners Map</title>
-    <meta name="content" content="NGO Aid Map is an InterAction initiative that collects information on the work of NGOs and makes it accessible.">
+    <meta name="content" content="The Partners Map shows where organizations are working, what activities they are doing, and how to contact them for more information. The Partners Map focuses on neglected tropical diseases (NTDs), nutrition, agriculture, education, and water, sanitation & hygiene (WASH)">
     <meta name="viewport" content="width=980px">
     <meta name="google-site-verification" content="r4LPeTYNAKGuj7MPrkGpDgZ2ZXaKpVqn-nV7ixs5-sQ">
 
@@ -18,11 +18,7 @@
       <%= stylesheet_link_tag "lib/jquery-ui/css/no-theme/jquery-ui-1.10.4.custom.css", "vendor/chachi-slider/chachi-slider.css", "vendor/select2/select2.css", "main.css", :media => 'all' %>
     <% end %>
 
-    <% if Rails.env.development? %>
-      <link rel="icon" type="image/png" href="/app/images/favicon-dev.png">
-    <% else %>
-      <link rel="icon" type="image/png" href="/dist/images/favicon.png">
-    <% end %>
+    <link rel="icon" type="image/png" href="<%= image_path "Logo_sm.ico" %>">
 
     <% unless content_for?(:js_vars) %>
       <% if defined?(@map_data) %>

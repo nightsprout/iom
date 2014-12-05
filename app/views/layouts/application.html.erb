@@ -16,11 +16,7 @@
 
     <%= csrf_meta_tag %>
 
-    <% if Rails.env.development? %>
-      <link rel="icon" type="image/png" href="/app/images/favicon-dev.png">
-    <% else %>
-      <link rel="icon" type="image/png" href="/dist/images/favicon.png">
-    <% end %>
+    <link rel="icon" type="image/png" href="<%= image_path "Logo_sm.ico" %>">
   </head>
   <body>
 
