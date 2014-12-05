@@ -26,6 +26,9 @@ Iom::Application.routes.draw do
 
   resource :passwords
 
+  get "registration" => 'registration#new'
+  post "registration" => 'registration#create'
+
   # Front urls
   # resources :reports
   resources :donors,        :only => [:index, :show]

@@ -96,7 +96,7 @@ class User < ActiveRecord::Base
   end
 
   def admin?
-    self.organization.blank?
+    (self.role.nil? && self.organization.blank?) || self.role == "admin"
   end
   alias administrator? admin?
 

@@ -1,0 +1,45 @@
+<div class="row">
+  <div class="mod-backoffice-menu">
+    <!-- <a href="http://<%= Settings.main_site_host %>" class="interaction-logo"><%= image_tag "interaction-white.svg", :alt  => "interaction logo", :height => '98', :width => '150' %></a> -->
+  </div>
+</div>
+<div class="row">
+  <div class="grid-6 offset-3">
+    <div class="mod-login">
+      <h2 style="color: black; font-size: 30px;">Create An Account</h2>
+      <br />
+      <br />
+      <%= form_tag registration_path do -%>
+
+          <%= label_tag 'Your Name' %>
+          <%= text_field_tag 'name', @user.name, :class=>(flash[:alert] ? "error museo_sans" : "museo_sans") %>
+          <%= label_tag 'email' %>
+          <%= text_field_tag 'email', @user.email, :class=>(flash[:alert] ? "error museo_sans" : "museo_sans") %>
+          <%= label_tag 'password' %>
+          <%= password_field_tag 'password', nil, :class=>(flash[:alert] ? "error museo_sans" : "museo_sans")%>
+          <%= label_tag 'Confirm Password' %>
+          <%= password_field_tag 'password_confirmation', nil, :class=>(flash[:alert] ? "error museo_sans" : "museo_sans")%>
+
+          <%= label_tag "Organization" %>
+          <div class="museo_sans">
+            <%= select_tag :organization_id, options_from_collection_for_select(Organization.all, "id", "name"), :include_blank => true, :style => "width: 300px; font-size: 25px;" %>
+          </div>
+
+          <br />
+          <br />
+
+          <% if flash[:alert] %>
+            <%= raw flash[:alert] %>
+          <% end %>
+
+          <% if @user.errors.present? %>
+            <p style="color: red">  - <%= @user.errors.first.to_sentence.capitalize %></p>
+            <br />
+          <% end %>
+
+          <%= submit_tag 'Create Account', :id=>'sign-in' %>
+      <% end -%>
+      <div class="footer"></div>
+    </div>
+  </div>
+</div>

@@ -40,6 +40,7 @@
               <!--<li class="<%= (((controller_name == 'offices' && params[:donor_id].blank?) || (@element && @element.is_a?(Office))) ? 'selected' : nil) %>"><%= link_to(admin_offices_path) do %><span class="museo_sans">offices</span><% end %></li>-->
               <li class="<%= (controller_name == 'activities' && action_name == 'show' && @project.blank? && @organization.blank? ? 'selected' : nil) %>"><%= link_to(admin_activity_path) do %>activity<% end %></li>
               <li class="<%= (controller_name == 'pages' && @site.blank? ? 'selected' : nil) %>"><%= link_to(admin_pages_path) do %>pages<% end %></li>
+              <li class="<%= (controller_name == 'users' && @site.blank? ? 'selected' : nil) %>"><%= link_to(admin_users_path) do %>users<% end %></li>
               <li class="<%= (controller_name == 'layers' && @site.blank? ? 'selected' : nil) %>"><%= link_to(admin_layers_path) do %>layers<% end %></li>
             <% else -%>
               <li class="<%= (controller_name == 'admin' ? 'selected' : nil) %>"><%= link_to(admin_admin_path) do %>dashboard<% end %></li>
