@@ -4,7 +4,7 @@
     <div class="top"></div>
     <div class="med information">
       <div class="header">
-        <h2 class="museo_sans"><%= link_to 'NGO information', edit_admin_organization_path(current_user.organization) %></h2>
+        <h2 class="museo_sans"><%= link_to 'Your Organization', edit_admin_organization_path(current_user.organization) %></h2>
         <span class="ngo_activity">
           <p><%= @organization_data.active_projects_count %><em>active</em></p>
           <p><%= @organization_data.closed_projects_count %><em>closed</em></p>

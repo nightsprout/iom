@@ -89,7 +89,7 @@
           <%= simple_format(@donor.description) if @donor.description.present? %>
         </header>
 
-        <p class="disclaimer"><%= params[:organization_id] ? "In some cases, this organization may be sub-recipient (rather than a direct recipient) of this donor's funding." : "The projects presented here are voluntarily provided by InterAction members and are not intended to be a complete representation of this donor’s activities." %> </p>
+        <p class="disclaimer"><%= params[:organization_id] ? "In some cases, this organization may be sub-recipient (rather than a direct recipient) of this donor's funding." : "The projects presented here are voluntarily provided by participating organizations and are not intended to be a complete representation of this donor’s activities." %> </p>
 
         <%= render :partial => 'new_partials/downloads', :locals => { :csv_path => donor_path(@donor, @carry_on_filters.merge(:format => :csv)), :xls_path => donor_path(@donor, @carry_on_filters.merge(:format => :xls)), :kml_path => donor_path(@donor, @carry_on_filters.merge(:format => :kml)) } %>
 
