@@ -1,23 +1,19 @@
 class AlertsMailer < ActionMailer::Base
-  default :from => 'mappinginfo@interaction.org'
+  default :from => 'CWW@taskforce.org'
 
   def projects_about_to_end(contact_email, projects)
     @projects = projects
-    mail(:to => contact_email, :subject => "[NGO Aid Map] Projects about to end!")
+    mail(:to => contact_email, :subject => "[Partners Map] Projects about to end!")
   end
 
   def reset_password(user_email, reset_token)
     @reset_token = reset_token
-    mail(:to => user_email, :subject => "Change your NGO Aid Map password")
+    mail(:to => user_email, :subject => "Change your Partners Map password")
   end
 
   def six_months_since_last_login(user)
-    cc = if Rails.env.production?
-           'mappinginfo@interaction.org'
-         else
-           'fer@ferdev.com'
-         end
-    mail(:to => user.email, :cc => cc, :subject => "NGO Aid Map - We Miss You!")
+    cc = 'CWW@taskforce.org'
+    mail(:to => user.email, :cc => cc, :subject => "Partners Map - We Miss You!")
   end
 
 =begin
