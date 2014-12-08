@@ -8,6 +8,7 @@ class Admin::AdminController < ApplicationController
   # end
 
   def index
+    redirect_to root_path and return unless current_user.admin? || current_user.organization.present?
     @changes_last_day_count = ChangesHistoryRecord.in_last_24h.count
     @changes_count          = ChangesHistoryRecord.count
 

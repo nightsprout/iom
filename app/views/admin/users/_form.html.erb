@@ -26,7 +26,7 @@
 
   <div class="field">
     <%= f.label :organization_id, raw('Organization&nbsp;<strong>*</strong>') %>
-    <%= f.select :organization_id, @organizations.map{|o| [o.name, o.id]}, {:include_blank => 'Interaction'}, :class => 'chzn-select long' %>
+    <%= f.select :organization_id, @organizations.map{|o| [o.name, o.id]}, {:include_blank => ''}, :class => 'chzn-select long' %>
   </div>
 
   <div class="field">

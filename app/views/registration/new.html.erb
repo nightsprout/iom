@@ -19,12 +19,7 @@
           <%= password_field_tag 'password', nil, :class=>(flash[:alert] ? "error museo_sans" : "museo_sans")%>
           <%= label_tag 'Confirm Password' %>
           <%= password_field_tag 'password_confirmation', nil, :class=>(flash[:alert] ? "error museo_sans" : "museo_sans")%>
-
-          <%= label_tag "Organization" %>
-          <div class="museo_sans">
-            <%= select_tag :organization_id, options_from_collection_for_select(Organization.all, "id", "name"), :include_blank => true, :style => "width: 300px; font-size: 25px;" %>
-          </div>
-
+          
           <br />
           <br />
 
