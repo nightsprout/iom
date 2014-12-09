@@ -475,7 +475,7 @@ define(['underscore', 'backbone', 'pluralize', 'underscoreString'], function(_, 
     // }
 
     cartodbOptions = {
-      user_name: 'ngoaidmap',
+      user_name: 'cww',
       type: 'cartodb',
       cartodb_logo: true,
       legends: false,
