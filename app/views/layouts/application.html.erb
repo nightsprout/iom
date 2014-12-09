@@ -27,7 +27,7 @@
             <% if current_user.admin? -%>
               <li><%= link_to('settings', edit_admin_setting_path(Settings.first)) %></li>
             <% end -%>
-            <li class="last"><%= link_to('close', logout_path) %></li>
+            <li class="last"><%= link_to('Log Out', logout_path) %></li>
           </ul>
 
           <ul class="main-menu">
@@ -42,7 +42,7 @@
               <li class="<%= (controller_name == 'pages' && @site.blank? ? 'selected' : nil) %>"><%= link_to(admin_pages_path) do %>pages<% end %></li>
               <li class="<%= (controller_name == 'users' && @site.blank? ? 'selected' : nil) %>"><%= link_to(admin_users_path) do %>users<% end %></li>
               <li class="<%= (controller_name == 'layers' && @site.blank? ? 'selected' : nil) %>"><%= link_to(admin_layers_path) do %>layers<% end %></li>
-            <% else -%>
+            <% elsif current_user.organization_id.present? -%>
               <li class="<%= (controller_name == 'admin' ? 'selected' : nil) %>"><%= link_to(admin_admin_path) do %>dashboard<% end %></li>
               <li class="<%= (((controller_name == 'projects' && !@organization) || (@element && @element.is_a?(Project))) ? 'selected' : nil) %>"><%= link_to(admin_projects_path) do %>Your projects<% end %></li>
               <li class="<%= ((@organization || controller_name == 'organizations' || (@element && @element.is_a?(Organization))) ? 'selected' : nil) %>"><%= link_to(edit_admin_organization_path(current_user.organization)) do %>Your organization<% end %></li>

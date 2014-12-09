@@ -11,6 +11,12 @@ class AlertsMailer < ActionMailer::Base
     mail(:to => user_email, :subject => "Change your Partners Map password")
   end
 
+  def upgrade_request(user, params)
+    @user = user
+    @params = params
+    mail(:to => "cww@taskforce.org", :from => user.email, :subject => "PartnersMap Upgrade Request")
+  end
+
   def six_months_since_last_login(user)
     cc = 'CWW@taskforce.org'
     mail(:to => user.email, :cc => cc, :subject => "Partners Map - We Miss You!")

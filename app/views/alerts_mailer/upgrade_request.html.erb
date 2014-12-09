@@ -1,0 +1,92 @@
+<html>
+  <head>
+    <style type="text/css">
+      body {
+        font-family: Arial;
+        font-size: 15px;
+        color: #666666;
+        width: 800px;
+        padding: 20px;
+      }
+
+      #content {
+        padding-bottom: 15px;
+        border-bottom: 1px solid #cad0da;
+      }
+
+      h1 {
+        font-size: 27px;
+        color: black;
+        margin-bottom: 5px;
+      }
+
+      a {
+        color: #E93E3F;
+        text-decoration: none;
+      }
+
+      h3 {
+        display: inline;
+        font-size: 17px;
+      }
+
+      table {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+        border-bottom: 1px solid #e5e5e5;
+      }
+
+      table tr td {
+        margin: 0;
+        padding: 16px 0;
+        border-top: 1px solid #e5e5e5;
+      }
+
+      table tr td div {
+        padding: 0 0 0;
+      }
+
+      table tr td a {
+        font-size: 17px;
+      }
+
+      table tr td span {
+        display: block;
+        padding-top: 13px;
+        font-size: 13px;
+        color: #B8B8B8;
+        line-height: 0;
+      }
+
+      table tr td span strong {
+        color: #666666;
+      }
+
+      #footer {
+        font-size: 13px;
+        text-align: right;
+      }
+
+    </style>
+  </head>
+  <body>
+    <div id="content">
+      <h1>PartnersMap Upgrade Request</h1>
+
+      <p>The following user submitted a request to upgrade accounts:</p>
+
+      <ol>
+        <li>Name: <%= @params[:name] %></li>
+        <li>Org Name: <%= @params[:organization_name] %></li>
+        <li>Org URL: <%= @params[:organization_url] %></li>
+        <li>Request Details: <%= @params[:organization_details] %></li>
+
+      </ol>
+
+    </div>
+    <p id="footer">
+      <a href="http://www.partnersmap.org/admin">http://www.partnersmap.org/admin</a>
+    </p>
+  </body>
+</html>

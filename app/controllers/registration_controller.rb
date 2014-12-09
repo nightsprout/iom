@@ -2,6 +2,13 @@ class RegistrationController < ApplicationController
 
   include AuthenticatedSystem
 
+  def upgrade
+  end
+
+  def upgrade_request
+    AlertsMailer.upgrade_request( current_user, params ).deliver
+  end
+
   def new
     @user = User.new
     redirect_back_or_default(admin_admin_path) and return if current_user.present?

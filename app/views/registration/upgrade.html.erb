@@ -1,0 +1,35 @@
+<div class="row">
+  <div class="mod-backoffice-menu">
+    <!-- <a href="http://<%= Settings.main_site_host %>" class="interaction-logo"><%= image_tag "interaction-white.svg", :alt  => "interaction logo", :height => '98', :width => '150' %></a> -->
+  </div>
+</div>
+<div class="row">
+  <div class="grid-6 offset-3">
+    <div class="mod-login">
+      <h2 style="color: black; font-size: 30px;">Submit Data To PartnersMap</h2>
+      <br />
+      <br />
+      <%= form_tag registration_upgrade_path do -%>
+
+          <%= label_tag 'Your Name' %>
+          <%= text_field_tag 'name', current_user.name, :class=>(flash[:alert] ? "error museo_sans" : "museo_sans"), :required => true %>
+          <%= label_tag 'Organization Name' %>
+          <%= text_field_tag 'organization_name', nil, :required => true %>
+          <%= label_tag 'Organization Website URL' %>
+          <%= text_field_tag 'organization_url', nil, :required => true %>
+          <%= label_tag "Describe your interest in submitting data to the Partners Map. Please include details about currently available data." %>
+          <%= text_area_tag 'organization_details', nil, :required => true, :style => "background: #EDEDED; width: 90%; line-height: 1.5em; padding: 10px 5%; height: 100px;"%>
+
+          <br />
+          <br />
+
+          <% if flash[:alert] %>
+            <%= raw flash[:alert] %>
+          <% end %>
+
+          <%= submit_tag 'Submit Request', :id=>'sign-in' %>
+      <% end -%>
+      <div class="footer"></div>
+    </div>
+  </div>
+</div>
