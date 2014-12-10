@@ -1,16 +1,22 @@
-# Welcome to NGOAIDMAP
 
-NGOAIDMAP is a website available at http://ngoaidmap.org/. It was a custom development done initially by Vizzuality (vizzuality.com) for Interaction (interaction.org). The application consist of a database of projects. Those projects get aggregated to create Sites, for example http://foodsecurity.ngoaidmap.org/ or http://haiti.ngoaidmap.org/
 
-It is probably a very specific application to be used directly, but the ideas and code behind it might be applicable for other people needs. If you have questions on how to use contact@vizzuality.com
+![Partners Map](http://www.partnersmap.org/dist/images/partners_horizontal.png)
+
+# Welcome to the Partners Map
+
+The Partners Map is an interactive, online tool that shows where organizations are working, what activities they are doing, and how to contact them for more information. Partners submit their data for inclusion on the map, which can then be used to identify potential partners, facilitate collaboration, establish synergistic relationships, and leverage resources. Through embeddable iFrames, the Partners Map also allows partners to easily showcase their achievements.
+
+This platform was a custom development done initially by Vizzuality (vizzuality.com) for Interaction (interaction.org). This project was forked from the original NGOAIDMAP, which can be found at https://github.com/simbiotica/iom. This fork was developed by Nightsprout (Nightsprout.com) to be used by the STH Coalition (STHCoalition.org) on PartnersMap.org.
+
+The application consists of a database of projects. Those projects get aggregated to create Sites, for example http://foodsecurity.ngoaidmap.org/ or http://haiti.ngoaidmap.org/. The application is somewhat customized for a specific use, so care is needed when forking the map. Any contributions which help generalize the map further are welcomed.
+
 
 ## Database structure 
 
-NGOAIDMAP is a project that allows you to create websites about projects around a certain topic. For example haiti or foodsecurity. 
+The map allows you to create websites about projects around a certain topic. For example, global health, disaster relief, and so forth. 
 
-The database consist of 4 main tables (and many supporting tables): "projects" done by "organizations" funded by "donors" which are included in different "sites".
+The database consist of 4 main tables (and many supporting tables): "projects" done by "organizations" funded by "donors" which are included in different "sites". Take a look at the database schema at db/db_schema.pdf for more information.
 
-Take a look at the database schema at db/db_schema.pdf to get a better idea of what the project does.
 
 ## Requirements
 
@@ -21,6 +27,7 @@ NGOAIDMAP is a Ruby on Rails application. The dependencies are:
  * Postgis 2.X+
  * Bundler 
  * RVM
+
 
 ## Installation
 
@@ -34,9 +41,10 @@ NGOAIDMAP is a Ruby on Rails application. The dependencies are:
  * ```npm install```
  * ```bower install```
 
+
 ## Database Seeding
 
-This is a big thing to do.  It'll take some time to fully seed. Some of the tasks are large and we have to make certain concessions thanks to the old version of Ruby/Rails.  Here's the process:
+This is a big thing to do.  It'll take some time to fully seed. Some of the tasks are large and we have to make certain concessions thanks to the old version of Ruby/Rails. Here's the process:
 
 Run the following commands in order as written.  Don't combine them unless already combined.  If you're running them on Heroku, make sure to run them all with a PX-sized instance.
 
