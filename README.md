@@ -4,7 +4,7 @@
 
 # Welcome to the Partners Map
 
-The Partners Map is an interactive, online tool that shows where organizations are working, what activities they are doing, and how to contact them for more information. Partners submit their data for inclusion on the map, which can then be used to identify potential partners, facilitate collaboration, establish synergistic relationships, and leverage resources. Through embeddable iFrames, the Partners Map also allows partners to easily showcase their achievements.
+The Partners Map is an interactive, online tool that shows where organizations are working, what activities they are doing, and how to contact them for more information. Collaborators submit their data for inclusion on the map, which can then be used to identify potential partners, establish synergistic relationships, and leverage resources. Through embeddable iFrames, the Partners Map also allows partners to easily showcase their achievements.
 
 This platform was a custom development done initially by Vizzuality (vizzuality.com) for Interaction (interaction.org). This project was forked from the original NGOAIDMAP, which can be found at https://github.com/simbiotica/iom. This fork was developed by Nightsprout (Nightsprout.com) to be used by the STH Coalition (STHCoalition.org) on PartnersMap.org.
 
@@ -20,7 +20,7 @@ The database consist of 4 main tables (and many supporting tables): "projects" d
 
 ## Requirements
 
-NGOAIDMAP is a Ruby on Rails application. The dependencies are:
+The map is a Ruby on Rails application. The dependencies are:
 
  * Ruby 1.8.7
  * PostgreSQL 9.2 or higher.
@@ -63,3 +63,9 @@ The iom:data tasks will typically take between 10 minutes and 1 hour to complete
 There seems to be a consistent error with rake db:seed in the rake db:iom_reset process.  This is probably related to Ruby 1.8.7.  If that fails, run ```rake db:seed``` separately, and then run ```rake iom:data:load_adm_levels iom:data:load_orgs iom:data:load_projects```.
 
 
+### Geography
+This map uses geographic boundary data from GeoConnect (http://linkssystem.org/). Additional boundary data was utilized from the Global Administrative Areas (GADM.org) project.
+
+
+### Contributions
+Contributions and collaboration are welcome. Please contact cww@taskforce.org to share your ideas or request additional information.
