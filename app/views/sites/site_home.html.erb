@@ -1,4 +1,4 @@
-<% cache("#{@site.id}/home/map") do %>
+<% cache("#{@site.id}/home/map", :expires_in => 1.day) do %>
   <%= render 'new_partials/map' %>
 <% end %>
 
