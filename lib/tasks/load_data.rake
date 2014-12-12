@@ -134,7 +134,7 @@ namespace :iom do
       
 
       i = 0
-      results = DB.select_rows "SELECT * from tmp_countries limit 100 offset #{i}"
+      results = DB.select_rows "SELECT * from tmp_countries ORDER BY gid ASC limit 100 offset #{i}"
       while results.count > 0
       
         results.each do |row|
@@ -156,7 +156,7 @@ namespace :iom do
           end
         end
         i += 100
-        results = DB.select_rows "SELECT * from tmp_countries limit 100 offset #{i}"
+        results = DB.select_rows "SELECT * from tmp_countries ORDER BY gid ASC limit 100 offset #{i}"
         GC.start
       end
 
@@ -176,7 +176,7 @@ namespace :iom do
              file.write(uri.read)
           end
         end
-      end
+     end
 
       sql = File.read("#{Rails.root}/db/data/admin2_regions.sql")
       statements = sql.split(/;$/)
@@ -189,8 +189,9 @@ namespace :iom do
       statements = nil
 
       GC.start
-      
+
       results = DB.select_rows "SELECT * from tmp_countries where name1 = '.' and name2 = '.'"
+
       results.each do |row|
         country = countries[ row[2].titleize ]
         country = Country.fast.find_by_name_insensitive row[2] if country.nil?
@@ -229,9 +230,9 @@ namespace :iom do
       GC.start
 
       i = 0
-      results = DB.select_rows "SELECT * from tmp_countries where name1 != '.' and name2 != '.' limit 100 offset #{i}"
+      results = DB.select_rows "SELECT * from tmp_countries where name1 != '.' and name2 != '.' ORDER BY gid ASC limit 100 offset #{i}"
+      
       while results.count > 0
-
         results.each do |row|
           country = countries[ row[2].titleize ] 
           country = Country.fast.find_by_name_insensitive row[2] if country.nil?
@@ -249,6 +250,7 @@ namespace :iom do
           end
 
           region = Region.where(:parent_region_id => parent_region.id, :country_id => country.id).fast.find_by_name_insensitive( row[4] )
+
           if region.nil?
             DB.execute "INSERT INTO regions(country_id, parent_region_id, level, name, center_lat, center_lon, the_geom, the_geom_geojson, code ) SELECT #{country.id}, #{parent_region.id}, 2, name2, st_y( ST_Centroid(the_geom) ), st_x( ST_Centroid(the_geom) ), the_geom, ST_AsGeoJSON(the_geom,6), hasc from tmp_countries where gid=#{row[0]}"
             region = Region.fast.where(:name => row[4], :parent_region_id => parent_region.id, :country_id => country.id).first 
@@ -257,7 +259,7 @@ namespace :iom do
           end
         end
         i += 100
-        results = DB.select_rows "SELECT * from tmp_countries where name1 != '.' and name2 != '.' limit 100 offset #{i}"
+        results = DB.select_rows "SELECT * from tmp_countries where name1 != '.' and name2 != '.' ORDER BY gid ASC limit 100 offset #{i}"
         GC.start
       end
 
