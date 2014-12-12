@@ -176,7 +176,7 @@ namespace :iom do
              file.write(uri.read)
           end
         end
-     end
+      end
 
       sql = File.read("#{Rails.root}/db/data/admin2_regions.sql")
       statements = sql.split(/;$/)
