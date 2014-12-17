@@ -198,7 +198,7 @@ class ProjectsSynchronization < ActiveRecord::Base
             if donor.nil?
               donor = Donor.create!(:name => don.titleize)
             end
-            p.donations << Donation.new( :project => p, :donor => donor) unless p.donations.where(:project => p, :donor => donor).count > 0
+            p.donations << Donation.new( :project => p, :donor => donor) unless p.donations( :donor => donor).count > 0
           end
         end
 

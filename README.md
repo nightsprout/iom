@@ -66,6 +66,8 @@ This project is running on Rails 3.1, but the Asset Pipeline is not currently be
 
 PostGIS is only available on "Standard 0" and higher Heroku Postgres plans.  At least one Worker process must always be running.
 
+Sometimes, in order to connect to your Postgres instance with PostGIS functionality, you'll need to change the DATABASE_URL from postgres:// to postgis://
+
 ### Contributions
 
 Contributions and collaboration are welcome. Please contact cww@taskforce.org to share your ideas or request additional information.
