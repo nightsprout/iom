@@ -113,10 +113,14 @@
           </div>
         <% end %>
 
-        <% if @project.target? %>
+        <% if @project.audiences.count > 0 %>
           <div class="mod-info mod-target-groups">
-            <h3 class="<%= (@project.estimated_people_reached?)? 'margin':'' %>">Target groups</h3>
-            <p><%= @project.target %></p>
+            <h3 class="<%= (@project.estimated_people_reached?)? 'margin':'' %>">Target Audiences</h3>
+            <ul>
+              <% @project.audiences.each do |audience| %>
+              <li><%= audience.name %></li>
+              <% end %>
+            </ul>
           </div>
         <% end %>
 
