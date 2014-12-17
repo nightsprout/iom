@@ -13,7 +13,7 @@ The application consists of a database of projects. Those projects get aggregate
 
 ## Database structure 
 
-The map allows you to create websites about projects around a certain topic. For example, global health, disaster relief, and so forth. 
+The map allows you to create sub-sites about projects around a certain topic. For example, global health, disaster relief, and so forth. 
 
 The database consist of 4 main tables (and many supporting tables): "projects" done by "organizations" funded by "donors" which are included in different "sites". Take a look at the database schema at db/db_schema.pdf for more information.
 
@@ -22,9 +22,10 @@ The database consist of 4 main tables (and many supporting tables): "projects" d
 
 The map is a Ruby on Rails application. The dependencies are:
 
- * Ruby 1.8.7
+ * Ruby 1.9.3
  * PostgreSQL 9.2 or higher.
  * Postgis 2.X+
+ * Redis, Resque, running workers as appropriate
  * Bundler 
  * RVM
 
@@ -48,7 +49,7 @@ This is a big thing to do.  It'll take some time to fully seed. Some of the task
 
 Run the following commands in order as written.  Don't combine them unless already combined.  If you're running them on Heroku, make sure to run them all with a PX-sized instance.
 
-  * rake db:drop db:create iom:postgis_init db:migrate  
+  * rake db:drop db:create iom:postgis_init iom:tiger_init db:migrate  
   * rake iom:data:load_regions_0
   * rake iom:data:load_regions_1
   * rake iom:data:load_regions_2
@@ -57,15 +58,14 @@ Run the following commands in order as written.  Don't combine them unless alrea
 
 The iom:data tasks will typically take between 10 minutes and 1 hour to complete (depends on the environment).  Brace yourself appropriately for the length of time required.
 
+## Hosting/Deploying
 
-### Install Errors
+This project fork is modified specifically for running on Heroku.  If any issues related to the environment constraints occur, please open an Issue as appropriate.
 
-There seems to be a consistent error with rake db:seed in the rake db:iom_reset process.  This is probably related to Ruby 1.8.7.  If that fails, run ```rake db:seed``` separately, and then run ```rake iom:data:load_adm_levels iom:data:load_orgs iom:data:load_projects```.
+This project is running on Rails 3.1, but the Asset Pipeline is not currently being used.  Before deploying, make sure to run ```grunt build``` and commit the compiled files to the repository.
 
-
-### Geography
-This map uses geographic boundary data from GeoConnect (http://linkssystem.org/). Additional boundary data was utilized from the Global Administrative Areas (GADM.org) project.
-
+PostGIS is only available on "Standard 0" and higher Heroku Postgres plans.  At least one Worker process must always be running.
 
 ### Contributions
+
 Contributions and collaboration are welcome. Please contact cww@taskforce.org to share your ideas or request additional information.
