@@ -268,146 +268,6 @@ namespace :iom do
       DB.execute 'DROP TABLE tmp_countries'
     end
 
-    def load_project_files( csv_projs )
-      csv_projs.each do |row|
-        begin
-          o = Organization.find_by_name row.organization
-          if o.nil?
-            o = Organization.create!( :name => row.organization )
-          end
-
-          p = o.projects.where(:name => row.project_name, :intervention_id => row.org_intervention_id).first
-          if p.nil?
-            p = Project.new({
-              :primary_organization_id  => o.id,
-              :intervention_id          => row.org_intervention_id,
-              :name                     => row.project_name.present? ? row.project_name.gsub(/\|/, ", ") : nil,
-              :description              => row.project_description,
-              :additional_information   => row.additional_information,
-              :budget                   => row.budget_numeric,
-              :partner_organizations    => row.local_partners,
-              :estimated_people_reached => row.estimated_people_reached
-            })
-
-            # verbatim locations
-
-            if row.start_date.blank?
-              p.start_date = Time.now - 1.year
-            else
-              begin
-                p.start_date = Date.strptime( row.start_date, '%m/%d/%Y' )
-              rescue
-                p.start_date = nil
-              end
-            end
-
-            if row.end_date.blank?
-              p.end_date = Time.now + 1.year
-            else
-              begin
-                p.end_date = Date.strptime( row.end_date, '%m/%d/%Y' )
-              rescue
-                p.end_date = nil
-              end
-            end
-
-            unless row.location.blank?
-              row.location.split("|").map(&:strip).each do |loc|
-                loc_array = loc.split(">").map(&:strip)
-
-                if loc_array[0].present?
-                  c = Country.fast.find_by_name_insensitive loc_array[0]
-                  next if c.nil?
-                  p.countries << c
-
-                  if loc_array[1].present?
-                    r = c.regions.fast.find_by_name_insensitive loc_array[1]
-                    next if r.nil?
-                    p.regions << r
-
-                    if loc_array[2].present?
-                      r2 = Region.fast.where(:country_id => c.id, :parent_region_id => r.id).first
-                      next if r2.nil?
-                      p.regions << r2
-                    end
-                  end
-                end
-
-              end
-            end
-
-            unless row.sectors.blank?
-              row.sectors.split("|").map(&:strip).each do |sec|
-                sect = Sector.find_by_name_ilike sec.titleize
-                if sect.nil?
-                  sect = Sector.create(:name => sec.titleize)
-                end
-                p.sectors << sect
-              end
-            end
-
-            unless row.target_groups.blank?
-              row.target_groups.split("|").map(&:strip).each do |aud|
-                a = Audience.find_by_name_ilike aud.titleize
-                if a.nil?
-                  a = Audience.create(:name => aud.titleize)
-                end
-                p.audiences << a
-              end
-            end
-
-            unless row.activities.blank?
-              row.activities.split("|").map(&:strip).each do |aud|
-                a = Activity.find_by_name_ilike aud.titleize
-                if a.nil?
-                  a = Activity.create(:name => aud.titleize)
-                end
-                p.activities << a
-              end
-            end
-
-            unless row.diseases.blank?
-              row.diseases.split("|").map(&:strip).each do |aud|
-                a = Disease.find_by_name_ilike aud.titleize
-                if a.nil?
-                  a = Disease.create(:name => aud.titleize)
-                end
-                p.diseases << a
-              end
-            end
-
-            unless row.medicine.blank?
-              row.medicine.split("|").map(&:strip).each do |aud|
-                a = Medicine.find_by_name_ilike aud.titleize
-                if a.nil?
-                  a = Medicine.create(:name => aud.titleize)
-                end
-                p.medicines << a
-              end
-            end
-
-
-            unless row.donors.blank?
-              row.donors.split("|").map(&:strip).each do |don|
-                donor = Donor.find_by_name_ilike don.titleize
-                if donor.nil?
-                  donor = Donor.create!(:name => don.titleize)
-                end
-                p.donations << Donation.new( :project => p, :donor => donor)
-              end
-            end
-
-            p.save!
-
-          end
-        rescue Exception => e
-          Rails.logger.info "Exception: #{e}"
-
-          nil
-        end
-      end
-    end
-
 
     desc "load all available regions not imported already"
     task :load_vitamin => :environment do    
@@ -427,7 +287,7 @@ namespace :iom do
 
       p "HKI.csv loaded"
 
-      load_project_files( csv_projs )
+      ProjectsSynchronization.load_project_files( csv_projs )
 
       GC.start
 
@@ -445,7 +305,7 @@ namespace :iom do
 
       p "EvidenceAction.csv loaded"
 
-      load_project_files( csv_projs )
+      ProjectsSynchronization.load_project_files( csv_projs )
 
       GC.start
 
@@ -463,7 +323,7 @@ namespace :iom do
 
       p "VAAmericas.csv loaded"
 
-      load_project_files( csv_projs )
+      ProjectsSynchronization.load_project_files( csv_projs )
 
       GC.start
 
@@ -481,7 +341,7 @@ namespace :iom do
 
       p "VAIndia.csv loaded"
 
-      load_project_files( csv_projs )
+      ProjectsSynchronization.load_project_files( csv_projs )
 
       s = Site.find_by_name "global"
       s.set_cached_projects

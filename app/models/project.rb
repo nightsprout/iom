@@ -72,9 +72,9 @@ class Project < ActiveRecord::Base
   validates_format_of :website, :with => /^(http|https):\/\/[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,5}(:[0-9]{1,5})?(\/.*)?$/ix, :message => "URL is invalid (your changes were not saved). Make sure the web address begins with 'http://' or 'https://'.", :allow_blank => true, :if => :website_changed?
 
 
-  #validates_uniqueness_of :intervention_id, :if => (lambda do
-    #intervention_id.present?
-  #end)
+  validates_uniqueness_of :intervention_id, :if => (lambda do
+    intervention_id.present?
+  end)
 
   after_create :generate_intervention_id
   after_save{ Resque.enqueue(CacheProject, self.id) }
@@ -828,12 +828,14 @@ SQL
   end
 
   def generate_intervention_id
-    Project.where(:id => id).update_all(:intervention_id => [
-      primary_organization.try(:organization_id).presence || 'XXXX',
-      countries.first.try(:iso2_code).presence || 'XX',
-      start_date.strftime('%y'),
-      id
-    ].join('-'))
+    unless intervention_id.present?
+      Project.where(:id => id).update_all(:intervention_id => [
+        primary_organization.try(:organization_id).presence || 'XXXX',
+        countries.first.try(:iso2_code).presence || 'XX',
+        start_date.strftime('%y'),
+        id
+      ].join('-'))
+    end
   end
 
   def create_intervention_id

@@ -8,6 +8,9 @@ function createUploader() {
         uploadButton: 'Import projects'
       },
       multiple: false,
+      validation: {
+        allowedExtensions: ['csv']
+      },
       callbacks: {
         onSubmit: function(){
           restartModalWindow().fadeIn();
