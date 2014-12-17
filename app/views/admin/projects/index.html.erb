@@ -109,7 +109,7 @@
                   <% end %>
                 </td>
                 <td width="150" class="center">
-                  <p><%= project.countries.fast.map(&:name).to_sentence %></p>
+                  <p><%= project.countries.fast.uniq.map(&:name).to_sentence %></p>
                 </td>
               </tr>
             <% end -%>

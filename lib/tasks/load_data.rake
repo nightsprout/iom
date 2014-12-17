@@ -97,9 +97,6 @@ namespace :iom do
         country = Country.fast.find_by_name_insensitive row[1]
         if country.nil?
           DB.execute "INSERT INTO countries( name, center_lat, center_lon, the_geom, the_geom_geojson ) SELECT name0, st_y( ST_Centroid(the_geom) ), st_x( ST_Centroid(the_geom) ), the_geom, ST_AsGeoJSON(the_geom,6) from tmp_countries where gid=#{row[0]}"
-          country = Country.fast.find_by_name row[1]
-          country.name = country.name.titleize
-          country.save!
         end
       end
 
@@ -142,7 +139,7 @@ namespace :iom do
           country = countries[ row[1] ]
           country = Country.fast.find_by_name_insensitive row[1] if country.nil?
           if country.nil?
-            country = Country.create!( :name => row[1].titleize )
+            country = Country.create!( :name => row[1] )
           end
 
           next if row[2].nil?
@@ -150,9 +147,6 @@ namespace :iom do
           region = country.regions.fast.find_by_name_insensitive row[2]        
           if region.nil?
             DB.execute "INSERT INTO regions(country_id, level, name, center_lat, center_lon, the_geom, the_geom_geojson ) SELECT #{country.id}, 1, name1, st_y( ST_Centroid(the_geom) ), st_x( ST_Centroid(the_geom) ), the_geom, ST_AsGeoJSON(the_geom,6) from tmp_countries where gid=#{row[0]}"
-            region = country.regions.fast.find_by_name row[2]
-            region.name = region.name.titleize
-            region.save!
           end
         end
         i += 100
@@ -193,13 +187,10 @@ namespace :iom do
       results = DB.select_rows "SELECT * from tmp_countries where name1 = '.' and name2 = '.'"
 
       results.each do |row|
-        country = countries[ row[2].titleize ]
+        country = countries[ row[2] ]
         country = Country.fast.find_by_name_insensitive row[2] if country.nil?
         if country.nil?
           DB.execute "INSERT INTO countries( name, code, center_lat, center_lon, iso3_code, the_geom, the_geom_geojson ) SELECT name0, iso, st_y( ST_Centroid(the_geom) ), st_x( ST_Centroid(the_geom) ), iso, the_geom, ST_AsGeoJSON(the_geom,6) from tmp_countries where gid=#{row[0]}"
-          country = Country.fast.find_by_name_insensitive row[2]
-          country.name = country.name.titleize
-          country.save!
         end
       end
 
@@ -207,21 +198,18 @@ namespace :iom do
 
       results = DB.select_rows "SELECT * from tmp_countries where name1 != '.' and name2 = '.'"
       results.each do |row|
-        country = countries[ row[2].titleize ]
+        country = countries[ row[2] ]
         country = Country.fast.find_by_name_insensitive row[2] if country.nil?
         if country.nil?
-          country = Country.create!(:name => row[2].titleize, :code => row[8], :iso3_code => row[8])
+          country = Country.create!(:name => row[2], :code => row[8], :iso3_code => row[8])
         else
-          country.update_attributes(:name => row[2].titleize, :code => row[8], :iso3_code => row[8])
+          country.update_attributes(:name => row[2], :code => row[8], :iso3_code => row[8])
         end
 
 
-        region = country.regions.fast.find_by_name_insensitive row[3].titleize     
+        region = country.regions.fast.find_by_name_insensitive row[3]     
         if region.nil?
           DB.execute "INSERT INTO regions(country_id, level, name, center_lat, center_lon, the_geom, the_geom_geojson, code ) SELECT #{country.id}, 1, name1, st_y( ST_Centroid(the_geom) ), st_x( ST_Centroid(the_geom) ), the_geom, ST_AsGeoJSON(the_geom,6), hasc from tmp_countries where gid=#{row[0]}"
-          region = country.regions.fast.find_by_name_insensitive row[3]
-          region.name = region.name.titleize
-          region.save!
         end
       end
 
@@ -234,28 +222,24 @@ namespace :iom do
       
       while results.count > 0
         results.each do |row|
-          country = countries[ row[2].titleize ] 
+          country = countries[ row[2] ] 
           country = Country.fast.find_by_name_insensitive row[2] if country.nil?
           if country.nil?
-            country = Country.create!(:name => row[2].titleize, :code => row[8], :iso3_code => row[8])
+            country = Country.create!(:name => row[2], :code => row[8], :iso3_code => row[8])
           else
-            # country.update_attributes(:name => row[2].titleize, :code => row[8], :iso3_code => row[8])
             DB.execute( "UPDATE countries set iso3_code='#{row[8]}' where id=#{country.id} ")
           end
           countries[ country.name ] = country if countries[ country.name ].nil?
 
           parent_region = country.regions.fast.find_by_name_insensitive row[3]
           if parent_region.nil?
-            parent_region = Region.create!(:name => row[3].titleize, :country_id => country.id, :level => 1)
+            parent_region = Region.create!(:name => row[3], :country_id => country.id, :level => 1)
           end
 
           region = Region.where(:parent_region_id => parent_region.id, :country_id => country.id).fast.find_by_name_insensitive( row[4] )
 
           if region.nil?
             DB.execute "INSERT INTO regions(country_id, parent_region_id, level, name, center_lat, center_lon, the_geom, the_geom_geojson, code ) SELECT #{country.id}, #{parent_region.id}, 2, name2, st_y( ST_Centroid(the_geom) ), st_x( ST_Centroid(the_geom) ), the_geom, ST_AsGeoJSON(the_geom,6), hasc from tmp_countries where gid=#{row[0]}"
-            region = Region.fast.where(:name => row[4], :parent_region_id => parent_region.id, :country_id => country.id).first 
-            region.name = region.name.titleize
-            region.save!
           end
         end
         i += 100
@@ -343,6 +327,7 @@ namespace :iom do
 
       ProjectsSynchronization.load_project_files( csv_projs )
 
+      p "Caching Projects"
       s = Site.find_by_name "global"
       s.set_cached_projects
 
