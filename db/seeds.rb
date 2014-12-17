@@ -528,3 +528,7 @@ Audience.find_or_create_by_name :name => 'Academia'
 Audience.find_or_create_by_name :name => 'Policymakers'
 Audience.find_or_create_by_name :name => 'Donors'
 
+
+LayerStyle.find_or_create_by_name :title => "yellow-to-blue", :name => "yellow-to-blue"
+LayerStyle.find_or_create_by_name :title => "light-to-green", :name => "light-to-green"
+LayerStyle.find_or_create_by_name :title => "yellow-to-red", :name => "yellow-to-red"
