@@ -741,10 +741,10 @@ SQL
       result_regions += all_regions.select{ |r| r.level == level }
       all_regions = all_regions - result_regions
       parent_region_ids = result_regions.map do |region|
-        region.path.split('/')[1..-1].map{ |e| e.to_i }
+        region.path.split('/')[1..-1].map{ |e| e.to_i } if region.path.present?
       end.flatten
       parent_countries_ids = result_regions.map do |region|
-        region.path.split('/').first.to_i
+        region.path.split('/').first.to_i if region.path.present?
       end.flatten
       all_regions = all_regions.delete_if{ |r| parent_region_ids.include?(r.id) }
       all_countries = all_countries.delete_if{ |c| parent_countries_ids.include?(c.id) }
