@@ -139,9 +139,9 @@
               <a href="#close">x</a>
             </div>
             <div class="bottom">
-              <h3>Project activities</h3>
+              <h3>Project Activities</h3>
               <span class="scroll">
-              <p>Description of project activities.</p>
+              <p>What activities are being carried out by this project? Please choose all options that apply.</p>
               </span>
             </div>
           </div>
@@ -172,9 +172,9 @@
               <a href="#close">x</a>
             </div>
             <div class="bottom">
-              <h3>Project audience</h3>
+              <h3>Project Audience</h3>
               <span class="scroll">
-              <p>Description of project audience.</p>
+              <p>Who is the activity aiming to reach? Who is the audience or target population? As a general guideline, infants are considered to be aged zero to one year, pre-school children (PSAC) are one to four years, and school-age children (SAC) are five to fourteen years. These target groups do not need to perfectly align with your activities' target groups, so please use your best judgment.</p>
               </span>
             </div>
           </div>
@@ -205,9 +205,9 @@
               <a href="#close">x</a>
             </div>
             <div class="bottom">
-              <h3>Project diseases</h3>
+              <h3>Project Diseases</h3>
               <span class="scroll">
-              <p>Description of project diseases.</p>
+              <p>What disease(s) do your efforts target or involve? Please check all that apply.</p>
               </span>
             </div>
           </div>
@@ -237,9 +237,9 @@
               <a href="#close">x</a>
             </div>
             <div class="bottom">
-              <h3>Project medicine</h3>
+              <h3>Project Medicine</h3>
               <span class="scroll">
-              <p>Description of project medicines.</p>
+              <p>What medicine, if any, is involved with your project? Please check all that apply.</p>
               </span>
             </div>
           </div>
@@ -741,9 +741,9 @@
   <div class="two_columns">
     <div class="left_column">
       <div class="field">
-        <label>CONTACT PERSON</label>
+        <label>CONTACT PERSON <strong>*</strong></label>
         <span class="input_short">
-          <%= f.text_field :contact_person %>
+          <%= f.text_field :contact_person, :required => true %>
         </span>
       </div>
     </div>
@@ -759,9 +759,9 @@
   <div class="two_columns">
     <div class="left_column">
       <div class="field">
-        <label>CONTACT EMAIL</label>
+        <label>CONTACT EMAIL <strong>*</strong></label>
         <span class="input_short">
-          <%= f.text_field :contact_email %>
+          <%= f.text_field :contact_email, :required => true %>
         </span>
       </div>
     </div>
