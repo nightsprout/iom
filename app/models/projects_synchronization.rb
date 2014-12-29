@@ -62,6 +62,7 @@ class ProjectsSynchronization < ActiveRecord::Base
     csv_projs.each do |row|
       line += 1
       begin
+        Rails.logger.debug "=== #{line} ==="
         o = Organization.find_by_name row.organization
         o = Organization.create!( :name => row.organization ) if o.nil?
 
@@ -101,15 +102,10 @@ class ProjectsSynchronization < ActiveRecord::Base
           end
         end  
 
+        Rails.logger.debug "===== Region Load"
         unless row.location.blank?
           p.countries.delete_all unless p.new_record?
           p.regions.delete_all unless p.new_record?
-          Rails.logger.debug "=================="
-          Rails.logger.debug "=================="
-          Rails.logger.debug "=================="
-          Rails.logger.debug "=================="
-          Rails.logger.debug p.regions.count
-          Rails.logger.debug "=================="
 
           row.location.split("|").map(&:strip).each do |loc|
             loc_array = loc.split(">").map(&:strip)
@@ -135,66 +131,78 @@ class ProjectsSynchronization < ActiveRecord::Base
           end
         end
 
+        Rails.logger.debug "===== Sector Load"
         unless row.sectors.blank?
           p.sectors.delete_all unless p.new_record?
           row.sectors.split("|").map(&:strip).each do |sec|
-            sect = Sector.find_by_name_ilike sec.titleize
+            sect = Sector.find_by_name_ilike sec
+            next if sect.nil? && ps.present? # Don't create new records for invalid values
             if sect.nil?
-              sect = Sector.create(:name => sec.titleize)
+              sect = Sector.create(:name => sec)
             end
             p.sectors << sect unless p.sectors.include?( sect )
           end
         end
 
+        Rails.logger.debug "===== Audience Load"
         unless row.target_groups.blank?
           p.audiences.delete_all unless p.new_record?
           row.target_groups.split("|").map(&:strip).each do |aud|
-            a = Audience.find_by_name_ilike aud.titleize
+            a = Audience.find_by_name_ilike aud
+            next if a.nil? && ps.present? # Don't create new records for invalid values
             if a.nil?
-              a = Audience.create(:name => aud.titleize)
+              a = Audience.create(:name => aud)
             end
             p.audiences << a unless p.audiences.include?( a )
           end
         end
 
+        Rails.logger.debug "===== Activities Load"
         unless row.activities.blank?
           p.activities.delete_all unless p.new_record?
           row.activities.split("|").map(&:strip).each do |aud|
-            a = Activity.find_by_name_ilike aud.titleize
+            a = Activity.find_by_name_ilike aud
+            next if a.nil? && ps.present? # Don't create new records for invalid values
             if a.nil?
-              a = Activity.create(:name => aud.titleize)
+              a = Activity.create(:name => aud)
             end
             p.activities << a unless p.activities.include?( a )
           end
         end
 
+        Rails.logger.debug "===== Disease Load"
         unless row.diseases.blank?
           p.diseases.delete_all unless p.new_record?
           row.diseases.split("|").map(&:strip).each do |aud|
-            a = Disease.find_by_name_ilike aud.titleize
+            a = Disease.find_by_name_ilike aud
+            next if a.nil? && ps.present? # Don't create new records for invalid values
             if a.nil?
-              a = Disease.create(:name => aud.titleize)
+              a = Disease.create(:name => aud)
             end
             p.diseases << a unless p.diseases.include?( a )
           end
         end
 
+        Rails.logger.debug "===== Medicine Load"
         unless row.medicine.blank?
           p.medicines.delete_all unless p.new_record?
           row.medicine.split("|").map(&:strip).each do |aud|
-            a = Medicine.find_by_name_ilike aud.titleize
+            a = Medicine.find_by_name_ilike aud
+            next if a.nil? && ps.present? # Don't create new records for invalid values
             if a.nil?
-              a = Medicine.create(:name => aud.titleize)
+              a = Medicine.create(:name => aud)
             end
             p.medicines << a unless p.medicines.include?( a )
           end
         end
 
 
+        Rails.logger.debug "===== Donors Load"
         unless row.donors.blank?
           p.donations.delete_all unless p.new_record?
           row.donors.split("|").map(&:strip).each do |don|
             donor = Donor.find_by_name_ilike don.titleize
+            next if donor.nil? && ps.present? # Don't create new records for invalid values
             if donor.nil?
               donor = Donor.create!(:name => don.titleize)
             end
@@ -214,7 +222,17 @@ class ProjectsSynchronization < ActiveRecord::Base
           end
         end
 
-        next if p.invalid?    
+        if p.invalid?
+          Rails.logger.debug "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+          Rails.logger.debug "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+          Rails.logger.debug "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+          Rails.logger.debug "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+          Rails.logger.debug p.errors.full_messages
+          Rails.logger.debug "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+          Rails.logger.debug "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+          Rails.logger.debug "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+          next 
+        end
 
       
       rescue Exception => e

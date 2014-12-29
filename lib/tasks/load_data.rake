@@ -244,7 +244,7 @@ namespace :iom do
 
           if region.nil?
             DB.execute "INSERT INTO regions(country_id, parent_region_id, level, name, center_lat, center_lon, the_geom, the_geom_geojson, code ) SELECT #{country.id}, #{parent_region.id}, 2, name2, st_y( ST_Centroid(the_geom) ), st_x( ST_Centroid(the_geom) ), the_geom, ST_AsGeoJSON(the_geom,6), hasc from tmp_countries where gid=#{row[0]}"
-            r = country.regions.fast.find_by_name row[3]
+            r = country.regions.fast.find_by_name row[4]
             r.save!
           end
         end

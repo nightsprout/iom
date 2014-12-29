@@ -518,7 +518,7 @@ Activity.find_or_create_by_name :name => 'Other'
 ####################################################################
 
 Audience.find_or_create_by_name :name => 'Infants'
-Audience.find_or_create_by_name :name => 'Preschool Children'
+Audience.find_or_create_by_name :name => 'Preschool-age Children'
 Audience.find_or_create_by_name :name => 'School-age Children'
 Audience.find_or_create_by_name :name => 'Women of Reproductive Age'
 Audience.find_or_create_by_name :name => 'Pregnant Women'
