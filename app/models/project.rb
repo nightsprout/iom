@@ -78,7 +78,7 @@ class Project < ActiveRecord::Base
 
   after_create :generate_intervention_id
   after_save{ Resque.enqueue(CacheProject, self.id) }
-  after_destroy :remove_cached_sites
+  after_destroy{ Resque.enqueue(CacheProject, self.id) }
   before_validation :strip_urls
 
   def strip_urls

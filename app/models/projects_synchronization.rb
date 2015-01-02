@@ -112,6 +112,7 @@ class ProjectsSynchronization < ActiveRecord::Base
           p.countries.delete_all unless p.new_record?
           p.regions.delete_all unless p.new_record?
 
+          Rails.logger.debug row.location
           row.location.split("|").map(&:strip).each do |loc|
             loc_array = loc.split(">").map(&:strip)
 
@@ -119,16 +120,18 @@ class ProjectsSynchronization < ActiveRecord::Base
               c = Country.fast.find_by_name_insensitive loc_array[0]
               next if c.nil?
               p.countries << c unless p.countries.fast.include?( c )
-
+              Rails.logger.debug c
               if loc_array[1].present?
                 r = c.regions.fast.find_by_name_insensitive loc_array[1]
                 next if r.nil?
                 p.regions << r unless p.regions.fast.include?( r )
+                Rails.logger.debug r
 
                 if loc_array[2].present?
-                  r2 = Region.fast.where(:country_id => c.id, :parent_region_id => r.id).first
+                  r2 = Region.fast.where(:country_id => c.id, :parent_region_id => r.id).find_by_name_insensitive loc_array[2]
                   next if r2.nil?
                   p.regions << r2 unless p.regions.fast.include?( r2 )
+                  Rails.logger.debug r2
                 end
               end
             end
