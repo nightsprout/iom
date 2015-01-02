@@ -80,8 +80,13 @@ class ProjectsSynchronization < ActiveRecord::Base
           :estimated_people_reached => row.estimated_people_reached
         })
 
-        # verbatim locations
+        p.contact_person            = row.project_contact_person if row.project_contact_person.present?
+        p.contact_email             = row.project_contact_email if row.project_contact_email.present?
+        p.implementing_organization = row.international_partners if row.international_partners.present?
+        p.partner_organizations     = row.local_partners if row.local_partners.present?
+        p.cross_cutting_issues      = row.cross_cutting_issues if row.cross_cutting_issues.present?
 
+        # verbatim locations
         if row.start_date.blank?
           p.start_date = Time.now - 1.year
         else
