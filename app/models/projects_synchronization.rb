@@ -82,8 +82,8 @@ class ProjectsSynchronization < ActiveRecord::Base
 
         p.contact_person            = row.project_contact_person if defined?( row.project_contact_person ) && row.project_contact_person.present?
         p.contact_email             = row.project_contact_email if defined?( row.project_contact_email ) && row.project_contact_email.present? 
-        p.implementing_organization = row.international_partners if defined?( row.international_partners ) row.international_partners.present? 
-        p.partner_organizations     = row.local_partners if defined?( row.local_partners ) row.local_partners.present?
+        p.implementing_organization = row.international_partners if defined?( row.international_partners ) && row.international_partners.present? 
+        p.partner_organizations     = row.local_partners if defined?( row.local_partners ) && row.local_partners.present?
         p.cross_cutting_issues      = row.cross_cutting_issues if defined?( row.cross_cutting_issues ) && row.cross_cutting_issues.present? 
 
         # verbatim locations
