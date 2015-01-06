@@ -1157,7 +1157,7 @@ SQL
   end
 
   def remove_from_country(region)
-    if self.id.present? and region.country_id
+    if self.id.present? and region.country_id.present?
       ActiveRecord::Base.connection.execute("DELETE from countries_projects where project_id=#{self.id} AND country_id=#{region.country_id}")
     end
   end
