@@ -705,6 +705,11 @@ SQL
 
   def set_cached_projects
 
+    # Don't cache if recently cached
+    if cached_at.present? && cached_at > ( Time.now - 6.hours )
+      return
+    end
+
     ActiveRecord::Base.connection.execute("DELETE FROM projects_sites WHERE site_id = #{self.id}")
     ActiveRecord::Base.connection.execute("insert into projects_sites select subsql.id as project_id, #{self.id} as site_id from (#{projects_sql({ :limit => nil, :offset => nil }).to_sql}) as subsql")
     #Work on the denormalization
@@ -714,6 +719,8 @@ SQL
     set_cached_projects_by_level( 3 ) if navigate_by_level3?
 
     projects_countries( true )
+
+    update_attributes( :cached_at => Time.now )
   end
 
   def set_cached_projects_by_level(level)

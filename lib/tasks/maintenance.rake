@@ -12,8 +12,9 @@ namespace :iom do
 
     desc 'Regenerates the physical caches of project information for all sites'
     task :regenerate_caches => :environment do
-      Site.all.each { |s| s.set_cached_projects }
+      Site.all.each { |s| Resque.enqueue(CacheSite, s.id) }
     end
 
   end
+
 end
