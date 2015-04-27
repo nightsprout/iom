@@ -25,8 +25,8 @@ class DataExporter
       raise ArgumentError, "Invalid export format"
     end
 
-    ExportsMailer.export(results
     s3.bucket(ENV['S3_BUCKET_NAME'])[aws_key].write(data)
+    ExportsMailer.export_results(user, site, format).deliver
   end
 
   private
