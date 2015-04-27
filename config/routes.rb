@@ -37,7 +37,10 @@ Iom::Application.routes.draw do
   resources :donors,        :only => [:index, :show]
   resources :offices,       :only => [:show]
   resources :projects,      :only => [:index, :show]
-  resources :organizations, :only => [:index, :show]
+  resources :organizations, :only => [:index, :show]  
+
+  # Request an export document to be mailed
+  get '/sites/:id/export', :to => 'sites#request_document'
 
   # Global Site projects export links for downloading
   get '/sites/download/(:id).csv', :to => 'sites#downloads', :format => :csv

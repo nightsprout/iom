@@ -135,6 +135,11 @@ class SitesController < ApplicationController
     end
   end
 
+  def request_document
+    Resque.enqueue(DataExporter, current_user.id, @site.id, params[:format])
+    render :nothing => true
+  end
+
   def about
   end
 
