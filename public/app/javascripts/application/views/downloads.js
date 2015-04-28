@@ -20,6 +20,13 @@ define(['backbone'], function(Backbone) {
 
     showExportOverlay: function(e) {
       Backbone.Events.trigger('export:show');
+
+      console.log('?????????????????????');
+      console.log(e.target);
+      console.log(e.target.href);
+
+      $.ajax({url: e.target.href });
+
       e.preventDefault();
     }
 
