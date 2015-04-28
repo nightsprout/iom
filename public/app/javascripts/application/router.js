@@ -9,6 +9,7 @@ define([
   'views/menu-fixed',
   'views/downloads',
   'views/embed-map',
+  'views/export-data',
   'views/search',
   'views/layer-overlay',
   'views/timeline',
@@ -22,11 +23,12 @@ define([
     MenuFixedView = arguments[4],
     DownloadsView = arguments[5],
     EmbedMapView = arguments[6],
-    SearchView = arguments[7],
-    LayerOverlayView = arguments[8],
-    TimelineView = arguments[9],
-    DonorsSidebarView = arguments[10],
-    GalleryView = arguments[11];
+    ExportDataView = arguments[7],
+    SearchView = arguments[8],
+    LayerOverlayView = arguments[9],
+    TimelineView = arguments[10],
+    DonorsSidebarView = arguments[11],
+    GalleryView = arguments[12];
 
   var Router = Backbone.Router.extend({
 
@@ -68,6 +70,7 @@ define([
       new FiltersView();
       new DownloadsView();
       new EmbedMapView();
+      new ExportDataView();
       new LayerOverlayView();
       new DonorsSidebarView();
     },
