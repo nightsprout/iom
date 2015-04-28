@@ -8,6 +8,11 @@ class OrganizationsController < ApplicationController
     @organizations = @site.organizations
   end
 
+  def request_export
+    Resque.enqueue(current_user.id, @site.id, params[:format], { organization: params[:id] })
+    render :nothing => true
+  end
+
   def show
     unless @organization = @site.organizations.select{ |org| org.id == params[:id].to_i }.first
       raise ActiveRecord::RecordNotFound

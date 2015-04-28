@@ -3,6 +3,11 @@ class DiseasesController < ApplicationController
   layout :sites_layout
   caches_action :show, :expires_in => 300, :cache_path => Proc.new { |c| c.params }
 
+  def request_export
+    Resque.enqueue(current_user.id, @site.id, params[:format], { disease: params[:id] })
+    render :nothing => true
+  end
+
   def show
     if params[:location_id].present?
       case params[:location_id]
