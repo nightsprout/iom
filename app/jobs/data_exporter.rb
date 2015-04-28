@@ -6,7 +6,10 @@ class DataExporter
     user = User.find(user_id)
 
     s3 = AWS::S3.new(region: 'us-east-1')
-    object_name = aws_object_name(site_id, format)
+    bucket = s3.buckets.select do |bucket|
+      bucket.name === ENV['S3_BUCKET_NAME']
+    end.first
+    object_name = aws_object_name(site_id, format, parameters)
 
     case format.to_sym
     when :csv
@@ -25,8 +28,8 @@ class DataExporter
       raise ArgumentError, "Invalid export format"
     end
 
-    s3.bucket(ENV['S3_BUCKET_NAME'])[aws_key].write(data)
-    ExportsMailer.export_results(user, site, format).deliver
+    bucket.objects[object_name].write(data)
+    ExportsMailer.export_results(user, site, format, parameters).deliver
   end
 
   private
