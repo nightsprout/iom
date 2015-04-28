@@ -39,9 +39,6 @@ Iom::Application.routes.draw do
   resources :projects,      :only => [:index, :show]
   resources :organizations, :only => [:index, :show]  
 
-  # Request an export document to be mailed
-  get '/sites/:id/export', :to => 'sites#request_document'
-
   # Global Site projects export links for downloading
   get '/sites/download/(:id).csv', :to => 'sites#downloads', :format => :csv
   get '/sites/download/(:id).xls', :to => 'sites#downloads', :format => :xls
@@ -62,6 +59,18 @@ Iom::Application.routes.draw do
   match 'audience/:id'    => 'audience#show', :as => 'audience'
   match 'diseases/:id'    => 'diseases#show', :as => 'disease'
   match 'medicines/:id'   => 'medicines#show', :as => 'medicine'
+
+  # Request an export document to be mailed
+  get 'sites/:id/export', :to => "sites#request_export"
+  get 'sectors/:id/export', :to => "clusters_sectors#request_export"
+  get 'clusters/:id/export', :to => "clusters_sectors#request_export"
+
+  get 'activities/:id/export', :to => "activities#request_export"
+  get 'audience/:id/export', :to => "audience#request_export"
+  get 'diseases/:id/export', :to => "diseases#request_export"
+  get 'medicines/:id/export', :to => "medicines#request_export"
+  get 'donors/:id/export', :to => "donors#request_export"
+  get 'organizations/:id/export', :to => "organizations#request_export"
 
   # pages
   match '/p/:id' => 'pages#show', :as => :page

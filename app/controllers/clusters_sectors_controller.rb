@@ -5,15 +5,15 @@ class ClustersSectorsController < ApplicationController
 
   def request_export
     if @site.navigate_by_cluster?
-      Resque.enqueue(current_user.id, @site.id, params[:format], { cluster: params[:id] })
+      Resque.enqueue(DataExporter, current_user.id, @site.id, params[:format], { cluster: params[:id] })
       render :nothing => true
 
     elsif @site.navigate_by_sector?
-      Resque.enqueue(current_user.id, @site.id, params[:format], { cluster: params[:id] })
+      Resque.enqueue(DataExporter, current_user.id, @site.id, params[:format], { cluster: params[:id] })
       render :nothing => true
     
     else
-      render_404
+a      render_404
     end
   end
 

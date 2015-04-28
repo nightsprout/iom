@@ -4,7 +4,7 @@ class AudienceController < ApplicationController
   caches_action :show, :expires_in => 300, :cache_path => Proc.new { |c| c.params }
 
   def request_export
-    Resque.enqueue(current_user.id, @site.id, params[:format], { audience: params[:id] })
+    Resque.enqueue(DataExporter, current_user.id, @site.id, params[:format], { audience: params[:id] })
     render :nothing => true
   end
 

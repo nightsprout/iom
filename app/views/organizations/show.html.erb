@@ -160,7 +160,12 @@
           <%= simple_format(@organization.description) if @organization.description.present? %>
         </header>
 
-        <%= render :partial => 'new_partials/downloads', :locals => { :csv_path => organization_path(@organization, @carry_on_filters.merge(:format => :csv)), :xls_path => organization_path(@organization, @carry_on_filters.merge(:format => :xls)), :kml_path => organization_path(@organization, @carry_on_filters.merge(:format => :kml)) } %>
+        <%= render :partial => 'new_partials/downloads', :locals => { 
+            :csv_path => organization_path(@data) + "/export?format=csv",
+            :xls_path => organization_path(@data) + "/export?format=excel",
+            :kml_path => organization_path(@data) + "/export?format=kml"
+          }
+        %>
 
         <%= render "new_partials/index_projects" %>
 
