@@ -8,9 +8,9 @@ define(['backbone'], function(Backbone) {
 
     events: {
       'click #embedMapBtn': 'showEmbedOverlay',
-      'click #exportCsvBtn': 'showExportOverlay',
-      'click #exportXlsBtn': 'showExportOverlay',
-      'click #exportKmlBtn': 'showExportOverlay'
+      'click #exportCsvBtn': 'triggerExport',
+      'click #exportXlsBtn': 'triggerExport',
+      'click #exportKmlBtn': 'triggerExport'
     },
 
     showEmbedOverlay: function(e) {
@@ -18,15 +18,9 @@ define(['backbone'], function(Backbone) {
       e.preventDefault();
     },
 
-    showExportOverlay: function(e) {
-      Backbone.Events.trigger('export:show');
-
-      console.log('?????????????????????');
-      console.log(e.target);
-      console.log(e.target.href);
-
+    triggerExport: function(e) {
       $.ajax({url: e.target.href });
-
+      Backbone.Events.trigger('export:show');
       e.preventDefault();
     }
 
