@@ -48,9 +48,9 @@
         <h1 class="section-title"><%= audience_projects_list_subtitle %></h1>
 
         <%= render :partial => 'new_partials/downloads', :locals => { 
-            :csv_path => audience_path(@data) + "/export?format=csv",
-            :xls_path => audience_path(@data) + "/export?format=excel",
-            :kml_path => audience_path(@data) + "/export?format=kml"
+            :csv_path => export_audience_path(@data, @carry_on_filters.merge(export_format: :csv)),
+            :xls_path => export_audience_path(@data, @carry_on_filters.merge(export_format: :xls)),
+            :kml_path => export_audience_path(@data, @carry_on_filters.merge(export_format: :kml))
           }
         %>
 

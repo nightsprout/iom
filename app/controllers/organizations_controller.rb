@@ -3,6 +3,7 @@ class OrganizationsController < ApplicationController
   layout :sites_layout
   caches_action :index, :expires_in => 300, :cache_path => Proc.new { |c| c.params }
   caches_action :show, :expires_in => 300, :cache_path => Proc.new { |c| c.params }
+  before_filter :load_location_filter_params
 
   def index
     @organizations = @site.organizations
@@ -24,29 +25,20 @@ class OrganizationsController < ApplicationController
                           else
                             nil
                           end
-    @filter_by_location = if params[:location_id].present?
-                            case params[:location_id]
-                            when String
-                              params[:location_id].split('/').map(&:to_i)
-                            else
-                              params[:location_id].map(&:to_i)
-                            end
-                          else
-                            nil
-                          end
 
-    @carry_on_filters = {}
+    @carry_on_filters ||= {}
     @carry_on_filters[:category_id] = params[:category_id] if params[:category_id].present?
-    @carry_on_filters[:location_id] = params[:location_id] if params[:location_id].present?
 
-    projects_custom_find_options = {
+    @projects_custom_find_options ||= {}
+    @projects_custom_find_options.merge!({
       :organization  => @organization.id,
       :per_page      => 10,
       :page          => params[:page],
       :order         => 'created_at DESC',
       :start_in_page => params[:start_in_page]
-    }
-    projects_custom_find_options[:organization_category_id] = @filter_by_category if filter_by_category_valid?
+    })
+    @projects_custom_find_options[:organization_category_id] = @filter_by_category if filter_by_category_valid?
+
     if @filter_by_location.present?
       if @filter_by_location.size > 1
         projects_custom_find_options[:organization_region_id] = @filter_by_location.last

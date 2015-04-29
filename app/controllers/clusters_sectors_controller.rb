@@ -4,12 +4,16 @@ class ClustersSectorsController < ApplicationController
   caches_action :show, :expires_in => 300, :cache_path => Proc.new { |c| c.params }
 
   def request_export
+    @projects_custom_find_options ||= {}
+
     if @site.navigate_by_cluster?
-      Resque.enqueue(DataExporter, current_user.id, @site.id, params[:format], { cluster: params[:id] })
+      @projects_custom_find_options.merge!({cluster: params[:id]})       
+      Resque.enqueue(DataExporter, current_user.id, @site.id, params[:format], @projects_custom_find_options)
       render :nothing => true
 
     elsif @site.navigate_by_sector?
-      Resque.enqueue(DataExporter, current_user.id, @site.id, params[:format], { cluster: params[:id] })
+      @projects_custom_find_options.merge!({sector: params[:id]})
+      Resque.enqueue(DataExporter, current_user.id, @site.id, params[:format], @projects_custom_find_options)
       render :nothing => true
     
     else

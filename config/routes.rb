@@ -61,16 +61,16 @@ Iom::Application.routes.draw do
   match 'medicines/:id'   => 'medicines#show', :as => 'medicine'
 
   # Request an export document to be mailed
-  get 'sites/:id/export', :to => "sites#request_export"
-  get 'sectors/:id/export', :to => "clusters_sectors#request_export"
-  get 'clusters/:id/export', :to => "clusters_sectors#request_export"
+  get 'sites/:id/export', :to => "sites#request_export", :as => :export_site
+  get 'sectors/:id/export', :to => "clusters_sectors#request_export", :as => :export_sector
+  get 'clusters/:id/export', :to => "clusters_sectors#request_export", :as => :export_cluster
 
-  get 'activities/:id/export', :to => "activities#request_export"
-  get 'audience/:id/export', :to => "audience#request_export"
-  get 'diseases/:id/export', :to => "diseases#request_export"
-  get 'medicines/:id/export', :to => "medicines#request_export"
-  get 'donors/:id/export', :to => "donors#request_export"
-  get 'organizations/:id/export', :to => "organizations#request_export"
+  get 'activities/:id/export', :to => "activities#request_export", :as => :export_activity
+  get 'audience/:id/export', :to => "audience#request_export", :as => :export_audience
+  get 'diseases/:id/export', :to => "diseases#request_export", :as => :export_disease
+  get 'medicines/:id/export', :to => "medicines#request_export", :as => :export_medicine
+  get 'donors/:id/export', :to => "donors#request_export", :as => :export_donor
+  get 'organizations/:id/export', :to => "organizations#request_export", :as => :export_organization
 
   # pages
   match '/p/:id' => 'pages#show', :as => :page

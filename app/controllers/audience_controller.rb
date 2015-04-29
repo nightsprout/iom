@@ -2,22 +2,17 @@ class AudienceController < ApplicationController
 
   layout :sites_layout
   caches_action :show, :expires_in => 300, :cache_path => Proc.new { |c| c.params }
+  before_filter :load_location_filter_params
 
   def request_export
+    @projects_custom_find_options ||= {}
+    @projects_custom_find_options.merge!({audience: params[:id]})
+
     Resque.enqueue(DataExporter, current_user.id, @site.id, params[:format], { audience: params[:id] })
     render :nothing => true
   end
 
   def show
-    if params[:location_id].present?
-      case params[:location_id]
-      when String
-        @filter_by_location = params[:location_id].split('/')
-      when Array
-        @filter_by_location = params[:location_id]
-      end
-    end
-
     @carry_on_filters = {}
     @carry_on_filters[:location_id] = @filter_by_location if @filter_by_location.present?
 
@@ -28,13 +23,14 @@ class AudienceController < ApplicationController
 
     @data = Audience.find params[:id]
 
-    projects_custom_find_options = {
+    @projects_custom_find_options ||= {}
+    @projects_custom_find_options.merge!({
       :audience      => @data.id,
       :per_page      => 10,
       :page          => params[:page],
       :order         => 'created_at DESC',
       :start_in_page => params[:start_in_page]
-    }
+    })
 
     if @filter_by_location.present? && @filter_by_location.size > 1
       projects_custom_find_options[:region_id] = @filter_by_location.last

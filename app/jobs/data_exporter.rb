@@ -5,7 +5,7 @@ class DataExporter
     site = Site.find(site_id)
     user = User.find(user_id)
 
-    s3 = AWS::S3.new(region: 'us-east-1')
+    s3 = AWS::S3.new(region: ENV['S3_REGION_NAME'] || 'us-east-1')
     bucket = s3.buckets.select do |bucket|
       bucket.name === ENV['S3_BUCKET_NAME']
     end.first
@@ -15,7 +15,7 @@ class DataExporter
     when :csv
       data = Project.to_csv(site, parameters)
       
-    when :excel
+    when :xls, :excel
       data = Project.to_excel(site, parameters)
       
     when :kml
