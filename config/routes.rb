@@ -45,6 +45,9 @@ Iom::Application.routes.draw do
   get '/sites/download/(:id).kml', :to => 'sites#downloads', :format => :kml
 
   match 'regions/:id' => 'georegion#old_regions'
+
+  get 'location/:id/export', :to => "georegion#request_export", :as => :export_location
+  get 'location/:location2_id/:id/export', :to => "georegion#request_export", :as => :export_location_level2
   
   resources :location, :controller => 'georegion' do
     get ':id', :to => 'georegion#show'
@@ -71,6 +74,7 @@ Iom::Application.routes.draw do
   get 'medicines/:id/export', :to => "medicines#request_export", :as => :export_medicine
   get 'donors/:id/export', :to => "donors#request_export", :as => :export_donor
   get 'organizations/:id/export', :to => "organizations#request_export", :as => :export_organization
+
 
   # pages
   match '/p/:id' => 'pages#show', :as => :page

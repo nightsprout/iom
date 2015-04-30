@@ -4,28 +4,30 @@ class GeoregionController < ApplicationController
   caches_action :show, :expires_in => 300, :cache_path => Proc.new { |c| c.params }
 
   skip_before_filter :set_site, :only => [:list_regions1_from_country,:list_regions2_from_country,:list_regions3_from_country]
+  before_filter :handle_parameters, :only => [:show, :request_export]
+  
+  def handle_parameters
+    @projects_custom_find_options ||= {}
 
-  def show
-
-    geo_ids = []
+    @geo_ids = []
     [:location_id, :location2_id, :id].each do |key|
       if params[key].present?
         if params[key].is_a?(Array)
-          geo_ids += params[key]
+          @geo_ids += params[key]
         else
-          geo_ids << params[key].gsub(/[\[\]]/, "")
+          @geo_ids << params[key].gsub(/[\[\]]/, "")
         end
       end
     end
 
     @empty_layer = false
-    @empty_layer = true if geo_ids.count > 1
+    @empty_layer = true if @geo_ids.count > 1
 
 
     @breadcrumb = []
 
-    @country = country = Country.fast.find( geo_ids[0], :select => Country.custom_fields )
-    @area = (geo_ids.last == geo_ids[0]) ? country : Region.find( geo_ids.last )
+    @country = country = Country.fast.find( @geo_ids[0], :select => Country.custom_fields )
+    @area = (@geo_ids.last == @geo_ids[0]) ? country : Region.find( @geo_ids.last )
 
     @breadcrumb << country.name if @site.navigate_by_country?
 
@@ -42,25 +44,21 @@ class GeoregionController < ApplicationController
       end
     end
 
-    if geo_ids.size == 1 && @site.navigate_by_country?
+    if @geo_ids.size == 1 && @site.navigate_by_country?
       raise NotFound if country.projects_count(@site) == 0
 
-      projects_custom_find_options = {
+      @projects_custom_find_options.merge!({
         :country => country.id,
         :level => 1,
-        :per_page => 10,
-        :page => params[:page],
-        :order => 'created_at DESC',
-        :start_in_page => params[:start_in_page]
-      }
-      projects_custom_find_options[:country_category_id] = @filter_by_category if @filter_by_category.present?
-      @projects = Project.custom_find @site, projects_custom_find_options
+        :order => 'created_at DESC'
+      })
+      @projects_custom_find_options[:country_category_id] = @filter_by_category if @filter_by_category.present?
 
       # TODO
       @area_parent = ""
 
       if @site.navigate_by_regions?
-        sql="select r.id,count(distinct ps.project_id) as count,r.name,r.center_lon as lon,
+        @sql="select r.id,count(distinct ps.project_id) as count,r.name,r.center_lon as lon,
                   r.center_lat as lat,r.name,
                   CASE WHEN count(distinct ps.project_id) > 1 THEN
                       '/location/'||r.path
@@ -86,7 +84,7 @@ class GeoregionController < ApplicationController
                   group by c.id,c.name,lon,lat,c.name,c.code
                   "
       else
-        sql="select *
+        @sql="select *
           from(
           select c.id,count(distinct ps.project_id) as count,c.name,c.center_lon as lon,c.center_lat as lat
           from (countries_projects as cp
@@ -99,7 +97,7 @@ class GeoregionController < ApplicationController
       end
     else
       level = 1
-      geo_ids[1..-1].each do |geo_id|
+      @geo_ids[1..-1].each do |geo_id|
         region = Region.find geo_id
         raise NotFound unless region
         @breadcrumb << region.name unless !@site.send("navigate_by_level#{level}?".to_sym)
@@ -112,17 +110,12 @@ class GeoregionController < ApplicationController
 
     if @area.is_a?(Region)
 
-      projects_custom_find_options = {
+      @projects_custom_find_options.merge!({
         :region   => @area.id,
         :level    => @site.levels_for_region & [@area.level],
-        :per_page => 10,
-        :page     => params[:page],
-        :order    => 'created_at DESC',
-        :start_in_page => params[:start_in_page]
-      }
-      projects_custom_find_options[:region_category_id] = @filter_by_category if @filter_by_category.present?
-
-      @projects = Project.custom_find @site, projects_custom_find_options
+        :order    => 'created_at DESC'
+      })
+      @projects_custom_find_options[:region_category_id] = @filter_by_category if @filter_by_category.present?
 
       @area_parent = country.name
 
@@ -131,7 +124,7 @@ class GeoregionController < ApplicationController
       Rails.logger.debug "========"
       Rails.logger.debug [@area.level, @site.levels_for_region.max]
       if @area.level == @site.levels_for_region.max
-        sql="select * from(
+        @sql="select * from(
           select r.id,count(distinct(ps.project_id)) as count,r.name,r.center_lon as lon,r.center_lat as lat,
           CASE WHEN count(distinct ps.project_id) > 1 THEN
               '/location/'||r.path
@@ -145,7 +138,7 @@ class GeoregionController < ApplicationController
             #{category_join}
           group by r.id,r.name,lon,lat) as subq"
       else
-        sql="select * from(
+        @sql="select * from(
           select r.id,count(distinct(ps.project_id)) as count,r.name,r.center_lon as lon,r.center_lat as lat,
           CASE WHEN count(distinct ps.project_id) > 1 THEN
               '/location/'||r.path
@@ -169,7 +162,22 @@ class GeoregionController < ApplicationController
       @filter_name =  "#{@georegion_projects_count} #{@category_name} projects"
     end
 
-    raise NotFound if sql.blank?
+    raise NotFound if @sql.blank?
+  end
+
+  def request_export
+    Resque.enqueue(DataExporter, current_user.id, @site.id, params[:export_format], @projects_custom_find_options)
+    render :nothing => true
+  end
+  
+  def show
+    @projects_custom_find_options.merge!({
+      :start_in_page => params[:start_in_page],
+      :per_page => 10,
+      :page     => params[:page]
+    })
+
+    @projects = Project.custom_find @site, @projects_custom_find_options
 
     respond_to do |format|
       format.html do
@@ -179,7 +187,7 @@ class GeoregionController < ApplicationController
         @georegion_map_stroke_color  = @site.theme.data[:georegion_map_stroke_color]
         @georegion_map_fill_color    = @site.theme.data[:georegion_map_fill_color]
 
-        result = ActiveRecord::Base.connection.execute(sql)
+        result = ActiveRecord::Base.connection.execute(@sql)
         if @area.is_a?(Country) && @site.navigate_by_regions?
           @map_data = result.map do |r|
             next if r['count'] == "0"
@@ -228,21 +236,21 @@ class GeoregionController < ApplicationController
         end
       end
       format.csv do
-        send_data Project.to_csv(@site, projects_custom_find_options),
+        send_data Project.to_csv(@site, @projects_custom_find_options),
           :type => 'text/plain; charset=utf-8; application/download',
           :disposition => "attachment; filename=#{@area.name}_projects.csv"
 
       end
       format.xls do
-        send_data Project.to_excel(@site, projects_custom_find_options),
+        send_data Project.to_excel(@site, @projects_custom_find_options),
           :type        => 'application/vnd.ms-excel',
           :disposition => "attachment; filename=#{@area.name}_projects.xls"
       end
       format.kml do
-        @projects_for_kml = Project.to_kml(@site, projects_custom_find_options)
+        @projects_for_kml = Project.to_kml(@site, @projects_custom_find_options)
       end
       format.json do
-        render :json => Project.to_geojson(@site, projects_custom_find_options).map do |p|
+        render :json => Project.to_geojson(@site, @projects_custom_find_options).map do |p|
           { projectName: p['project_name'],
             geoJSON: p['geojson']
           }
