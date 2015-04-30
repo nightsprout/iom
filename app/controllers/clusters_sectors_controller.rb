@@ -17,11 +17,10 @@ class ClustersSectorsController < ApplicationController
       render :nothing => true
     
     else
-a      render_404
+      render_404
     end
   end
 
-  end
 
   def show
     if params[:location_id].present?

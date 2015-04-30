@@ -8,7 +8,7 @@ class DonorsController < ApplicationController
 
   def request_export
     Resque.enqueue(DataExporter, current_user.id, @site.id, params[:format], { 
-                     :audience => params[:id] 
+                     :audience => params[:id], 
                      :organization_filter => params[:organization_id],
                      :category_id => params[:category_id]
                    })
