@@ -33,14 +33,14 @@ class AudienceController < ApplicationController
     })
 
     if @filter_by_location.present? && @filter_by_location.size > 1
-      projects_custom_find_options[:region_id] = @filter_by_location.last
+      @projects_custom_find_options[:region_id] = @filter_by_location.last
     elsif @filter_by_location.present? && @site.navigate_by_country? && @filter_by_location.size == 1
-      projects_custom_find_options[:country_id] = @filter_by_location.first
+      @projects_custom_find_options[:country_id] = @filter_by_location.first
     elsif @filter_by_location.present? && @site.navigate_by_region? && @filter_by_location.size == 1
-      projects_custom_find_options[:region_id] = @filter_by_location.first
+      @projects_custom_find_options[:region_id] = @filter_by_location.first
     end
 
-    @projects = Project.custom_find @site, projects_custom_find_options
+    @projects = Project.custom_find @site, @projects_custom_find_options
 
     @audience_project_count = @data.total_projects(@site, @filter_by_location)
 
@@ -175,21 +175,21 @@ class AudienceController < ApplicationController
         end
       end
       format.csv do
-        send_data Project.to_csv(@site, projects_custom_find_options),
+        send_data Project.to_csv(@site, @projects_custom_find_options),
           :type => 'text/plain; charset=utf-8; application/download',
           :disposition => "attachment; filename=#{@data.name.gsub(/[^0-9A-Za-z]/, '')}_projects.csv"
 
       end
       format.xls do
-        send_data Project.to_excel(@site, projects_custom_find_options),
+        send_data Project.to_excel(@site, @projects_custom_find_options),
           :type        => 'application/vnd.ms-excel',
           :disposition => "attachment; filename=#{@data.name.gsub(/[^0-9A-Za-z]/, '')}_projects.xls"
       end
       format.kml do
-        @projects_for_kml = Project.to_kml(@site, projects_custom_find_options)
+        @projects_for_kml = Project.to_kml(@site, @projects_custom_find_options)
       end
       format.json do
-        render :json => Project.to_geojson(@site, projects_custom_find_options).map do |p|
+        render :json => Project.to_geojson(@site, @projects_custom_find_options).map do |p|
           { projectName: p['project_name'],
             geoJSON: p['geojson']
           }
