@@ -153,7 +153,7 @@ class ClustersSectorsController < ApplicationController
 
               sql = <<-SQL
                 SELECT r.id AS id,
-                       r.name as region_name,
+                       r.name ,
                        count(distinct pse.project_id) AS count,
                        r.center_lon AS lon,
                        r.center_lat AS lat,
@@ -222,6 +222,7 @@ class ClustersSectorsController < ApplicationController
 
         @map_data = result.map do |r|
           next if r['count'] == "0"
+          next if r['url'].blank?
           uri = URI.parse(r['url'])
           params = Hash[uri.query.split('&').map{|p| p.split('=')}] rescue {}
           params['force_site_id'] = @site.id unless @site.published?
