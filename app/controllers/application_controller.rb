@@ -22,6 +22,30 @@ class ApplicationController < ActionController::Base
     render :file => "/public/old_browser.html.erb", :status => 200, :layout => false
   end
 
+  def load_location_filter_params
+    @filter_by_location = if params[:location_id].present?
+      case params[:location_id]
+      when String
+        params[:location_id].split('/')
+      when Array
+        params[:location_id]
+      end
+    end
+
+    @carry_on_filters ||= {}
+    @carry_on_filters[:location_id] = @filter_by_location if @filter_by_location.present?
+
+    @projects_custom_find_options ||= {}
+
+    if @filter_by_location.present? && @filter_by_location.size > 1      
+      @projects_custom_find_options[:region_id] = @filter_by_location.last
+    elsif @filter_by_location.present? && @site.navigate_by_country? && @filter_by_location.size == 1
+      @projects_custom_find_options[:country_id] = @filter_by_location.first
+    elsif @filter_by_location.present? && @site.navigate_by_region? && @filter_by_location.size == 1
+      @projects_custom_find_options[:region_id] = @filter_by_location.first
+    end
+  end
+
   protected
 
     # Site management

@@ -6,6 +6,15 @@ class DonorsController < ApplicationController
   layout :sites_layout
   caches_action :show, :expires_in => 300, :cache_path => Proc.new { |c| c.params }
 
+  def request_export
+    Resque.enqueue(DataExporter, current_user.id, @site.id, params[:export_format], { 
+                     :audience => params[:id], 
+                     :organization_filter => params[:organization_id],
+                     :category_id => params[:category_id]
+                   })
+    render :nothing => true
+  end
+
 
   def show
     @donor = Donor.find(params[:id])

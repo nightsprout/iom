@@ -47,7 +47,12 @@
 
         <h1 class="section-title"><%= audience_projects_list_subtitle %></h1>
 
-        <%= render :partial => 'new_partials/downloads', :locals => { :csv_path => @site.navigate_by_cluster?? cluster_path(@data, @carry_on_filters.merge(:format => :csv)) : sector_path(@data, @carry_on_filters.merge(:format => :csv)), :xls_path => @site.navigate_by_cluster?? cluster_path(@data, @carry_on_filters.merge(:format => :xls)) : sector_path(@data, @carry_on_filters.merge(:format => :xls)), :kml_path => @site.navigate_by_cluster?? cluster_path(@data, @carry_on_filters.merge(:format => :kml)) : sector_path(@data, @carry_on_filters.merge(:format => :kml)) } %>
+        <%= render :partial => 'new_partials/downloads', :locals => { 
+            :csv_path => export_audience_path(@data, @carry_on_filters.merge(export_format: :csv)),
+            :xls_path => export_audience_path(@data, @carry_on_filters.merge(export_format: :xls)),
+            :kml_path => export_audience_path(@data, @carry_on_filters.merge(export_format: :kml))
+          }
+        %>
 
         <%= render "new_partials/index_projects" %>
 

@@ -7,11 +7,20 @@ define(['backbone'], function(Backbone) {
     el: '#downloadsView',
 
     events: {
-      'click #embedMapBtn': 'showOverlay'
+      'click #embedMapBtn': 'showEmbedOverlay',
+      'click #exportCsvBtn': 'triggerExport',
+      'click #exportXlsBtn': 'triggerExport',
+      'click #exportKmlBtn': 'triggerExport'
     },
 
-    showOverlay: function(e) {
+    showEmbedOverlay: function(e) {
       Backbone.Events.trigger('embed:show');
+      e.preventDefault();
+    },
+
+    triggerExport: function(e) {
+      $.ajax({url: e.target.href });
+      Backbone.Events.trigger('export:show');
       e.preventDefault();
     }
 

@@ -3,6 +3,25 @@ class ClustersSectorsController < ApplicationController
   layout :sites_layout
   caches_action :show, :expires_in => 300, :cache_path => Proc.new { |c| c.params }
 
+  def request_export
+    @projects_custom_find_options ||= {}
+
+    if @site.navigate_by_cluster?
+      @projects_custom_find_options.merge!({cluster: params[:id]})       
+      Resque.enqueue(DataExporter, current_user.id, @site.id, params[:export_format], @projects_custom_find_options)
+      render :nothing => true
+
+    elsif @site.navigate_by_sector?
+      @projects_custom_find_options.merge!({sector: params[:id]})
+      Resque.enqueue(DataExporter, current_user.id, @site.id, params[:export_format], @projects_custom_find_options)
+      render :nothing => true
+    
+    else
+      render_404
+    end
+  end
+
+
   def show
     if params[:location_id].present?
       case params[:location_id]
@@ -134,7 +153,7 @@ class ClustersSectorsController < ApplicationController
 
               sql = <<-SQL
                 SELECT r.id AS id,
-                       r.name as region_name,
+                       r.name ,
                        count(distinct pse.project_id) AS count,
                        r.center_lon AS lon,
                        r.center_lat AS lat,
@@ -203,6 +222,7 @@ class ClustersSectorsController < ApplicationController
 
         @map_data = result.map do |r|
           next if r['count'] == "0"
+          next if r['url'].blank?
           uri = URI.parse(r['url'])
           params = Hash[uri.query.split('&').map{|p| p.split('=')}] rescue {}
           params['force_site_id'] = @site.id unless @site.published?

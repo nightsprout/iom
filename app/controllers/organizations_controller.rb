@@ -3,15 +3,22 @@ class OrganizationsController < ApplicationController
   layout :sites_layout
   caches_action :index, :expires_in => 300, :cache_path => Proc.new { |c| c.params }
   caches_action :show, :expires_in => 300, :cache_path => Proc.new { |c| c.params }
+  before_filter :load_location_filter_params
 
   def index
     @organizations = @site.organizations
+  end
+
+  def request_export
+    Resque.enqueue(DataExporter, current_user.id, @site.id, params[:export_format], { organization: params[:id] })
+    render :nothing => true
   end
 
   def show
     unless @organization = @site.organizations.select{ |org| org.id == params[:id].to_i }.first
       raise ActiveRecord::RecordNotFound
     end
+    @data = @organization
     @organization.attributes = @organization.attributes_for_site(@site)
 
     @filter_by_category = if params[:category_id].present?
@@ -19,38 +26,29 @@ class OrganizationsController < ApplicationController
                           else
                             nil
                           end
-    @filter_by_location = if params[:location_id].present?
-                            case params[:location_id]
-                            when String
-                              params[:location_id].split('/').map(&:to_i)
-                            else
-                              params[:location_id].map(&:to_i)
-                            end
-                          else
-                            nil
-                          end
 
-    @carry_on_filters = {}
+    @carry_on_filters ||= {}
     @carry_on_filters[:category_id] = params[:category_id] if params[:category_id].present?
-    @carry_on_filters[:location_id] = params[:location_id] if params[:location_id].present?
 
-    projects_custom_find_options = {
+    @projects_custom_find_options ||= {}
+    @projects_custom_find_options.merge!({
       :organization  => @organization.id,
       :per_page      => 10,
       :page          => params[:page],
       :order         => 'created_at DESC',
       :start_in_page => params[:start_in_page]
-    }
-    projects_custom_find_options[:organization_category_id] = @filter_by_category if filter_by_category_valid?
+    })
+    @projects_custom_find_options[:organization_category_id] = @filter_by_category if filter_by_category_valid?
+
     if @filter_by_location.present?
       if @filter_by_location.size > 1
-        projects_custom_find_options[:organization_region_id] = @filter_by_location.last
+        @projects_custom_find_options[:organization_region_id] = @filter_by_location.last
       else
-        projects_custom_find_options[:organization_country_id] = @filter_by_location.first
+        @projects_custom_find_options[:organization_country_id] = @filter_by_location.first
       end
     end
 
-    @projects = Project.custom_find @site, projects_custom_find_options
+    @projects = Project.custom_find @site, @projects_custom_find_options
 
     @organization_projects_count            = @projects.total_entries
     @organization_projects_clusters_sectors = @organization.projects_clusters_sectors(@site, @filter_by_location)
@@ -245,20 +243,20 @@ class OrganizationsController < ApplicationController
         end
       end
       format.csv do
-        send_data Project.to_csv(@site, projects_custom_find_options),
+        send_data Project.to_csv(@site, @projects_custom_find_options),
           :type => 'text/plain; charset=utf-8; application/download',
           :disposition => "attachment; filename=#{@organization.name.gsub(/[^0-9A-Za-z]/, '')}_projects.csv"
       end
       format.xls do
-        send_data Project.to_excel(@site, projects_custom_find_options),
+        send_data Project.to_excel(@site, @projects_custom_find_options),
           :type        => 'application/vnd.ms-excel',
           :disposition => "attachment; filename=#{@organization.name.gsub(/[^0-9A-Za-z]/, '')}_projects.xls"
       end
       format.kml do
-        @projects_for_kml = Project.to_kml(@site, projects_custom_find_options)
+        @projects_for_kml = Project.to_kml(@site, @projects_custom_find_options)
       end
       format.json do
-        render :json => Project.to_geojson(@site, projects_custom_find_options).map do |p|
+        render :json => Project.to_geojson(@site, @projects_custom_find_options).map do |p|
           { projectName: p['project_name'],
             geoJSON: p['geojson']
           }

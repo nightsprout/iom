@@ -2,9 +2,9 @@
   <% if current_user.present? %>
   <span>Download this list: </span>
   <ul>
-    <li><%= link_to 'CSV', csv_path, :class => 'csv' %></li>
-    <li><%= link_to 'XLS', xls_path, :class => 'xls' %></li>
-    <li><%= link_to 'KML', kml_path, :class => 'kml' %></li>
+    <li><%= link_to 'CSV', csv_path, :class => 'csv', :id => 'exportCsvBtn' %></li>
+    <li><%= link_to 'XLS', xls_path, :class => 'xls', :id => 'exportXlsBtn' %></li>
+    <li><%= link_to 'KML', kml_path, :class => 'kml', :id => 'exportKmlBtn' %></li>
     <li><%= link_to 'Embed this map', '#embedMapView', :class => 'embebed', :id => 'embedMapBtn' %></li>
   </ul>
   <% else %>

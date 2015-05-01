@@ -37,7 +37,7 @@ Iom::Application.routes.draw do
   resources :donors,        :only => [:index, :show]
   resources :offices,       :only => [:show]
   resources :projects,      :only => [:index, :show]
-  resources :organizations, :only => [:index, :show]
+  resources :organizations, :only => [:index, :show]  
 
   # Global Site projects export links for downloading
   get '/sites/download/(:id).csv', :to => 'sites#downloads', :format => :csv
@@ -45,6 +45,9 @@ Iom::Application.routes.draw do
   get '/sites/download/(:id).kml', :to => 'sites#downloads', :format => :kml
 
   match 'regions/:id' => 'georegion#old_regions'
+
+  get 'location/:id/export', :to => "georegion#request_export", :as => :export_location
+  get 'location/:location2_id/:id/export', :to => "georegion#request_export", :as => :export_location_level2
   
   resources :location, :controller => 'georegion' do
     get ':id', :to => 'georegion#show'
@@ -59,6 +62,19 @@ Iom::Application.routes.draw do
   match 'audience/:id'    => 'audience#show', :as => 'audience'
   match 'diseases/:id'    => 'diseases#show', :as => 'disease'
   match 'medicines/:id'   => 'medicines#show', :as => 'medicine'
+
+  # Request an export document to be mailed
+  get 'sites/:id/export', :to => "sites#request_export", :as => :export_site
+  get 'sectors/:id/export', :to => "clusters_sectors#request_export", :as => :export_sector
+  get 'clusters/:id/export', :to => "clusters_sectors#request_export", :as => :export_cluster
+
+  get 'activities/:id/export', :to => "activities#request_export", :as => :export_activity
+  get 'audience/:id/export', :to => "audience#request_export", :as => :export_audience
+  get 'diseases/:id/export', :to => "diseases#request_export", :as => :export_disease
+  get 'medicines/:id/export', :to => "medicines#request_export", :as => :export_medicine
+  get 'donors/:id/export', :to => "donors#request_export", :as => :export_donor
+  get 'organizations/:id/export', :to => "organizations#request_export", :as => :export_organization
+
 
   # pages
   match '/p/:id' => 'pages#show', :as => :page
