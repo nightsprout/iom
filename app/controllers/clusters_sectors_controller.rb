@@ -8,12 +8,12 @@ class ClustersSectorsController < ApplicationController
 
     if @site.navigate_by_cluster?
       @projects_custom_find_options.merge!({cluster: params[:id]})       
-      Resque.enqueue(DataExporter, current_user.id, @site.id, params[:format], @projects_custom_find_options)
+      Resque.enqueue(DataExporter, current_user.id, @site.id, params[:export_format], @projects_custom_find_options)
       render :nothing => true
 
     elsif @site.navigate_by_sector?
       @projects_custom_find_options.merge!({sector: params[:id]})
-      Resque.enqueue(DataExporter, current_user.id, @site.id, params[:format], @projects_custom_find_options)
+      Resque.enqueue(DataExporter, current_user.id, @site.id, params[:export_format], @projects_custom_find_options)
       render :nothing => true
     
     else

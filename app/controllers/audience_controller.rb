@@ -8,7 +8,7 @@ class AudienceController < ApplicationController
     @projects_custom_find_options ||= {}
     @projects_custom_find_options.merge!({audience: params[:id]})
 
-    Resque.enqueue(DataExporter, current_user.id, @site.id, params[:format], { audience: params[:id] })
+    Resque.enqueue(DataExporter, current_user.id, @site.id, params[:export_format], { audience: params[:id] })
     render :nothing => true
   end
 

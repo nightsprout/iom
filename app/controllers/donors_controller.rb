@@ -7,7 +7,7 @@ class DonorsController < ApplicationController
   caches_action :show, :expires_in => 300, :cache_path => Proc.new { |c| c.params }
 
   def request_export
-    Resque.enqueue(DataExporter, current_user.id, @site.id, params[:format], { 
+    Resque.enqueue(DataExporter, current_user.id, @site.id, params[:export_format], { 
                      :audience => params[:id], 
                      :organization_filter => params[:organization_id],
                      :category_id => params[:category_id]

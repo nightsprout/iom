@@ -28,7 +28,8 @@ class DataExporter
       raise ArgumentError, "Invalid export format"
     end
 
-    bucket.objects[object_name].write(data)
+    bucket.objects[object_name].write( data, {:acl => :public_read} )
+
     ExportsMailer.export_results(user, site, format, parameters).deliver
   end
 

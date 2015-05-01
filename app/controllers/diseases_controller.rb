@@ -8,7 +8,7 @@ class DiseasesController < ApplicationController
     @projects_custom_find_options ||= {}
     @projects_custom_find_options.merge!({disease: params[:id]})
 
-    Resque.enqueue(DataExporter, current_user.id, @site.id, params[:format], { disease: params[:id] })
+    Resque.enqueue(DataExporter, current_user.id, @site.id, params[:export_format], { disease: params[:id] })
     render :nothing => true
   end
 

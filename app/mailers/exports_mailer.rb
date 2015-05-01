@@ -2,7 +2,7 @@ class ExportsMailer < ActionMailer::Base
   default :from => 'CWW@taskforce.org'
 
   def export_results(user, site, format, parameters)
-    s3 = AWS::S3.new(region: 'us-east-1')
+    s3 = AWS::S3.new(region: ENV['S3_REGION_NAME'] || 'us-east-1')
     bucket = s3.buckets.select do |bucket|
       bucket.name === ENV['S3_BUCKET_NAME']
     end.first

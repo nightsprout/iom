@@ -136,7 +136,7 @@ class SitesController < ApplicationController
   end
 
   def request_export
-    Resque.enqueue(DataExporter, current_user.id, @site.id, params[:format])
+    Resque.enqueue(DataExporter, current_user.id, @site.id, params[:export_format])
     render :nothing => true
   end
 
