@@ -1,5 +1,5 @@
 class ExportsMailer < ActionMailer::Base
-  default :from => 'CWW@taskforce.org'
+  default :from => 'info@partnersmap.org'
 
   def export_results(user, site, format, parameters)
     s3 = AWS::S3.new(region: ENV['S3_REGION_NAME'] || 'us-east-1')
