@@ -70,19 +70,20 @@ class Admin::AdminController < ApplicationController
     options[:organization]    = current_user.organization_id unless current_user.admin?
     options[:headers_options] = {:show_private_fields => true}
 
+    # 
+
     respond_to do |format|
       format.html do
-        render :text => Project.to_csv(nil, options)
+        Resque.enqueue(DataExporter, current_user.id, @site.id, :csv, options )
+        redirect_to request.referrer, :notice => "Export requested!  Check your email in a few minutes."
       end
       format.csv do
-        send_data Project.to_csv(nil, options),
-          :type => 'text/plain; charset=utf-8; application/download',
-          :disposition => "attachment; filename=ngoaidmap_projects.csv"
+        Resque.enqueue(DataExporter, current_user.id, @site.id, :csv, options )
+        redirect_to request.referrer, :notice => "Export requested!  Check your email in a few minutes."
       end
       format.xls do
-        send_data Project.to_excel(nil, options),
-          :type => 'application/vnd.ms-excel',
-          :disposition => "attachment; filename=ngoaidmap_projects.xls"
+        Resque.enqueue(DataExporter, current_user.id, @site.id, :xls, options )
+        redirect_to request.referrer, :notice => "Export requested!  Check your email in a few minutes."
       end
     end
   end
