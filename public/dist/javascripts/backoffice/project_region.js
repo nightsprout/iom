@@ -195,32 +195,6 @@
       $('div.region_window').fadeIn();
     });
 
-    $('a#add_region_map').click(function(ev){
-      $('#region_select_level_0').change(region_select_level_0_onchange);
-
-      $.getJSON('/geo/countries/json', function (json) {
-        level_0_options = json;
-        level_0_options.unshift({ name: "All", id: 0 });
-        
-        var level_0_select = $('select#region_select_level_0');
-        
-        for (var i = 0, l = level_0_options.length; i < l; i++) {
-          var $el = $(document.createElement('option'));
-          var option = level_0_options[i];
-          
-          $el.attr('value', option.id);
-          $el.append(document.createTextNode(option.name));
-          level_0_select.append($el);
-        }
-        
-        level_0_select.chosen();
-      });
-      
-      ev.preventDefault();
-      ev.stopPropagation();
-      $('div.region_window').fadeIn();
-    });
-
 
     $('div.region_window a.close').click(function(ev){
       ev.preventDefault();
@@ -232,40 +206,38 @@
     });
 
     $('a#add_region_to_list').click(function (e){
-      var countries_ids = [];
-      var regions_ids = [];
-      var countries_names = [];
-      var regions_names = [];            
-
-      if (selected_region_ids[0] != null && selected_region_ids[0] > 0) {
-        countries_ids.push(selected_region_ids[0]);
-        countries_names.push(selected_region_names[0]);
-      }
-
-      if (selected_region_ids[1] != null && selected_region_ids[1] > 0) {
-        regions_ids.push(selected_region_ids[1]);
-        regions_names.push(selected_region_names[1]);
-      }
-
-      if (selected_region_ids[2] != null && selected_region_ids[2] > 0) {
-        regions_ids.push(selected_region_ids[2]);
-        regions_names.push(selected_region_names[2]);
-      }
-
-      if (selected_region_ids[3] != null && selected_region_ids[3] > 0) {
-        regions_ids.push(selected_region_ids[3]);
-        regions_names.push(selected_region_names[3]);
-      }
-      
-      if (regions_ids.length === 0)
-        $('#regions_list').append('<li data-country-id="'+countries_ids[0]+'"><p>'+countries_names[0]+'</p><input type="hidden" name="project[regions_ids][]" value="country_'+countries_ids[0]+'" /><a href="javascript:void(null)" class="close"></a></li>');
-      else {
+      if (selected_region_ids[0] !== '0') {
         var breadcrumb = [];
-        breadcrumb.push(countries_names[0]);
-        for(var i = 0;i<regions_names.length;i++) {
-          breadcrumb.push(regions_names[i]);
+        for(var i = 0; i < selected_region_names.length; i++) {
+          if (selected_region_ids[i] === '0' || 
+              selected_region_ids[i] === null ||
+              typeof selected_region_ids[i] === 'undefined') {
+            selected_region_ids.length = i;
+            break;
+          }
+
+          breadcrumb.push(selected_region_names[i]);
         }
-        $('#regions_list').append('<li data-country-id="'+countries_ids[0]+'"><p>'+breadcrumb.join(' > ')+'</p><input type="hidden" name="project[regions_ids][]" value="region_'+regions_ids[regions_ids.length - 1]+'" /><a href="javascript:void(null)" class="close"></a></li>');
+
+        var country_id = selected_region_ids[0];
+        var region_ids = selected_region_ids.slice(1, selected_region_ids.length);
+
+        if (region_ids.length === 0) {
+          $('#regions_list').append(
+            '<li data-country-id="'+country_id+'">'+
+              '<p>'+breadcrumb.join(' > ')+'</p>'+
+              '<input type="hidden" name="project[regions_ids][]" value="country_'+country_id+'" />'+
+              '<a href="javascript:void(null)" class="close"></a>'+
+            '</li>');
+
+        } else {
+          $('#regions_list').append(
+            '<li data-country-id="'+country_id+'">'+
+              '<p>'+breadcrumb.join(' > ')+'</p>'+
+              '<input type="hidden" name="project[regions_ids][]" value="region_'+region_ids[region_ids.length-1]+'" />'+
+              '<a href="javascript:void(null)" class="close"></a>'+
+            '</li>');
+        }
       }
       
       e.preventDefault();
@@ -273,7 +245,7 @@
 
       $('div.region_window').fadeOut(function () {
         resetRegionValues();
-      });
-    });
+      });      
+    })
     
   });
