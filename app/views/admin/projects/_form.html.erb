@@ -665,46 +665,33 @@
       <div class="bottom_region">
         <h3 class="museo_sans">Add a region to the project</h3>
         <p class="info_region_exp">You can specify the administrative level you need (1st, 2nd or 3rd)</p>
+
         <div class="level_0">
           <label>COUNTRY <strong>*</strong></label>
-          <span class="region_combo">
-            <p id="country_0">Not specified</p>
-            <div class="wrapper">
-              <ul class="options scroll_pane">
-                <li><a id="country_0">Not specified</a></li>
-                <% Country.select("id,name").order("name ASC").all.each do |country| %>
-                  <li class="region_combo_item"><a id="country_<%= country.id %>" href="#"><%= country.name %></a></li>
-                <% end %>
-                <li class="last"></li>
-              </ul>
-            </div>
-          </span>
+
+          <select id="region_select_level_0">
+          </select>
         </div>
 
         <div class="level_1">
           <label>1st ADMINISTRATIVE LEVEL</label>
-          <span class="region_combo">
-            <p id="level1_0">Not specified</p>
-            <div class="wrapper">
-              <ul class="options scroll_pane">
-                <li><a id="level1_0">Not specified</a></li>
-                <li class="last"></li>
-              </ul>
-            </div>
-          </span>
+          
+          <select id="region_select_level_1">
+          </select>
         </div>
 
         <div class="level_2">
-          <label>2st ADMINISTRATIVE LEVEL</label>
-          <span class="region_combo">
-            <p id="level2_0">Not specified</p>
-            <div class="wrapper">
-              <ul class="options scroll_pane">
-                <li><a id="level2_0">Not specified</a></li>
-                <li class="last"></li>
-              </ul>
-            </div>
-          </span>
+          <label>2nd ADMINISTRATIVE LEVEL</label>
+          
+          <select id="region_select_level_2">
+          </select>
+        </div>
+
+        <div class="level_3">
+          <label>3rd ADMINISTRATIVE LEVEL</label>
+          
+          <select id="region_select_level_3">
+          </select>
         </div>
 
         <a class="add_location museo_sans shadow_green" id="add_region_to_list">add region</a>

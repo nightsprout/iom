@@ -266,6 +266,15 @@ class GeoregionController < ApplicationController
     redirect_to location_path(region), :status => 301
   end
 
+  def list_countries
+    countries = Country.select("id,name").reorder("name ASC").all
+    respond_to do |format|
+      format.json do
+        render :json => countries.map{ |c| {:name => c.name, :id => c.id}}.to_json , :layout => false
+      end
+    end
+  end
+
   def list_regions1_from_country
     country = Country.fast.find(params[:id])
     regions = country.regions.select("id,name").where(:level => 1).order("name ASC")

@@ -13,7 +13,7 @@ define(['backbone', 'liveupdate'], function(Backbone) {
       this.$menu = this.$el.find('.menu');
 
       this.liveUpdate();
-
+      
       if (Modernizr.touch) {
         this.$el.find('.father').on('touchend', function(ev) {
           var item = $(ev.currentTarget).closest('li');
@@ -36,6 +36,15 @@ define(['backbone', 'liveupdate'], function(Backbone) {
     },
 
     liveUpdate: function() {
+      this.$el.find('.audience input.mod-categories-search')
+        .liveUpdate('.audience .mod-categories-child li a');
+
+      this.$el.find('.activities input.mod-categories-search')
+        .liveUpdate('.activities .mod-categories-child li a');
+
+      this.$el.find('.diseases input.mod-categories-search')
+        .liveUpdate('.diseases .mod-categories-child li a');
+
       this.$el.find('.organizations input.mod-categories-search')
         .liveUpdate('.organizations .mod-categories-child li a');
 
@@ -44,6 +53,9 @@ define(['backbone', 'liveupdate'], function(Backbone) {
 
       this.$el.find('.countries input.mod-categories-search')
         .liveUpdate('.countries .mod-categories-child li a');
+
+      this.$el.find('.regions input.mod-categories-search')
+        .liveUpdate('.regions .mod-categories-child li a');
     },
 
     fixCategoriesSelector: function() {

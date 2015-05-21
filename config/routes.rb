@@ -81,6 +81,7 @@ Iom::Application.routes.draw do
   # search
   match '/search' => 'search#index', :as => :search
   # list of regions of each level
+  match '/geo/countries/json'     => 'georegion#list_countries', :format => :json
   match '/geo/regions/1/:id/json' => 'georegion#list_regions1_from_country', :format => :json
   match '/geo/regions/2/:id/json' => 'georegion#list_regions2_from_country', :format => :json
   match '/geo/regions/3/:id/json' => 'georegion#list_regions3_from_country', :format => :json
