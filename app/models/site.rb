@@ -776,7 +776,7 @@ SQL
                where site_id=#{self.id} and p.id = #{project.id}
                GROUP BY p.id,p.name,o.id,o.name,p.description,p.start_date,p.end_date,ps.site_id,p.created_at) as subq"
         ActiveRecord::Base.connection.execute(sql)
-        sleep 10 # To try and allow other things to get in there in between calls
+#        sleep 10 # To try and allow other things to get in there in between calls
       end
     end
 
