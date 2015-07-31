@@ -6,7 +6,11 @@ class AudienceController < ApplicationController
 
   def request_export
     @projects_custom_find_options ||= {}
-    @projects_custom_find_options.merge!({audience: params[:id]})
+    @projects_custom_find_options.merge!({audience: params[:id],
+                                           :time_window   => {
+                                             :left  => params[:time_window_left],
+                                             :right => params[:time_window_right]
+                                           }})
 
     Resque.enqueue(DataExporter, current_user.id, @site.id, params[:export_format], { audience: params[:id] })
     render :nothing => true
@@ -29,8 +33,7 @@ class AudienceController < ApplicationController
       :per_page      => 10,
       :page          => params[:page],
       :order         => 'created_at DESC',
-      :start_in_page => params[:start_in_page]
-    })
+      :start_in_page => params[:start_in_page]})
 
     if @filter_by_location.present? && @filter_by_location.size > 1
       @projects_custom_find_options[:region_id] = @filter_by_location.last
@@ -63,6 +66,8 @@ class AudienceController < ApplicationController
 
           # Get the data for the map depending on the region definition of the site (country or region)
           sql="select r.id,r.name,count(distinct pa.project_id) as count,r.center_lon as lon,r.center_lat as lat,r.name,
+               extract(year from start_date) as start_year,
+               extract(year from end_date) as end_year,
                CASE WHEN count(distinct pa.project_id) > 1 THEN
                  '#{carry_on_url}'||r.path
                ELSE
@@ -76,13 +81,15 @@ class AudienceController < ApplicationController
                 inner join projects as p on ps.project_id=p.id and (p.end_date is null OR p.end_date > now())
                 inner join projects_audiences as pa on pa.project_id=p.id and pa.audience_id=#{params[:id].sanitize_sql!.to_i}
                 #{location_filter}
-                group by r.id,r.name,lon,lat,r.code"
+                group by r.id,r.name,lon,lat,r.code,start_year,end_year"
         elsif @filter_by_location.present? and @filter_by_location.size == 1
           sql = "select r.id,
                  count (distinct pa.project_id) as count,
                  r.name,
                  r.center_lon as lon,
                  r.center_lat as lat,
+                 extract(year from start_date) as start_year,
+                 extract(year from end_date) as end_year,
                  CASE WHEN count(distinct pa.project_id) > 1 THEN
                    '#{carry_on_url}'||r.path
                  ELSE
@@ -95,13 +102,15 @@ class AudienceController < ApplicationController
                  inner join projects as p on pr.project_id=p.id and (p.end_date is NULL OR p.end_date > now())
                  inner join regions as r on pr.region_id=r.id and r.level=#{@site.levels_for_region.min} and r.country_id=#{@filter_by_location.first}
                  inner join projects_audiences as pa on pa.project_id=p.id and pa.audience_id=#{params[:id].sanitize_sql!.to_i}
-                 group by r.id,r.name,lon,lat,r.code"   
+                 group by r.id,r.name,lon,lat,r.code,start_year,end_year"
         elsif @filter_by_location.present? and @filter_by_location.size > 1         
           sql = "select r.id,
                  count(distinct pa.project_id) as count,
                  r.name,
                  r.center_lon as lon,
                  r.center_lat as lat,
+                 extract(year from start_date) as start_year,
+                 extract(year from end_date) as end_year,
                  CASE WHEN count(distinct pa.project_id) > 1 THEN
                    '#{carry_on_url}'||r.path
                  ELSE
@@ -113,9 +122,11 @@ class AudienceController < ApplicationController
                  inner join projects as p on pr.project_id=p.id and (p.end_date is NULL or p.end_date > now())
                  inner join regions as r on pr.region_id=r.id and r.level=#{@site.levels_for_region.min} and r.country_id=#{@filter_by_location.shift} and r.id in (#{@filter_by_location.join(',')})
                  inner join projects_audiences as pa on pa.project_id=p.id and pa.audience_id=#{params[:id].sanitize_sql!.to_i}
-                 group by r.id,r.name,lon,lat,r.path,r.code"
+                 group by r.id,r.name,lon,lat,r.path,r.code,start_year,end_year"
         else
           sql="select c.id,c.name,count(distinct pa.project_id) as count,c.center_lon as lon,c.center_lat as lat,c.name,
+                 extract(year from start_date) as start_year,
+                 extract(year from end_date) as end_year,
                  CASE WHEN count(distinct pa.project_id) > 1 THEN
                    '#{carry_on_url}'||c.id
                  ELSE
@@ -128,7 +139,7 @@ class AudienceController < ApplicationController
                   inner join projects_sites as ps on cp.project_id=ps.project_id and ps.site_id=#{@site.id}
                   inner join projects as p on ps.project_id=p.id and (p.end_date is null OR p.end_date > now())
                   left outer join projects_audiences as pa on pa.project_id=p.id and pa.audience_id=#{params[:id].sanitize_sql!.to_i}
-                  group by c.id,c.name,lon,lat,c.name"
+                  group by c.id,c.name,lon,lat,c.name,start_year,end_year"
         end
 
 
@@ -145,6 +156,12 @@ class AudienceController < ApplicationController
           r['url'] = uri.to_s
           r
         end.compact.to_json
+
+        require 'pp'
+        p "-------------------------------------------------------------------------"
+        pp @map_data
+        p "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+
         @overview_map_chco = @site.theme.data[:overview_map_chco]
         @overview_map_chf = @site.theme.data[:overview_map_chf]
         @overview_map_marker_source = @site.theme.data[:overview_map_marker_source]

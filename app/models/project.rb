@@ -544,8 +544,22 @@ SQL
     level = level[0] if level.is_a?(Array)
 
     sql = ""
+
+    where = []
+    
+    if options[:time_window]
+      options[:time_window][:left]  ||= 0
+      options[:time_window][:right] ||= 500.years.to_i
+      
+      time_window_left  = Time.at(options[:time_window][:left].to_i).strftime('%Y-%m-%d')
+      time_window_right = Time.at(options[:time_window][:right].to_i).strftime('%Y-%m-%d')
+
+      options[:time_window][:left] = 
+
+      where << "end_date >= '#{time_window_left}' and start_date <= '#{time_window_right}'"
+    end
+    
     if options[:region]
-      where = []
       where << "regions_ids && '{#{options[:region]}}' and site_id=#{site.id} and (end_date is null OR end_date > now())"
       if options[:region_category_id]
         if site.navigate_by_cluster?
@@ -557,7 +571,6 @@ SQL
       where << "level = #{level}"
       sql="select * from data_denormalization where #{where.join(' and ')}"
     elsif options[:country]
-      where = []
       where << "countries_ids && '{#{options[:country]}}' and site_id=#{site.id} and (end_date is null OR end_date > now())"
       if options[:country_category_id]
         if site.navigate_by_cluster?
@@ -570,21 +583,18 @@ SQL
       where << "level = #{level}"
       sql="select * from data_denormalization where #{where.join(' and ')}"
     elsif options[:cluster]
-      where = []
       where << "cluster_ids && '{#{options[:cluster]}}' and site_id=#{site.id} and (end_date is null OR end_date > now())"
       where << "regions_ids && '{#{options[:cluster_region_id]}}'" if options[:cluster_region_id]
       where << "countries_ids && '{#{options[:cluster_country_id]}}'" if options[:cluster_country_id]
       where << "level = #{level}"
       sql="select * from data_denormalization where #{where.join(' and ')}"
     elsif options[:sector]
-      where = []
       where << "sector_ids && '{#{options[:sector]}}' and site_id=#{site.id} and (end_date is null OR end_date > now())"
       where << "regions_ids && '{#{options[:sector_region_id]}}'" if options[:sector_region_id]
       where << "countries_ids && '{#{options[:sector_country_id]}}'" if options[:sector_country_id]
       where << "level = #{level}"
       sql="select * from data_denormalization where #{where.join(' and ')}"
     elsif options[:organization]
-      where = []
       where << "organization_id = #{options[:organization]} and site_id=#{site.id} and (end_date is null OR end_date > now())"
 
       if options[:organization_category_id]
@@ -600,7 +610,6 @@ SQL
       where << "level = #{level}"
       sql="select * from data_denormalization where #{where.join(' and ')}"
     elsif options[:donor_id]
-      where = []
       where << "regions_ids && '{#{options[:organization_region_id]}}'::integer[]" if options[:organization_region_id]
       where << "countries_ids && '{#{options[:organization_country_id]}}'::integer[]" if options[:organization_country_id]
       where << "donors_ids && '{#{options[:donor_id]}}' "
@@ -616,36 +625,38 @@ SQL
       where << "level = #{level}"
       sql="select * from data_denormalization where #{where.join(' and ')}"
     elsif options[:activity]
-      where = ["activities_ids && '{#{options[:activity]}}'",
-              "site_id=#{site.id}",
-              "(end_date is null OR end_date > now())",
-              "level = #{level}"]
+      where << "activities_ids && '{#{options[:activity]}}'"
+      where << "site_id=#{site.id}"
+      where << "(end_date is null OR end_date > now())"
+      where << "level = #{level}"
       where << "regions_ids && '{#{options[:region_id]}}'" if options[:region_id]
       where << "countries_ids && '{#{options[:country_id]}}'" if options[:country_id]
 
       sql="select * from data_denormalization where #{where.join(' and ')}"
     elsif options[:audience]
-      where = ["audiences_ids && '{#{options[:audience]}}'",
-              "site_id=#{site.id}",
-              "(end_date is null OR end_date > now())",
-              "level = #{level}"]
+      where << "audiences_ids && '{#{options[:audience]}}'"
+      where << "site_id=#{site.id}"
+      where << "(end_date is null OR end_date > now())"
+      where << "level = #{level}"
       where << "regions_ids && '{#{options[:region_id]}}'" if options[:region_id]
       where << "countries_ids && '{#{options[:country_id]}}'" if options[:country_id]
 
       sql="select * from data_denormalization where #{where.join(' and ')}"
     elsif options[:disease]
-      where = ["diseases_ids && '{#{options[:disease]}}'",
-              "site_id=#{site.id}",
-              "(end_date is null OR end_date > now())",
-              "level = #{level}"]
+      where << "diseases_ids && '{#{options[:disease]}}'"
+      where << "site_id=#{site.id}"
+      where << "(end_date is null OR end_date > now())"
+      where << "level = #{level}"
       where << "regions_ids && '{#{options[:region_id]}}'" if options[:region_id]
       where << "countries_ids && '{#{options[:country_id]}}'" if options[:country_id]
 
       sql="select * from data_denormalization where #{where.join(' and ')}"
     else
-      sql="select * from data_denormalization where site_id=#{site.id} and (end_date is null OR end_date > now()) and level = #{level}"
+      where << "site_id=#{site.id}"
+      where << "level = #{level}"
+      sql="select * from data_denormalization where #{where.join(' and ')}"
     end
-
+    
     total_entries = ActiveRecord::Base.connection.execute("select count(*) as count from (#{sql}) as q").first['count'].to_i
 
     options[:per_page] = 1 if options[:per_page] < 1
