@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20150716174950) do
+ActiveRecord::Schema.define(:version => 20150731230553) do
 
   create_table "activities", :force => true do |t|
     t.string   "name"
@@ -660,6 +660,7 @@ ActiveRecord::Schema.define(:version => 20150716174950) do
     t.text     "project_needs"
     t.text     "idprefugee_camp"
     t.string   "organization_id"
+    t.datetime "cached_at"
   end
 
   create_table "projects_activities", :id => false, :force => true do |t|
@@ -791,6 +792,7 @@ ActiveRecord::Schema.define(:version => 20150716174950) do
     t.text     "internal_description"
     t.boolean  "featured",                                                                    :default => false
     t.datetime "cached_at"
+    t.boolean  "global"
   end
 
   create_table "state", :id => false, :force => true do |t|

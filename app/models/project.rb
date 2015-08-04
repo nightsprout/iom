@@ -55,6 +55,8 @@ class Project < ActiveRecord::Base
   has_many :donors, :through => :donations
   has_many :cached_sites, :class_name => 'Site', :finder_sql => proc { "select * from sites, projects_sites where projects_sites.project_id = #{id} and projects_sites.site_id = sites.id" }
 
+  has_one :site
+
   scope :active, where("end_date > ?", Date.today.to_s(:db))
   scope :closed, where("end_date < ?", Date.today.to_s(:db))
   scope :with_no_country, select('projects.*').
@@ -858,11 +860,120 @@ SQL
     generate_intervention_id if Project.where('intervention_id = ? AND id <> ?', intervention_id, id).count > 0
   end
 
-  def update_data_denormalization
-    sql = """UPDATE data_denormalization
-            SET project_name = '#{self.name}'
-            WHERE project_id = #{self.id}"""
-    ActiveRecord::Base.connection.execute(sql)
+  def update_data_denormalization(opts = {levels: [1, 2], force: false, sites: nil})
+    if !opts[:force] and self.cached_at.present? and Time.now - self.cached_at < 6.hours
+      return
+    end
+
+    while Time.now - self.updated_at < 10.seconds
+      sleep 10
+      self.reload
+    end
+
+    sites = opts[:sites]
+    sites ||= [Site.where(global: true)]
+    site_ids = sites.collect { |s| s.id if s.respond_to? :id }
+
+    connection = ActiveRecord::Base.connection
+
+    opts[:levels].each do |level|
+      site_ids.each do |site_id|
+        connection.execute <<-DELETE_EXISTING_ROW
+          DELETE FROM data_denormalization
+          WHERE site_id=#{site_id}
+          AND   project_id=#{self.id}
+          AND   level=#{level}
+        DELETE_EXISTING_ROW
+  
+        next if self.destroyed?
+  
+        connection.execute <<-INSERT_NEW_ROW
+          INSERT INTO data_denormalization
+          (project_id,
+           level,
+           project_name,
+           project_description,
+           organization_id,
+           organization_name,
+           start_date,
+           end_date,
+           regions,
+           regions_ids,
+           countries,
+           countries_ids,
+           sectors,
+           sector_ids,
+           clusters,
+           cluster_ids,
+           donors_ids,
+           activities,
+           activities_ids,
+           audiences,
+           audiences_ids,
+           diseases,
+           diseases_ids,
+           is_active,
+           site_id,
+           created_at)
+  
+           SELECT *
+           FROM
+             (
+               SELECT 
+                 p.id AS project_id,
+                 #{level} AS level,
+                 p.name AS project_name,
+                 p.description AS project_description,
+                 o.id AS organization_id,
+                 o.name AS organization_name,
+                 p.start_date AS start_date,
+                 p.end_date AS end_date,
+                 '|'||array_to_string(array_agg(distinct r.name),'|')||'|' AS regions,
+                 ('{'||array_to_string(array_agg(distinct r.id),',')||'}')::integer[] AS regions_ids,
+                 '|'||array_to_string(array_agg(distinct c.name),'|')||'|' AS countries,
+                 ('{'||array_to_string(array_agg(distinct c.id),',')||'}')::integer[] AS countries_ids,
+                 '|'||array_to_string(array_agg(distinct sec.name),'|')||'|' AS sectors,
+                 ('{'||array_to_string(array_agg(distinct sec.id),',')||'}')::integer[] AS sector_ids,
+                 '|'||array_to_string(array_agg(distinct clus.name),'|')||'|' AS clusters,
+                 ('{'||array_to_string(array_agg(distinct clus.id),',')||'}')::integer[] AS cluster_ids,
+                 ('{'||array_to_string(array_agg(distinct d.donor_id),',')||'}')::integer[] AS donors_ids,
+                 '|'||array_to_string(array_agg(distinct act.name),'|')||'|' AS activities,
+                 ('{'||array_to_string(array_agg(distinct act.id),',')||'}')::integer[] AS activities_ids,
+                 '|'||array_to_string(array_agg(distinct aud.name),'|')||'|' AS audiences,
+                 ('{'||array_to_string(array_agg(distinct aud.id),',')||'}')::integer[] AS audiences_ids,
+                 '|'||array_to_string(array_agg(distinct dis.name),'|')||'|' AS diseASes,
+                 ('{'||array_to_string(array_agg(distinct dis.id),',')||'}')::integer[] AS diseASes_ids,
+                 CASE WHEN end_date is null OR p.end_date > now() THEN true ELSE false END AS is_active,
+                 ps.site_id AS site_id,
+                 p.created_at AS created_at
+
+                 FROM projects AS p
+                 INNER JOIN organizations AS o ON p.primary_organization_id=o.id
+                 INNER JOIN projects_sites AS ps ON p.id=ps.project_id
+                 LEFT JOIN projects_regions AS pr ON pr.project_id=p.id
+                 LEFT JOIN regions AS r ON pr.region_id=r.id and r.level=#{level}
+                 LEFT JOIN countries_projects AS cp ON cp.project_id=p.id
+                 LEFT JOIN countries AS c ON c.id=cp.country_id OR c.id = r.country_id
+                 LEFT JOIN clusters_projects AS cpro ON cpro.project_id=p.id
+                 LEFT JOIN clusters AS clus ON clus.id=cpro.cluster_id
+                 LEFT JOIN projects_sectors AS psec ON psec.project_id=p.id
+                 LEFT JOIN sectors AS sec ON sec.id=psec.sector_id
+                 LEFT JOIN donations AS d ON d.project_id=ps.project_id
+                 LEFT JOIN projects_activities AS actpro ON actpro.project_id=p.id          
+                 LEFT JOIN activities AS act ON act.id=actpro.activity_id
+                 LEFT JOIN projects_audiences AS audpro ON audpro.project_id=p.id
+                 LEFT JOIN audiences AS aud ON aud.id=audpro.audience_id
+                 LEFT JOIN diseases_projects AS dispro on dispro.project_id=p.id
+                 LEFT JOIN diseases AS dis ON dis.id=dispro.disease_id
+                    
+                 where site_id=#{site_id} and p.id = #{self.id}
+                 GROUP BY p.id,p.name,o.id,o.name,p.description,p.start_date,p.end_date,ps.site_id,p.created_at
+          ) AS subq;
+        INSERT_NEW_ROW
+      end  
+    end
+
+    self.update_attribute(:cached_at, Time.now)
   end
 
   ##############################
