@@ -36,6 +36,8 @@ class SitesController < ApplicationController
           if @site.geographic_context_country_id
             sql="select r.id,count(distinct ps.project_id) as count,r.name,r.center_lon as lon,
                       r.center_lat as lat,r.name,
+                      extract(year from p.start_date) as start_year,
+                      extract(year from p.end_date) as end_year,
                       CASE WHEN count(distinct ps.project_id) > 1 THEN
                         '/location/'||r.path
                       ELSE
@@ -45,11 +47,12 @@ class SitesController < ApplicationController
                       from projects_regions as pr 
                       inner join projects_sites as ps on pr.project_id=ps.project_id
                       inner join regions as r on pr.region_id=r.id and r.level=#{@site.level_for_region}
-                      group by r.id,r.name,lon,lat,r.name,r.path,r.code"
+                      group by r.id,r.name,lon,lat,r.name,r.path,r.code,start_year,end_year"
           else
             sql="select c.id,count(distinct ps.project_id) as count,c.name,c.center_lon as lon,
                       c.center_lat as lat,
-
+                      extract(year from p.start_date) as start_year,
+                      extract(year from p.end_date) as end_year,
                       CASE WHEN count(distinct ps.project_id) > 1 THEN
                           '/location/'||c.id
                       ELSE
@@ -61,7 +64,7 @@ class SitesController < ApplicationController
                       inner join projects_sites as ps on cp.project_id=ps.project_id and site_id=#{@site.id}
                       inner join projects as p on ps.project_id=p.id and (p.end_date is null OR p.end_date > now())
                       inner join countries as c on cp.country_id=c.id
-                      group by c.id,c.name,lon,lat,iso2_code"
+                      group by c.id,c.name,lon,lat,iso2_code,starT_year,end_year"
           end
           result = ActiveRecord::Base.connection.execute(sql)
         else

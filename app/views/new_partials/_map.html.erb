@@ -1,3 +1,6 @@
+<%= javascript_include_tag 'backoffice/jquery.min.js', 'backoffice/plugins/jquery-ui.min.js' %>
+<%= stylesheet_link_tag "lib/jquery-ui/css/smoothness/jquery-ui.css" %>
+
 <section class="mod-map" id="mapView">
 
   <div class="row">
@@ -72,3 +75,39 @@
     </div>
   </div>
 <% end %>
+
+<div class="date-range-slider-wrapper">
+  <span>
+      <label id="start-label">2005</label>
+      <div class="date-range-slider"></div>
+      <label id="end-label">2025</label>
+  </span>
+  <script>
+    $( ".date-range-slider" ).slider({
+        range: true,
+        min: <%= Date.today.beginning_of_year.year - 15 %>,
+        max: <%= Date.today.beginning_of_year.year + 15 %>,
+        values: [2005, 2025],
+        slide: function (event, ui) {
+            $("label#start-label").text(ui.values[0]);
+            $("label#end-label").text(ui.values[1]);
+            $("input#min-start").val(ui.values[0]);            
+            $("input#max-end").val(ui.values[1]);
+            $("form#date-range-form").change();
+        }
+    });
+  </script>
+  <form id="date-range-form" style="display: none;">
+      <input type="number" id="min-start" 
+             value="2005"
+             min="<%= Date.today.beginning_of_year.year - 15 %>" 
+             max="<%= Date.today.beginning_of_year.year + 15 %>" 
+      />
+      <input type="number" id="max-end" 
+             value="2025"
+             min="<%= Date.today.beginning_of_year.year - 15 %>" 
+             max="<%= Date.today.beginning_of_year.year + 15 %>" 
+             
+      />
+  </form>
+</div>
