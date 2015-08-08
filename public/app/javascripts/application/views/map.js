@@ -101,6 +101,11 @@ define(['underscore', 'backbone', 'pluralize', 'underscoreString'], function(_, 
     initializeIOMMarker(this, info, classname, map);
   }
 
+  function cleanStaleMarkers () {
+    $(".stale-marker").remove();
+  }
+  setInterval(cleanStaleMarkers, 50);
+
   function buildIOMMarkersFromMapData(classname, data, map) {
     var i, l;
     var newDataString = data.toString();
@@ -110,11 +115,11 @@ define(['underscore', 'backbone', 'pluralize', 'underscoreString'], function(_, 
     IOMMarker.byId = {};
     IOMMarker.dataString = newDataString;
     
-    $("." + classname).remove();
+    $("." + classname).addClass("stale-marker");
 
     _.each(data, function (dataPoint) {
       createOrMergeIOMMarker(dataPoint, classname, map);
-    });    
+    });
   }
   
   function createOrMergeIOMMarker(info, classname, map) {
@@ -826,9 +831,9 @@ define(['underscore', 'backbone', 'pluralize', 'underscoreString'], function(_, 
     },
 
     adjustDateRange: function (start, end) {
-      var filteredData = _.filter(map_data, function (p) { return parseInt(p.start_year) >= parseInt(start); });
-      filteredData = _.filter(filteredData, function (p) { return parseInt(p.start_year) <= parseInt(end); });
-
+      var filteredData = _.filter(map_data, function (p) { return (parseInt(p.end_year) >= parseInt(start)) &&
+                                                                  (parseInt(p.start_year) <= parseInt(end));                                                           
+                                                         });
       placeMarkers(filteredData);
     },
 
