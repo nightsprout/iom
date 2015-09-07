@@ -11,9 +11,6 @@ class SitesController < ApplicationController
     else
       @site = Site.find_by_name("global")
       site_home
-      ## old behaviour:
-      #
-      # general_home
     end
   end
 
@@ -24,6 +21,9 @@ class SitesController < ApplicationController
   end
 
   def site_home
+    Rails.logger.info @site.inspect
+    Rails.logger.info Site.find_by_name("global")
+
     @projects = Project.custom_find @site, :per_page => 10,
                                            :page => params[:page],
                                            :order => 'created_at DESC'
