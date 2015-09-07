@@ -10,7 +10,10 @@ class OrganizationsController < ApplicationController
   end
 
   def request_export
-    Resque.enqueue(DataExporter, current_user.id, @site.id, params[:export_format], { organization: params[:id] })
+    Resque.enqueue(DataExporter, current_user.id, @site.id, params[:export_format], { organization: params[:id], :time_window   => {
+                       :left  => params[:time_window_left],
+                       :right => params[:time_window_right]
+                     }})
     render :nothing => true
   end
 

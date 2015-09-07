@@ -724,8 +724,7 @@ SQL
   end
 
   def set_cached_projects_by_level(level)
-
-    Project.find_in_batches(batch_size: 100) do |batch|
+    Project.where("updated_at > ?", Time.now - 24.hours).where("cached_at IS NULL OR cached_at < ?", Time.now - 24.hours).find_in_batches(batch_size: 100) do |batch|
       batch.each do |project|
         # Delete what we're about to insert
         ActiveRecord::Base.connection.execute("DELETE FROM data_denormalization WHERE site_id = #{self.id} and project_id = #{project.id} and level = #{level} ")
@@ -776,7 +775,7 @@ SQL
                where site_id=#{self.id} and p.id = #{project.id}
                GROUP BY p.id,p.name,o.id,o.name,p.description,p.start_date,p.end_date,ps.site_id,p.created_at) as subq"
         ActiveRecord::Base.connection.execute(sql)
-        sleep 10 # To try and allow other things to get in there in between calls
+#        sleep 10 # To try and allow other things to get in there in between calls
       end
     end
 

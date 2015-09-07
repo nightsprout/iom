@@ -34,387 +34,430 @@ define(['underscore', 'backbone', 'pluralize', 'underscoreString'], function(_, 
 
   var sprintf = _.str.sprintf;
 
-  function old() {
-    var MERCATOR_RANGE = 256;
+  var MERCATOR_RANGE = 256;
 
-    function bound(value, opt_min, opt_max) {
-      if (opt_min !== null) {
-        value = Math.max(value, opt_min);
+  function bound(value, opt_min, opt_max) {
+    if (opt_min !== null) {
+      value = Math.max(value, opt_min);
+    }
+    if (opt_max !== null) {
+      value = Math.min(value, opt_max);
+    }
+    return value;
+  }
+
+  function degreesToRadians(deg) {
+    return deg * (Math.PI / 180);
+  }
+
+  function radiansToDegrees(rad) {
+    return rad / (Math.PI / 180);
+  }
+
+  function MercatorProjection() {
+    this.pixelOrigin_ = new google.maps.Point(MERCATOR_RANGE / 2, MERCATOR_RANGE / 2);
+    this.pixelsPerLonDegree_ = MERCATOR_RANGE / 360;
+    this.pixelsPerLonRadian_ = MERCATOR_RANGE / (2 * Math.PI);
+  }
+
+  MercatorProjection.prototype.fromLatLngToPoint = function(latLng, opt_point) {
+    var me = this;
+
+    var point = opt_point || new google.maps.Point(0, 0);
+
+    var origin = me.pixelOrigin_;
+    point.x = origin.x + latLng.lng() * me.pixelsPerLonDegree_;
+    // NOTE(appleton): Truncating to 0.9999 effectively limits latitude to
+    // 89.189.  This is about a third of a tile past the edge of the world tile.
+    var siny = bound(Math.sin(degreesToRadians(latLng.lat())), -0.9999, 0.9999);
+    point.y = origin.y + 0.5 * Math.log((1 + siny) / (1 - siny)) * -me.pixelsPerLonRadian_;
+    return point;
+  };
+
+  MercatorProjection.prototype.fromDivPixelToLatLng = function(pixel, zoom) {
+    var me = this;
+
+    var origin = me.pixelOrigin_;
+    var scale = Math.pow(2, zoom);
+    var lng = (pixel.x / scale - origin.x) / me.pixelsPerLonDegree_;
+    var latRadians = (pixel.y / scale - origin.y) / -me.pixelsPerLonRadian_;
+    var lat = radiansToDegrees(2 * Math.atan(Math.exp(latRadians)) - Math.PI / 2);
+    return new google.maps.LatLng(lat, lng);
+  };
+
+  MercatorProjection.prototype.fromDivPixelToSphericalMercator = function(pixel, zoom) {
+    var me = this;
+    var coord = me.fromDivPixelToLatLng(pixel, zoom);
+
+    var r = 6378137.0;
+    var x = r * degreesToRadians(coord.lng());
+    var latRad = degreesToRadians(coord.lat());
+    var y = (r / 2) * Math.log((1 + Math.sin(latRad)) / (1 - Math.sin(latRad)));
+
+    return new google.maps.Point(x, y);
+  };
+
+  function IOMMarker(info, classname, map) {
+    initializeIOMMarker(this, info, classname, map);
+  }
+
+  function cleanStaleMarkers () {
+    $('.stale-marker').remove();
+  }
+  setInterval(cleanStaleMarkers, 50);
+
+  function buildIOMMarkersFromMapData(classname, data, map) {
+    var newDataString = data.toString();
+
+    if (IOMMarker.dataString === newDataString) { return; }
+
+    IOMMarker.byId = {};
+    IOMMarker.dataString = newDataString;
+    
+    $('.' + classname).addClass('stale-marker');
+
+    _.each(data, function (dataPoint) {
+      createOrMergeIOMMarker(dataPoint, classname, map);
+    });
+  }
+  
+  function createOrMergeIOMMarker(info, classname, map) {
+    var marker;
+    info = JSON.parse(JSON.stringify(info));
+
+    if (!IOMMarker.byId[info.id]) {
+      IOMMarker.byId[info.id] = new IOMMarker(info, classname, map);
+      return;
+    }
+
+    marker = IOMMarker.byId[info.id];
+
+    info.count = (parseInt(marker.count) + parseInt(info.count)).toString();
+    initializeIOMMarker(marker, info, classname, map);
+  }
+
+  function initializeIOMMarker(marker, info, classname, map) {
+    var isRegion = !!(!info.total_in_region && info.code === null && info.region_name);
+
+    marker.latlng_ = new google.maps.LatLng(parseFloat(info.lat), parseFloat(info.lon));
+    marker.url = info.url;
+    marker.count = info.count;
+    marker.total_in_region = info.total_in_region;
+
+    marker.map_ = map;
+    marker.name = info.full_region_name || info.name;
+    marker.countryName = info.country_name;
+
+    if (document.URL.indexOf('force_site_id=3') >= 0) {
+      if (marker.count < 5) {
+        marker.diameter = 20;
+        //image_source = '/app/images/themes/' + theme + '/marker_2.png';
+      } else if ((marker.count >= 5) && (marker.count < 10)) {
+        marker.diameter = 26;
+        //image_source = '/app/images/themes/' + theme + '/marker_3.png';
+      } else if ((marker.count >= 10) && (marker.count < 18)) {
+        marker.diameter = 34;
+        //image_source = '/app/images/themes/' + theme + '/marker_4.png';
+      } else if (marker.count >= 18) {
+        marker.diameter = 42;
+        //image_source = '/app/images/themes/' + theme + '/marker_5.png';
+      } else {
+        marker.diameter = 26;
+        //image_source = '/app/images/themes/' + theme + '/marker_6.png';
       }
-      if (opt_max !== null) {
-        value = Math.min(value, opt_max);
+    } else if (map_type === 'overview_map') {
+      if (marker.count < 25) {
+        marker.diameter = 20;
+        //image_source = '/app/images/themes/' + theme + '/marker_2.png';
+      } else if ((marker.count >= 25) && (marker.count < 50)) {
+        marker.diameter = 26;
+        // image_source = '/app/images/themes/' + theme + '/marker_3.png';
+      } else if ((marker.count >= 50) && (marker.count < 90)) {
+        marker.diameter = 34;
+        // image_source = '/app/images/themes/' + theme + '/marker_4.png';
+      } else if (marker.count >= 90) {
+        marker.diameter = 42;
+        // image_source = '/app/images/themes/' + theme + '/marker_5.png';
+      } else {
+        marker.diameter = 26;
+        // image_source = '/app/images/themes/' + theme + '/marker_6.png';
       }
-      return value;
+    } else if (map_type === 'administrative_map') {
+      var range;
+
+      if (map_type === 'administrative_map') {
+        range = marker.count / 5;
+      }
+      if (marker.count < range) {
+        marker.diameter = 20;
+        // image_source = '/app/images/themes/' + theme + '/marker_2.png';
+      } else if ((marker.count >= range) && (marker.count < (range * 2))) {
+        marker.diameter = 26;
+        // image_source = '/app/images/themes/' + theme + '/marker_3.png';
+      } else if ((marker.count >= (range * 2)) && (marker.count < (range * 3))) {
+        marker.diameter = 34;
+        // image_source = '/app/images/themes/' + theme + '/marker_4.png';
+      } else if ((marker.count >= (range * 3)) && (marker.count < (range * 4))) {
+        marker.diameter = 42;
+        // image_source = '/app/images/themes/' + theme + '/marker_5.png';
+      } else {
+        marker.diameter = 26;
+        // image_source = '/app/images/themes/' + theme + '/marker_6.png';
+      }
+    } else {
+      marker.diameter = 34;
+      marker.classname = 'marker-project-bubble';
+      // image_source = '/app/images/themes/' + theme + '/project_marker.png';
+    }
+    
+    marker.offsetVertical_ = -(marker.diameter / 2);
+    marker.offsetHorizontal_ = -(marker.diameter / 2);
+    marker.height_ = marker.diameter;
+    marker.width_ = marker.diameter;
+    marker.classname = classname;
+
+    if (marker.classname === 'marker-project-bubble' && isRegion) {
+      marker.classname = 'marker-project-bubble is-marker-region';
+      marker.height_ = 20;
+      marker.width_ = 20;
+    } else if (marker.classname === 'marker-bubble' && isRegion) {
+      marker.classname = 'marker-bubble is-marker-region';
     }
 
-    function degreesToRadians(deg) {
-      return deg * (Math.PI / 180);
-    }
+    marker.setMap(map);
+    bounds.extend(new google.maps.LatLng(info.lat, info.lon));
+  }
 
-    function radiansToDegrees(rad) {
-      return rad / (Math.PI / 180);
-    }
+  IOMMarker.prototype = new google.maps.OverlayView();
 
-    function MercatorProjection() {
-      this.pixelOrigin_ = new google.maps.Point(MERCATOR_RANGE / 2, MERCATOR_RANGE / 2);
-      this.pixelsPerLonDegree_ = MERCATOR_RANGE / 360;
-      this.pixelsPerLonRadian_ = MERCATOR_RANGE / (2 * Math.PI);
-    }
+  IOMMarker.prototype.draw = function() {
 
-    MercatorProjection.prototype.fromLatLngToPoint = function(latLng, opt_point) {
-      var me = this;
+    var me = this;
 
-      var point = opt_point || new google.maps.Point(0, 0);
+    var div = this.div_;
+    if (!div) {
+      div = this.div_ = document.createElement('div');
 
-      var origin = me.pixelOrigin_;
-      point.x = origin.x + latLng.lng() * me.pixelsPerLonDegree_;
-      // NOTE(appleton): Truncating to 0.9999 effectively limits latitude to
-      // 89.189.  This is about a third of a tile past the edge of the world tile.
-      var siny = bound(Math.sin(degreesToRadians(latLng.lat())), -0.9999, 0.9999);
-      point.y = origin.y + 0.5 * Math.log((1 + siny) / (1 - siny)) * -me.pixelsPerLonRadian_;
-      return point;
-    };
+      div.className = this.classname;
+      div.style.position = 'absolute';
+      div.style.width = this.diameter + 'px';
+      div.style.height = this.diameter + 'px';
+      div.style.zIndex = 1;
+      div.style.cursor = 'pointer';
 
-    MercatorProjection.prototype.fromDivPixelToLatLng = function(pixel, zoom) {
-      var me = this;
+      var count;
+      try {
+        if (show_regions_with_one_project) {
+          count = document.createElement('p');
+          count.style.position = 'absolute';
+          count.style.top = '50%';
+          count.style.left = '50%';
+          count.style.height = '15px';
+          count.style.textAlign = 'center';
+          if (this.diameter === 20) {
+            count.style.margin = '-6px 0 0 0px';
+            count.style.font = 'normal 10px Arial';
+          } else if (this.diameter === 26) {
+            count.style.margin = '-6px 0 0 0px';
+            count.style.font = 'normal 11px Arial';
+          } else if (this.diameter === 34) {
+            count.style.margin = '-7px 0 0 0px';
+            count.style.font = 'normal 12px Arial';
+          } else if (this.diameter === 42) {
+            count.style.margin = '-7px 0 0 0px';
+            count.style.font = 'normal 15px Arial';
+          } else {
+            count.style.margin = '-9px 0 0 0px';
+            count.style.font = 'normal 18px Arial';
+          }
+          
+          if (this.count > 1) {
+            $(count).text(this.count);
+          }
 
-      var origin = me.pixelOrigin_;
-      var scale = Math.pow(2, zoom);
-      var lng = (pixel.x / scale - origin.x) / me.pixelsPerLonDegree_;
-      var latRadians = (pixel.y / scale - origin.y) / -me.pixelsPerLonRadian_;
-      var lat = radiansToDegrees(2 * Math.atan(Math.exp(latRadians)) - Math.PI / 2);
-      return new google.maps.LatLng(lat, lng);
-    };
-
-    MercatorProjection.prototype.fromDivPixelToSphericalMercator = function(pixel, zoom) {
-      var me = this;
-      var coord = me.fromDivPixelToLatLng(pixel, zoom);
-
-      var r = 6378137.0;
-      var x = r * degreesToRadians(coord.lng());
-      var latRad = degreesToRadians(coord.lat());
-      var y = (r / 2) * Math.log((1 + Math.sin(latRad)) / (1 - Math.sin(latRad)));
-
-      return new google.maps.Point(x, y);
-    };
-
-    function IOMMarker(info, classname, map) {
-      var isRegion = !!(!info.total_in_region && info.code === null && info.region_name);
-
-      // this.latlng_ = new google.maps.LatLng(info.lat,info.lon);
-      this.latlng_ = new google.maps.LatLng(parseFloat(info.lat), parseFloat(info.lon));
-      this.url = info.url;
-      this.count = info.count;
-      this.total_in_region = info.total_in_region;
-      //this.image = image;
-
-      this.map_ = map;
-      this.name = info.full_region_name || info.name;
-      this.countryName = info.country_name;
-
-      if (document.URL.indexOf('force_site_id=3') >= 0) {
-        if (this.count < 5) {
-          this.diameter = 20;
-          //image_source = '/app/images/themes/' + theme + '/marker_2.png';
-        } else if ((this.count >= 5) && (this.count < 10)) {
-          this.diameter = 26;
-          //image_source = '/app/images/themes/' + theme + '/marker_3.png';
-        } else if ((this.count >= 10) && (this.count < 18)) {
-          this.diameter = 34;
-          //image_source = '/app/images/themes/' + theme + '/marker_4.png';
-        } else if (this.count >= 18) {
-          this.diameter = 42;
-          //image_source = '/app/images/themes/' + theme + '/marker_5.png';
-        } else {
-          this.diameter = 26;
-          //image_source = '/app/images/themes/' + theme + '/marker_6.png';
+          div.appendChild(count);
         }
-      } else if (map_type === 'overview_map') {
-        if (this.count < 25) {
-          this.diameter = 20;
-          //image_source = '/app/images/themes/' + theme + '/marker_2.png';
-        } else if ((this.count >= 25) && (this.count < 50)) {
-          this.diameter = 26;
-          // image_source = '/app/images/themes/' + theme + '/marker_3.png';
-        } else if ((this.count >= 50) && (this.count < 90)) {
-          this.diameter = 34;
-          // image_source = '/app/images/themes/' + theme + '/marker_4.png';
-        } else if (this.count >= 90) {
-          this.diameter = 42;
-          // image_source = '/app/images/themes/' + theme + '/marker_5.png';
-        } else {
-          this.diameter = 26;
-          // image_source = '/app/images/themes/' + theme + '/marker_6.png';
+      } catch (e) {
+        if (this.count > 1) {
+          count = document.createElement('p');
+          count.style.position = 'absolute';
+          count.style.top = '50%';
+          count.style.left = '50%';
+          count.style.height = '15px';
+          count.style.textAlign = 'center';
+          if (this.diameter === 20) {
+            count.style.margin = '-6px 0 0 0px';
+            count.style.font = 'normal 10px Arial';
+          } else if (this.diameter === 26) {
+            count.style.margin = '-6px 0 0 0px';
+            count.style.font = 'normal 11px Arial';
+          } else if (this.diameter === 34) {
+            count.style.margin = '-7px 0 0 0px';
+            count.style.font = 'normal 12px Arial';
+          } else if (this.diameter === 42) {
+            count.style.margin = '-7px 0 0 0px';
+            count.style.font = 'normal 15px Arial';
+          } else {
+            count.style.margin = '-9px 0 0 0px';
+            count.style.font = 'normal 18px Arial';
+          }
+
+          if (this.count > 1) {
+            $(count).text(this.count);
+          }
+
+          div.appendChild(count);
         }
-      } else if (map_type === 'administrative_map') {
-        if (this.count < range) {
-          this.diameter = 20;
-          // image_source = '/app/images/themes/' + theme + '/marker_2.png';
-        } else if ((this.count >= range) && (this.count < (range * 2))) {
-          this.diameter = 26;
-          // image_source = '/app/images/themes/' + theme + '/marker_3.png';
-        } else if ((this.count >= (range * 2)) && (this.count < (range * 3))) {
-          this.diameter = 34;
-          // image_source = '/app/images/themes/' + theme + '/marker_4.png';
-        } else if ((this.count >= (range * 3)) && (this.count < (range * 4))) {
-          this.diameter = 42;
-          // image_source = '/app/images/themes/' + theme + '/marker_5.png';
+      }
+
+      //Marker address
+      if (this.count) {
+        if (map_type === 'overview_map' || map_type === 'administrative_map') {
+
+          var hidden_div = document.createElement('div');
+          hidden_div.className = 'map-tooltip';
+          hidden_div.style.bottom = this.diameter + 4 + 'px';
+          hidden_div.style.left = (this.diameter / 2) - (175 / 2) + 'px';
+
+          var top_hidden = document.createElement('div');
+          top_hidden.className = 'map-top-tooltip';
+
+          if ($('body').hasClass('organizations-page')) {
+            $(top_hidden).html('<h3>' + this.name + '</h3><strong>' + this.count + ' ' +
+                               Pluralize.inflectForCount('project', this.count) + ' by this ' + Pluralize.singularize(kind) +
+                               '</strong>.<br/><strong>' + (this.total_in_region ? this.total_in_region + ' in total</strong>' : ''));
+          } else if ($('body').hasClass('sites-page')) {
+            $(top_hidden).html('<h3>' + this.name + '</h3><strong>' + this.count + ' ' +
+                               Pluralize.inflectForCount('project', this.count) +
+                               '</strong>');
+          } else {
+            $(top_hidden).html('<h3>' + this.name + '</h3><strong>' + this.count + ' ' +
+                               Pluralize.inflectForCount('project', this.count) + ' in this ' + Pluralize.singularize(kind) +
+                               '</strong>.<br/><strong>' + (this.total_in_region ? this.total_in_region + ' in total</strong>' : ''));
+          }
+
+          hidden_div.appendChild(top_hidden);
+
+          div.appendChild(hidden_div);
+
+          google.maps.event.addDomListener(div, 'mouseover', function() {
+            $(this).css('zIndex', global_index++);
+            $(this).children('div').show();
+          });
+
+          google.maps.event.addDomListener(div, 'mouseout', function() {
+            $(this).children('div').hide();
+          });
         } else {
-          this.diameter = 26;
-          // image_source = '/app/images/themes/' + theme + '/marker_6.png';
+          google.maps.event.addDomListener(div, 'mouseover', function() {
+            $(this).css('zIndex', global_index++);
+          });
         }
       } else {
-        this.diameter = 34;
-        this.classname = 'marker-project-bubble';
-        // image_source = '/app/images/themes/' + theme + '/project_marker.png';
+        if (map_type === 'project_map') {
+          var _hidden_div = document.createElement('div');
+          _hidden_div.className = 'map-tooltip';
+          _hidden_div.style.bottom = this.diameter + 4 + 'px';
+          _hidden_div.style.left = (this.diameter / 2) - (175 / 2) + 'px';
+
+          var _top_hidden = document.createElement('div');
+          _top_hidden.className = 'map-top-tooltip';
+          
+          var locationName;
+          if (this.name) {
+            locationName = this.name + ', ' + this.countryName;
+          } else {
+            locationName = this.countryName;
+          }
+
+          $(_top_hidden).html('<strong>' + locationName + '</strong>');
+
+          _hidden_div.appendChild(_top_hidden);
+
+          div.appendChild(_hidden_div);
+
+          google.maps.event.addDomListener(div, 'mouseover', function() {
+            $(this).css('zIndex', global_index++);
+            $(this).children('div').show();
+          });
+
+          google.maps.event.addDomListener(div, 'mouseout', function() {
+            $(this).children('div').hide();
+          });
+        }
       }
 
-      this.offsetVertical_ = -(this.diameter / 2);
-      this.offsetHorizontal_ = -(this.diameter / 2);
-      this.height_ = this.diameter;
-      this.width_ = this.diameter;
-      this.classname = classname;
+      google.maps.event.addDomListener(div, 'click', function(ev) {
+        try {
+          ev.stopPropagation();
+        } catch (e) {
+          event.cancelBubble = true;
+        }
 
-      if (this.classname === 'marker-project-bubble' && isRegion) {
-        this.classname = 'marker-project-bubble is-marker-region';
-        this.height_ = 20;
-        this.width_ = 20;
-      } else if (this.classname === 'marker-bubble' && isRegion) {
-        this.classname = 'marker-bubble is-marker-region';
+        if (me.url !== undefined && me.url !== window.location.pathname + window.location.search) {
+
+          if (typeof MAP_EMBED !== 'undefined' && MAP_EMBED) {
+            window.open(
+              me.url,
+              '_blank'
+            );
+          } else {
+            window.location.href = me.url;
+          }
+        } else {
+          var elementOffset = $('.main-content').offset().top - 49;
+          $('html, body').animate({
+            scrollTop: elementOffset
+          }, 500);
+        }
+      });
+
+      google.maps.event.addDomListener(div, 'mousedown', function(ev) {
+        try {
+          ev.stopPropagation();
+        } catch (e) {
+          event.cancelBubble = true;
+        }
+      });
+
+      var panes = this.getPanes();
+      panes.floatPane.appendChild(div);
+
+      if (($(this.div_).children('p').width() + 6) > this.width_) {
+        $(this.div_).children('p').css('display', 'none');
+      } else {
+        $(this.div_).children('p').css('margin-left', -($(this.div_).children('p').width() / 2) + 'px');
       }
 
-      this.setMap(map);
     }
 
-    IOMMarker.prototype = new google.maps.OverlayView();
+    var pixPosition = me.getProjection().fromLatLngToDivPixel(me.latlng_);
+    if (pixPosition) {
+      div.style.width = me.width_ + 'px';
+      div.style.left = (pixPosition.x + me.offsetHorizontal_) + 'px';
+      div.style.height = me.height_ + 'px';
+      div.style.top = (pixPosition.y + me.offsetVertical_) + 'px';
+    }
 
-    IOMMarker.prototype.draw = function() {
+  };
 
-      var me = this;
+  IOMMarker.prototype.remove = function() {
+    if (this.div_) {
+      this.div_.parentNode.removeChild(this.div_);
+      this.div_ = null;
+    }
+  };
 
-      var div = this.div_;
-      if (!div) {
-        div = this.div_ = document.createElement('div');
+  IOMMarker.prototype.hide = function() {
+    if (this.div_) {
+      $(this.div_).find('div').fadeOut();
+    }
+  };
 
-        div.className = this.classname;
-        div.style.position = 'absolute';
-        div.style.width = this.diameter + 'px';
-        div.style.height = this.diameter + 'px';
-        div.style.zIndex = 1;
-        div.style.cursor = 'pointer';
+  var global_index = 10;
 
-        var count;
-        try {
-          if (show_regions_with_one_project) {
-            count = document.createElement('p');
-            count.style.position = 'absolute';
-            count.style.top = '50%';
-            count.style.left = '50%';
-            count.style.height = '15px';
-            count.style.textAlign = 'center';
-            if (this.diameter === 20) {
-              count.style.margin = '-6px 0 0 0px';
-              count.style.font = 'normal 10px Arial';
-            } else if (this.diameter === 26) {
-              count.style.margin = '-6px 0 0 0px';
-              count.style.font = 'normal 11px Arial';
-            } else if (this.diameter === 34) {
-              count.style.margin = '-7px 0 0 0px';
-              count.style.font = 'normal 12px Arial';
-            } else if (this.diameter === 42) {
-              count.style.margin = '-7px 0 0 0px';
-              count.style.font = 'normal 15px Arial';
-            } else {
-              count.style.margin = '-9px 0 0 0px';
-              count.style.font = 'normal 18px Arial';
-            }
-            
-            if (this.count > 1) {
-                $(count).text(this.count);
-            }
-
-            div.appendChild(count);
-          }
-        } catch (e) {
-          if (this.count > 1) {
-            count = document.createElement('p');
-            count.style.position = 'absolute';
-            count.style.top = '50%';
-            count.style.left = '50%';
-            count.style.height = '15px';
-            count.style.textAlign = 'center';
-            if (this.diameter === 20) {
-              count.style.margin = '-6px 0 0 0px';
-              count.style.font = 'normal 10px Arial';
-            } else if (this.diameter === 26) {
-              count.style.margin = '-6px 0 0 0px';
-              count.style.font = 'normal 11px Arial';
-            } else if (this.diameter === 34) {
-              count.style.margin = '-7px 0 0 0px';
-              count.style.font = 'normal 12px Arial';
-            } else if (this.diameter === 42) {
-              count.style.margin = '-7px 0 0 0px';
-              count.style.font = 'normal 15px Arial';
-            } else {
-              count.style.margin = '-9px 0 0 0px';
-              count.style.font = 'normal 18px Arial';
-            }
-
-            if (this.count > 1) {
-                $(count).text(this.count);
-            }
-
-            div.appendChild(count);
-          }
-        }
-
-        //Marker address
-        if (this.count) {
-          if (map_type === 'overview_map' || map_type === 'administrative_map') {
-
-            var hidden_div = document.createElement('div');
-            hidden_div.className = 'map-tooltip';
-            hidden_div.style.bottom = this.diameter + 4 + 'px';
-            hidden_div.style.left = (this.diameter / 2) - (175 / 2) + 'px';
-
-            var top_hidden = document.createElement('div');
-            top_hidden.className = 'map-top-tooltip';
-
-            if ($('body').hasClass('organizations-page')) {
-                $(top_hidden).html('<h3>' + this.name + '</h3><strong>' + this.count + ' ' +
-                                   Pluralize.inflectForCount('project', this.count) + ' by this ' + Pluralize.singularize(kind) +
-                                   '</strong>.<br/><strong>' + (this.total_in_region ? this.total_in_region + ' in total</strong>' : ''));
-            } else if ($('body').hasClass('sites-page')) {
-                $(top_hidden).html('<h3>' + this.name + '</h3><strong>' + this.count + ' ' +
-                                   Pluralize.inflectForCount('project', this.count) +
-                                   '</strong>');
-            } else {
-                $(top_hidden).html('<h3>' + this.name + '</h3><strong>' + this.count + ' ' +
-                                   Pluralize.inflectForCount('project', this.count) + ' in this ' + Pluralize.singularize(kind) +
-                                   '</strong>.<br/><strong>' + (this.total_in_region ? this.total_in_region + ' in total</strong>' : ''));
-            }
-
-            hidden_div.appendChild(top_hidden);
-
-            div.appendChild(hidden_div);
-
-            google.maps.event.addDomListener(div, 'mouseover', function() {
-              $(this).css('zIndex', global_index++);
-              $(this).children('div').show();
-            });
-
-            google.maps.event.addDomListener(div, 'mouseout', function() {
-              $(this).children('div').hide();
-            });
-          } else {
-            google.maps.event.addDomListener(div, 'mouseover', function() {
-              $(this).css('zIndex', global_index++);
-            });
-          }
-        } else {
-          if (map_type === 'project_map') {
-            var _hidden_div = document.createElement('div');
-            _hidden_div.className = 'map-tooltip';
-            _hidden_div.style.bottom = this.diameter + 4 + 'px';
-            _hidden_div.style.left = (this.diameter / 2) - (175 / 2) + 'px';
-
-            var _top_hidden = document.createElement('div');
-            _top_hidden.className = 'map-top-tooltip';
-            
-            var locationName;
-            if (this.name) {
-              locationName = this.name + ', ' + this.countryName;
-            } else {
-              locationName = this.countryName;
-            }
-
-            $(_top_hidden).html('<strong>' + locationName + '</strong>');
-
-            _hidden_div.appendChild(_top_hidden);
-
-            div.appendChild(_hidden_div);
-
-            google.maps.event.addDomListener(div, 'mouseover', function() {
-              $(this).css('zIndex', global_index++);
-              $(this).children('div').show();
-            });
-
-            google.maps.event.addDomListener(div, 'mouseout', function() {
-              $(this).children('div').hide();
-            });
-          }
-        }
-
-        google.maps.event.addDomListener(div, 'click', function(ev) {
-          try {
-            ev.stopPropagation();
-          } catch (e) {
-            event.cancelBubble = true;
-          }
-
-          if (me.url !== undefined && me.url !== window.location.pathname + window.location.search) {
-
-            if (typeof MAP_EMBED !== 'undefined' && MAP_EMBED) {
-              window.open(
-                me.url,
-                '_blank'
-              );
-            } else {
-              window.location.href = me.url;
-            }
-          } else {
-            var elementOffset = $('.main-content').offset().top - 49;
-            $('html, body').animate({
-              scrollTop: elementOffset
-            }, 500);
-          }
-        });
-
-        google.maps.event.addDomListener(div, 'mousedown', function(ev) {
-          try {
-            ev.stopPropagation();
-          } catch (e) {
-            event.cancelBubble = true;
-          }
-        });
-
-        var panes = this.getPanes();
-        panes.floatPane.appendChild(div);
-
-        if (($(this.div_).children('p').width() + 6) > this.width_) {
-          $(this.div_).children('p').css('display', 'none');
-        } else {
-          $(this.div_).children('p').css('margin-left', -($(this.div_).children('p').width() / 2) + 'px');
-        }
-
-      }
-
-      var pixPosition = me.getProjection().fromLatLngToDivPixel(me.latlng_);
-      if (pixPosition) {
-        div.style.width = me.width_ + 'px';
-        div.style.left = (pixPosition.x + me.offsetHorizontal_) + 'px';
-        div.style.height = me.height_ + 'px';
-        div.style.top = (pixPosition.y + me.offsetVertical_) + 'px';
-      }
-
-    };
-
-    IOMMarker.prototype.remove = function() {
-      if (this.div_) {
-        this.div_.parentNode.removeChild(this.div_);
-        this.div_ = null;
-      }
-    };
-
-    IOMMarker.prototype.hide = function() {
-      if (this.div_) {
-        $(this.div_).find('div').fadeOut();
-      }
-    };
-
-
-    var global_index = 10;
-
+  function initializeMap(mapData) {
+    global_index = 10;
     /**
      * @constructor
      * @implements {google.maps.MapType}
@@ -648,9 +691,9 @@ define(['underscore', 'backbone', 'pluralize', 'underscoreString'], function(_, 
     }
 
     // If region exist, reject a country object
-    _.each(map_data, function(d) {
+    _.each(mapData, function(d) {
       if (d !== null && d.type === 'region') {
-        map_data = _.reject(map_data, function(d) {
+        mapData = _.reject(mapData, function(d) {
           if( d === null ){
             return true;
           }
@@ -676,27 +719,13 @@ define(['underscore', 'backbone', 'pluralize', 'underscoreString'], function(_, 
         console.log(err);
       });
 
-    var countriesAndRegions = (_.where(map_data, {code: null}).length > 0);
-
-    // Markers
-    for (var i = 0; i < map_data.length; i++) {
-      // var image_source = '';
-      var classname = 'marker-bubble';
-
-      if (!countriesAndRegions) {
-        new IOMMarker(map_data[i], classname, map);
-      } else if (countriesAndRegions && !map_data[i].code) {
-        new IOMMarker(map_data[i], classname, map);
-      }
-
-      bounds.extend(new google.maps.LatLng(map_data[i].lat, map_data[i].lon));
-    }
+    // var countriesAndRegions = (_.where(mapData, {code: null}).length > 0);
 
     if (!globalPage || page !== 'sites') {
       map.fitBounds(bounds);
     }
 
-    if (page === 'georegion' && map_data.length === 1) {
+    if (page === 'georegion' && mapData.length === 1) {
       setTimeout(function() {
         map.setZoom(8);
       }, 300);
@@ -740,7 +769,11 @@ define(['underscore', 'backbone', 'pluralize', 'underscoreString'], function(_, 
       e.preventDefault();
       map.setZoom(map.getZoom() + 1);
     });
+  }
 
+  function placeMarkers(mapData) {
+    global_index = 10; 
+    buildIOMMarkersFromMapData('marker-bubble', mapData, map);
   }
 
   var MapView = Backbone.View.extend({
@@ -758,11 +791,21 @@ define(['underscore', 'backbone', 'pluralize', 'underscoreString'], function(_, 
       }
 
       var $w = $(window);
+
+      var $dateRangeForm = $('#date-range-form');
+
+      var $startYearSlider = $('#date-range-form #min-start');
+      var $endYearSlider = $('#date-range-form #max-end');
+
+      var $startYearLabel = $('#date-range-form label#start-label');
+      var $endYearLabel = $('#date-range-form label#end-label');
+
       var self = this;
 
       this.active = false;
 
-      old();
+      initializeMap(map_data);
+      placeMarkers(map_data);
 
       this.resizeMap();
 
@@ -777,6 +820,25 @@ define(['underscore', 'backbone', 'pluralize', 'underscoreString'], function(_, 
           }
         });
       }
+
+      $startYearSlider.on('input', function (e) {
+        $startYearLabel.text('Start Year: ' + e.target.value);
+      });
+
+      $endYearSlider.on('input', function (e) {
+        $endYearLabel.text('End Year: ' + e.target.value);
+      });
+
+      $dateRangeForm.on('change', function () {
+        self.adjustDateRange($startYearSlider.val(), $endYearSlider.val());
+      });
+    },
+
+    adjustDateRange: function (start, end) {
+      var filteredData = _.filter(map_data, function (p) { return (parseInt(p.end_year) >= parseInt(start)) &&
+                                                                  (parseInt(p.start_year) <= parseInt(end));                                                           
+                                                         });
+      placeMarkers(filteredData);
     },
 
     resizeMap: function() {
