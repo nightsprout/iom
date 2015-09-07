@@ -102,12 +102,11 @@ define(['underscore', 'backbone', 'pluralize', 'underscoreString'], function(_, 
   }
 
   function cleanStaleMarkers () {
-    $(".stale-marker").remove();
+    $('.stale-marker').remove();
   }
   setInterval(cleanStaleMarkers, 50);
 
   function buildIOMMarkersFromMapData(classname, data, map) {
-    var i, l;
     var newDataString = data.toString();
 
     if (IOMMarker.dataString === newDataString) { return; }
@@ -115,7 +114,7 @@ define(['underscore', 'backbone', 'pluralize', 'underscoreString'], function(_, 
     IOMMarker.byId = {};
     IOMMarker.dataString = newDataString;
     
-    $("." + classname).addClass("stale-marker");
+    $('.' + classname).addClass('stale-marker');
 
     _.each(data, function (dataPoint) {
       createOrMergeIOMMarker(dataPoint, classname, map);
@@ -124,7 +123,7 @@ define(['underscore', 'backbone', 'pluralize', 'underscoreString'], function(_, 
   
   function createOrMergeIOMMarker(info, classname, map) {
     var marker;
-    var info = JSON.parse(JSON.stringify(info));
+    info = JSON.parse(JSON.stringify(info));
 
     if (!IOMMarker.byId[info.id]) {
       IOMMarker.byId[info.id] = new IOMMarker(info, classname, map);
@@ -184,6 +183,11 @@ define(['underscore', 'backbone', 'pluralize', 'underscoreString'], function(_, 
         // image_source = '/app/images/themes/' + theme + '/marker_6.png';
       }
     } else if (map_type === 'administrative_map') {
+      var range;
+
+      if (map_type === 'administrative_map') {
+        range = marker.count / 5;
+      }
       if (marker.count < range) {
         marker.diameter = 20;
         // image_source = '/app/images/themes/' + theme + '/marker_2.png';
@@ -715,7 +719,7 @@ define(['underscore', 'backbone', 'pluralize', 'underscoreString'], function(_, 
         console.log(err);
       });
 
-    var countriesAndRegions = (_.where(mapData, {code: null}).length > 0);
+    // var countriesAndRegions = (_.where(mapData, {code: null}).length > 0);
 
     if (!globalPage || page !== 'sites') {
       map.fitBounds(bounds);
@@ -788,13 +792,13 @@ define(['underscore', 'backbone', 'pluralize', 'underscoreString'], function(_, 
 
       var $w = $(window);
 
-      var $dateRangeForm = $("#date-range-form");
+      var $dateRangeForm = $('#date-range-form');
 
-      var $startYearSlider = $("#date-range-form #min-start");
-      var $endYearSlider = $("#date-range-form #max-end");
+      var $startYearSlider = $('#date-range-form #min-start');
+      var $endYearSlider = $('#date-range-form #max-end');
 
-      var $startYearLabel = $("#date-range-form label#start-label");
-      var $endYearLabel = $("#date-range-form label#end-label");
+      var $startYearLabel = $('#date-range-form label#start-label');
+      var $endYearLabel = $('#date-range-form label#end-label');
 
       var self = this;
 
@@ -818,11 +822,11 @@ define(['underscore', 'backbone', 'pluralize', 'underscoreString'], function(_, 
       }
 
       $startYearSlider.on('input', function (e) {
-        $startYearLabel.text("Start Year: " + e.target.value);
+        $startYearLabel.text('Start Year: ' + e.target.value);
       });
 
       $endYearSlider.on('input', function (e) {
-        $endYearLabel.text("End Year: " + e.target.value);
+        $endYearLabel.text('End Year: ' + e.target.value);
       });
 
       $dateRangeForm.on('change', function () {
