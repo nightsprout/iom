@@ -6,7 +6,7 @@ class SitesController < ApplicationController
   caches_action :general_home, :expires_in => 300, :cache_path => Proc.new { |c| c.params }
 
   def home
-    if @site
+    if @site.present?
       site_home
     else
       @site = Site.find_by_name("global")
