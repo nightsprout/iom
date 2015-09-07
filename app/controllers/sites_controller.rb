@@ -22,7 +22,7 @@ class SitesController < ApplicationController
 
   def site_home
     Rails.logger.info "Site inspect - " + @site.inspect
-    Rails.logger.info "Site count - " + Site.count
+    Rails.logger.info "Site count - #{Site.count}"
     Rails.logger.info "All Sites - " + Site.all.inspect
 
     @projects = Project.custom_find @site, :per_page => 10,
