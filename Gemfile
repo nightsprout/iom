@@ -40,6 +40,10 @@ gem 'browser'
 gem 'heroku-api'
 #gem 'rd_searchlogic', :require => 'searchlogic', :git => 'git://github.com/railsdog/searchlogic.git'
 
+group :production do 
+  gem 'rails_12factor'
+end
+
 group :development do
   gem 'git-up'
   gem 'capistrano'
