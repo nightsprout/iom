@@ -75,9 +75,9 @@ class SitesController < ApplicationController
           r['url'] = uri.to_s
           r
         end.to_json
-        @overview_map_chco = @site.present? & @site.theme.present? ? @site.theme.data[:overview_map_chco] : nil
-        @overview_map_chf =  @site.present? & @site.theme.present? ? @site.theme.data[:overview_map_chf] : nil
-        @overview_map_marker_source =  @site.present? & @site.theme.present? ? @site.theme.data[:overview_map_marker_source] : nil
+        @overview_map_chco = @site.present? && @site.theme.present? ? @site.theme.data[:overview_map_chco] : nil
+        @overview_map_chf =  @site.present? && @site.theme.present? ? @site.theme.data[:overview_map_chf] : nil
+        @overview_map_marker_source =  @site.present? && @site.theme.present? ? @site.theme.data[:overview_map_marker_source] : nil
 
         areas= []
         data = []
