@@ -860,7 +860,7 @@ SQL
     generate_intervention_id if Project.where('intervention_id = ? AND id <> ?', intervention_id, id).count > 0
   end
 
-  def update_data_denormalization(opts = {levels: [1, 2], force: false, sites: nil})
+  def update_data_denormalization(opts = {levels: [1, 2, 3], force: false, sites: nil})
     if !opts[:force] and self.cached_at.present? and Time.now - self.cached_at < 6.hours
       return
     end
