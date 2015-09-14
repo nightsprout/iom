@@ -23,6 +23,8 @@
     <% if logged_in? %>
         <div class="mod-backoffice-menu">
 
+          <a href="http://<%= Settings.main_site_host %>" class="aid-map-logo"><%= image_tag "partners_horizontal.png", :alt  => "partners map logo", :style => "width: 260px;margin-top: 25px;" %></a>
+
           <ul class="admin-menu">
             <% if current_user.admin? -%>
               <li><%= link_to('settings', edit_admin_setting_path(Settings.first)) %></li>

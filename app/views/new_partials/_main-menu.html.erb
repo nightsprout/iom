@@ -25,7 +25,7 @@
       </ul>
     </li>
     <li class="menu-item access"><a href="/search" class="index-item access">Search</a></li>
-    <li class="menu-item access"><a href="https://ntdforum.org" class="index-item about">Feedback</a></li>
+    <li class="menu-item access"><a href="mailto:cww@taskforce.org" class="index-item about">Feedback</a></li>
     <% if current_user.present? && (current_user.admin? || current_user.organization.present?) %>
 		  <li class="menu-item access"><a href="/admin" class="index-item access <%= if action_name == 'access' then 'active' end %>">admin</a></li>
     <% elsif current_user.present? %>
