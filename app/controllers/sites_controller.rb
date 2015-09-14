@@ -6,6 +6,7 @@ class SitesController < ApplicationController
   caches_action :general_home, :expires_in => 300, :cache_path => Proc.new { |c| c.params }
 
   def home
+    @home = true
     if @site.present?
       site_home
     else

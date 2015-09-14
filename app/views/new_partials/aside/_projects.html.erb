@@ -1,4 +1,8 @@
 <div class="projects mod-info">
   <h3>Projects</h3>
-  <span><%= number_with_delimiter(@site.total_projects) %></span>
+  <% if @projects.total_entries && !defined?(@home)%>
+    <span><%= number_with_delimiter(@projects.total_entries) %></span>
+  <% else %>
+    <span><%= number_with_delimiter(@site.total_projects) %></span>
+  <% end %>
 </div>
