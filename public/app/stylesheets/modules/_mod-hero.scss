@@ -4,7 +4,7 @@
   background-color: $color-4;
 
   .linos-about &, .pages-page & { background: image-url('hero-about.jpg') no-repeat center; background-size: cover;}
-  .linos-contact-us & { background: image-url('hero-contact-us.jpg') no-repeat center; background-size: cover;}
+  .linos-contact-us &, .linos-contact & { background: image-url('hero-contact-us.jpg') no-repeat center; background-size: cover;}
   .linos-staff-list &, .linos-about-interaction & { background: image-url('hero-staff-list.jpg') no-repeat center; background-size: cover;}
   .linos-getting-on-the-map &, .linos-faqs & { background: image-url('hero-getting-on-the-map.jpg') no-repeat center; background-size: cover;}
   .linos-of-interest &, .news-and-updates & { background: image-url('hero-of-interest.jpg') no-repeat center; background-size: cover;}
