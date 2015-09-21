@@ -117,6 +117,7 @@ define(['underscore', 'backbone', 'pluralize', 'underscoreString'], function(_, 
     $('.' + classname).addClass('stale-marker');
 
     _.each(data, function (dataPoint) {
+      console.log(dataPoint);
       createOrMergeIOMMarker(dataPoint, classname, map);
     });
   }
@@ -133,6 +134,10 @@ define(['underscore', 'backbone', 'pluralize', 'underscoreString'], function(_, 
     marker = IOMMarker.byId[info.id];
 
     info.count = (parseInt(marker.count) + parseInt(info.count)).toString();
+    if (info.count > 1) {
+      info.url = "/location/" + info.id + "?";
+    }
+
     initializeIOMMarker(marker, info, classname, map);
   }
 
