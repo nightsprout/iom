@@ -117,7 +117,6 @@ define(['underscore', 'backbone', 'pluralize', 'underscoreString'], function(_, 
     $('.' + classname).addClass('stale-marker');
 
     _.each(data, function (dataPoint) {
-      console.log(dataPoint);
       createOrMergeIOMMarker(dataPoint, classname, map);
     });
   }
@@ -488,7 +487,7 @@ define(['underscore', 'backbone', 'pluralize', 'underscoreString'], function(_, 
     var emptyMapType = new EmptyMapType();
 
     var latlng, zoom, mapOptions, cartodbOptions, currentLayer, $layerSelector, legends, $legendWrapper, $mapTypeSelector, layerActive;
-
+   
     if (map_type === 'project_map') {
       latlng = new google.maps.LatLng(map_center[0], map_center[1]);
       zoom = map_zoom;
