@@ -871,7 +871,7 @@ SQL
     end
 
     sites = opts[:sites]
-    sites ||= [Site.where(global: true)]
+    sites ||= Site.where(global: true)
     site_ids = sites.collect { |s| s.id if s.respond_to? :id }
 
     connection = ActiveRecord::Base.connection
