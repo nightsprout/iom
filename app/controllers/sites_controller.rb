@@ -62,7 +62,7 @@ class SitesController < ApplicationController
                       inner join projects_sites as ps on cp.project_id=ps.project_id and site_id=#{@site.id}
                       inner join projects as p on ps.project_id=p.id and (p.end_date is null OR p.end_date > now())
                       inner join countries as c on cp.country_id=c.id
-                      group by c.id,c.name,lon,lat,iso2_code,starT_year,end_year"
+                      group by c.id,c.name,lon,lat,iso2_code,start_year,end_year"
           end
           result = ActiveRecord::Base.connection.execute(sql)
         else
