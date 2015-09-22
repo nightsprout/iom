@@ -136,7 +136,6 @@ class Admin::ProjectsController < Admin::AdminController
         render :action => 'edit'
     else
       if @project.save
-        @project.update_data_denormalization
         flash[:notice] = 'Project updated successfully.'
         redirect_to edit_admin_project_path(@project), :flash => {:success => 'Project has been updated successfully'}
       else
