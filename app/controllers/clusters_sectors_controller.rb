@@ -134,7 +134,7 @@ class ClustersSectorsController < ApplicationController
             CASE WHEN count(distinct cp.project_id) > 1 THEN
                 '#{carry_on_url}'||r.path
             ELSE
-                '/projects/'||(array_to_string(array_agg(ps.project_id),''))
+                '/projects/'||(array_to_string(array_agg(distinct ps.project_id),''))
             END as url,
             r.code,
                 (select count(*) from data_denormalization where regions_ids && ('{'||r.id||'}')::integer[] and (end_date is null OR end_date > now()) and site_id=#{@site.id}) as total_in_region
@@ -160,7 +160,7 @@ class ClustersSectorsController < ApplicationController
                        c.name as country_name,
                        CASE
                            WHEN COUNT(DISTINCT ps.project_id) > 1 THEN '#{carry_on_url}'||r.path
-                           ELSE '/projects/'||(array_to_string(array_agg(ps.project_id),''))
+                           ELSE '/projects/'||(array_to_string(array_agg(distinct ps.project_id),''))
                        END AS url,
                   (SELECT COUNT(*)
                    FROM data_denormalization
@@ -181,7 +181,7 @@ class ClustersSectorsController < ApplicationController
                  c.center_lat as lat,
                  c.name as country_name,
                  CASE WHEN count(distinct pse.project_id) > 1 THEN '#{carry_on_url}'||c.id
-                 ELSE '/projects/'||(array_to_string(array_agg(ps.project_id),''))
+                 ELSE '/projects/'||(array_to_string(array_agg(distinct ps.project_id),''))
                  END as url,
                  (select count(*) from data_denormalization
                  where countries_ids && ('{'||c.id||'}')::integer[] AND (end_date IS NULL OR end_date > now()) AND site_id=#{@site.id}) AS total_in_region
@@ -203,7 +203,7 @@ class ClustersSectorsController < ApplicationController
                 CASE WHEN count(distinct ps.project_id) > 1 THEN
                     '#{carry_on_url}'||c.id
                 ELSE
-                    '/projects/'||(array_to_string(array_agg(ps.project_id),''))
+                    '/projects/'||(array_to_string(array_agg(distinct ps.project_id),''))
                 END as url,
                     (select count(*) from data_denormalization where countries_ids && ('{'||c.id||'}')::integer[] and (end_date is null OR end_date > now()) and site_id=#{@site.id}) as total_in_region
                 from countries as c

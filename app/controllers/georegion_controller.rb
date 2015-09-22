@@ -68,7 +68,7 @@ class GeoregionController < ApplicationController
                   CASE WHEN count(distinct ps.project_id) > 1 THEN
                       '/location/'||r.path
                   ELSE
-                      '/projects/'||(array_to_string(array_agg(ps.project_id),''))
+                      '/projects/'||(array_to_string(array_agg(distinct ps.project_id),''))
                   END as url,
                   r.code, 'region' as type
                   from ((projects_regions as pr inner join projects_sites as ps on pr.project_id=ps.project_id and ps.site_id=#{@site.id})
@@ -83,7 +83,7 @@ class GeoregionController < ApplicationController
                   CASE WHEN count(distinct ps.project_id) > 1 THEN
                   '/location/'||c.id
                   ELSE
-                  '/projects/'||(array_to_string(array_agg(ps.project_id),''))
+                  '/projects/'||(array_to_string(array_agg(distinct ps.project_id),''))
                   END as url,
                   c.code, 'country' as type
                   from ((countries_projects as cp inner join projects_sites as ps on cp.project_id=ps.project_id and ps.site_id=#{@site.id}) inner join projects as p
@@ -137,7 +137,7 @@ class GeoregionController < ApplicationController
           CASE WHEN count(distinct ps.project_id) > 1 THEN
               '/location/'||r.path
           ELSE
-              '/projects/'||(array_to_string(array_agg(ps.project_id),''))
+              '/projects/'||(array_to_string(array_agg(distinct ps.project_id),''))
           END as url
           from (projects_regions as pr
             inner join projects_sites as ps on pr.project_id=ps.project_id and site_id=#{@site.id})
@@ -151,7 +151,7 @@ class GeoregionController < ApplicationController
           CASE WHEN count(distinct ps.project_id) > 1 THEN
               '/location/'||r.path
           ELSE
-              '/projects/'||(array_to_string(array_agg(ps.project_id),''))
+              '/projects/'||(array_to_string(array_agg(distinct ps.project_id),''))
           END as url,
           r.code, 'region' as type
           from (projects_regions as pr
