@@ -78,7 +78,7 @@
 
 <style>
 .date-range-slider-area {
-  padding: 20px 200px 20px 200px;
+  padding: 20px 200px 10px 200px;
   position: relative;
   background-color: #EDEDED;
 }
@@ -95,6 +95,13 @@
   width: 60%;
 }
 
+.date-range-slider-wrapper span{
+  width: 100%;
+  display: inline-block;
+  text-align: center;
+  margin-top: 10px;
+}
+
 .max-date-label-wrapper {
   float: right; 
   width: 20%;
@@ -104,26 +111,29 @@
 </style>
 
 <div class="date-range-slider-area">
-    <div class="min-date-label-wrapper"><label id="start-label">2005</label></div>
-    <div class="date-range-slider-wrapper"><div class="date-range-slider"></div></div>
-    <div class="max-date-label-wrapper"><label id="end-label">2025</label></div>
-    <script>
-     $( ".date-range-slider" ).slider({
-         range: true,
-         min: 2000,
-         max: 2030,
-         values: [2005, 2025],
-         slide: function (event, ui) {
-             $("label#start-label").text(ui.values[0]);
-             $("label#end-label").text(ui.values[1]);
-             $("input#min-start").val(ui.values[0]);            
-             $("input#max-end").val(ui.values[1]);
-             $("form#date-range-form").change();
-         }
-     });
-    </script>
-    <form id="date-range-form" style="display: none">
-        <input type="number" id="min-start" value="2005" />
-        <input type="number" id="max-end" value="2025" />
-    </form>
+  <div class="min-date-label-wrapper"><label id="start-label">2005</label></div>
+  <div class="date-range-slider-wrapper">
+    <div class="date-range-slider"></div>
+    <span>Click and drag to adjust the projects visible in the map!</span>
+  </div>
+  <div class="max-date-label-wrapper"><label id="end-label">2025</label></div>
+  <script>
+   $( ".date-range-slider" ).slider({
+     range: true,
+     min: 2000,
+     max: 2030,
+     values: [2005, 2025],
+     slide: function (event, ui) {
+       $("label#start-label").text(ui.values[0]);
+       $("label#end-label").text(ui.values[1]);
+       $("input#min-start").val(ui.values[0]);            
+       $("input#max-end").val(ui.values[1]);
+       $("form#date-range-form").change();
+     }
+   });
+  </script>
+  <form id="date-range-form" style="display: none">
+    <input type="number" id="min-start" value="2005" />
+    <input type="number" id="max-end" value="2025" />
+  </form>
 </div>

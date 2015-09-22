@@ -29,7 +29,9 @@ class ProjectsController < ApplicationController
                r.country_id,
                c.name       AS country_name,
                r.parent_region_id,
-               r.level
+               r.level,
+               extract(year from p.start_date) as start_year,
+               extract(year from p.end_date) as end_year
         FROM   (projects AS p
                 INNER JOIN projects_regions AS pr ON pr.project_id = p.id AND p.id = #{@project.id}
                 INNER JOIN countries_projects as cp ON cp.project_id = p.id AND p.id = #{@project.id})
@@ -44,7 +46,9 @@ class ProjectsController < ApplicationController
                c.id,
                c.name       AS country_name,
                null as parent_region_id,
-               0 as level
+               0 as level,
+               extract(year from p.start_date) as start_year,
+               extract(year from p.end_date) as end_year
         FROM   (projects AS p
                 INNER JOIN countries_projects as cp ON cp.project_id = p.id AND p.id = #{@project.id})
                 INNER JOIN countries AS c ON cp.country_id = c.id
