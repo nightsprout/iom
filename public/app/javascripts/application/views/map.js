@@ -133,8 +133,8 @@ define(['underscore', 'backbone', 'pluralize', 'underscoreString'], function(_, 
     marker = IOMMarker.byId[info.id];
 
     info.count = (parseInt(marker.count) + parseInt(info.count)).toString();
-    if (info.count > 1) {
-      info.url = "/location/" + info.id + "?";
+    if (parseInt(info.count) > 1) {
+      info.url = '/location/' + info.id + '?';
     }
 
     initializeIOMMarker(marker, info, classname, map);
