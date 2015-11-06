@@ -68,7 +68,7 @@ class ActivitiesController < ApplicationController
               from regions as r
                 inner join projects_regions as pr on r.id=pr.region_id and r.level=#{@site.level_for_region}
                 inner join projects_sites as ps on pr.project_id=ps.project_id and ps.site_id=#{@site.id}
-                inner join projects as p on ps.project_id=p.id and (p.end_date is null OR p.end_date > now())
+                inner join projects as p on ps.project_id=p.id
                 left outer join projects_activities as pa on pa.project_id=p.id and pa.activity_id=#{params[:id].sanitize_sql!.to_i}
                 #{location_filter}
                 group by r.id,r.name,lon,lat,r.name,r.code,start_year,end_year"
@@ -89,7 +89,7 @@ class ActivitiesController < ApplicationController
                  (select count(*) from data_denormalization where regions_ids && ('{'||r.id||'}')::integer[] and (end_date is null OR end_date > now()) and site_id=#{@site.id}) as total_in_region
                  from projects_regions as pr
                  inner join projects_sites as ps on pr.project_id=ps.project_id and ps.site_id=#{@site.id}
-                 inner join projects as p on pr.project_id=p.id and (p.end_date is NULL OR p.end_date > now())
+                 inner join projects as p on pr.project_id=p.id
                  inner join regions as r on pr.region_id=r.id and r.level=#{@site.levels_for_region.min} and r.country_id=#{@filter_by_location.first}
                  inner join projects_activities as pa on pa.project_id=p.id and pa.activity_id=#{params[:id].sanitize_sql!.to_i}
                  group by r.id,r.name,lon,lat,r.code,start_year,end_year"
@@ -109,7 +109,7 @@ class ActivitiesController < ApplicationController
                  r.code
                  from projects_regions as pr
                  inner join projects_sites as ps on pr.project_id=ps.project_id and ps.site_id=#{@site.id}
-                 inner join projects as p on pr.project_id=p.id and (p.end_date is NULL or p.end_date > now())
+                 inner join projects as p on pr.project_id=p.id
                  inner join regions as r on pr.region_id=r.id and r.level=#{@site.levels_for_region.min} and r.country_id=#{@filter_by_location.shift} and r.id in (#{@filter_by_location.join(',')})
                  inner join projects_activities as pa on pa.project_id=p.id and pa.activity_id=#{params[:id].sanitize_sql!.to_i}
                  group by r.id,r.name,lon,lat,r.path,r.code,start_year,end_year"
@@ -128,7 +128,7 @@ class ActivitiesController < ApplicationController
                 from countries as c
                   inner join countries_projects as cp on c.id=cp.country_id
                   inner join projects_sites as ps on cp.project_id=ps.project_id and ps.site_id=#{@site.id}
-                  inner join projects as p on ps.project_id=p.id and (p.end_date is null OR p.end_date > now())
+                  inner join projects as p on ps.project_id=p.id
                   left outer join projects_activities as pa on pa.project_id=p.id and pa.activity_id=#{params[:id].sanitize_sql!.to_i}
                   #{location_filter}
                   group by c.id,c.name,lon,lat,c.name,start_year,end_year"

@@ -108,7 +108,7 @@ class ClustersSectorsController < ApplicationController
             from regions as r
               inner join projects_regions as pr on r.id=pr.region_id and r.level=#{@site.level_for_region}
               inner join projects_sites as ps on pr.project_id=ps.project_id and ps.site_id=#{@site.id}
-              inner join projects as p on ps.project_id=p.id and (p.end_date is null OR p.end_date > now())
+              inner join projects as p on ps.project_id=p.id
               left outer join clusters_projects as cp on cp.project_id=p.id and cp.cluster_id=#{params[:id].sanitize_sql!.to_i}
               #{location_filter}
               group by r.id,r.name,lon,lat,r.name,url,r.code"
@@ -119,7 +119,7 @@ class ClustersSectorsController < ApplicationController
               from countries as c
                 inner join countries_projects as cp on c.id=cp.country_id
                 inner join projects_sites as ps on cp.project_id=ps.project_id and ps.site_id=#{@site.id}
-                inner join projects as p on ps.project_id=p.id and (p.end_date is null OR p.end_date > now())
+                inner join projects as p on ps.project_id=p.id
                 left outer join clusters_projects as cpr on cpr.project_id=p.id and cpr.cluster_id=#{params[:id].sanitize_sql!.to_i}
                 #{location_filter}
                 group by c.id,c.name,lon,lat,c.name,url"
@@ -141,7 +141,7 @@ class ClustersSectorsController < ApplicationController
             from regions as r
               inner join projects_regions as pr on r.id=pr.region_id and r.level=#{@site.level_for_region}
               inner join projects_sites as ps on pr.project_id=ps.project_id and ps.site_id=#{@site.id}
-              inner join projects as p on ps.project_id=p.id and (p.end_date is null OR p.end_date > now())
+              inner join projects as p on ps.project_id=p.id
               left outer join projects_sectors as pse on pse.project_id=p.id and pse.sector_id=#{params[:id].sanitize_sql!.to_i}
               #{location_filter}
               group by r.id,r.name,lon,lat,r.path,r.code"
@@ -168,7 +168,7 @@ class ClustersSectorsController < ApplicationController
                    from regions as r
                    inner join projects_regions as pr on r.id=pr.region_id
                    inner join projects_sites as ps on pr.project_id=ps.project_id and ps.site_id=#{@site.id}
-                    inner join projects as p on ps.project_id=p.id and (p.end_date is null OR p.end_date > now())
+                    inner join projects as p on ps.project_id=p.id
                     left outer join projects_sectors as pse on pse.project_id=p.id and pse.sector_id=#{params[:id].sanitize_sql!.to_i}
                     inner join countries c on r.country_id = c.id
                     where #{region_location_filter}
@@ -191,8 +191,6 @@ class ClustersSectorsController < ApplicationController
                   INNER JOIN projects_sites AS ps ON cp.project_id=ps.project_id
                   AND ps.site_id=#{@site.id}
                   INNER JOIN projects AS p ON ps.project_id=p.id
-                  AND (p.end_date IS NULL
-                       OR p.end_date > now())
                   INNER JOIN projects_sectors AS pse ON pse.project_id=p.id
                   AND pse.sector_id=#{params[:id].sanitize_sql!.to_i}
                   AND #{country_location_filter}
@@ -209,7 +207,7 @@ class ClustersSectorsController < ApplicationController
                 from countries as c
                   inner join countries_projects as cp on c.id=cp.country_id
                   inner join projects_sites as ps on cp.project_id=ps.project_id and ps.site_id=#{@site.id}
-                  inner join projects as p on ps.project_id=p.id and (p.end_date is null OR p.end_date > now())
+                  inner join projects as p on ps.project_id=p.id
                   left outer join projects_sectors as pse on pse.project_id=p.id and pse.sector_id=#{params[:id].sanitize_sql!.to_i}
                   group by c.id,c.name,lon,lat,c.name"
             end
