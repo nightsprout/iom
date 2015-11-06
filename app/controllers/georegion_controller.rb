@@ -72,7 +72,7 @@ class GeoregionController < ApplicationController
                   END as url,
                   r.code, 'region' as type
                   from ((projects_regions as pr inner join projects_sites as ps on pr.project_id=ps.project_id and ps.site_id=#{@site.id})
-                  inner join projects as p on pr.project_id=p.id and (p.end_date is null OR p.end_date > now())
+                  inner join projects as p on pr.project_id=p.id
                   inner join regions as r on pr.region_id=r.id and r.level=#{@site.levels_for_region.min} and r.country_id=#{country.id})
                   #{category_join}
                   group by r.id,r.name,lon,lat,r.name,r.path,r.code,start_year,end_year
@@ -87,7 +87,7 @@ class GeoregionController < ApplicationController
                   END as url,
                   c.code, 'country' as type
                   from ((countries_projects as cp inner join projects_sites as ps on cp.project_id=ps.project_id and ps.site_id=#{@site.id}) inner join projects as p
-                  on cp.project_id=p.id and (p.end_date is null OR p.end_date > now() AND cp.country_id=#{country.id}) inner join countries as c on cp.country_id=c.id and c.id=#{country.id} )
+                  on cp.project_id=p.id and (cp.country_id=#{country.id}) inner join countries as c on cp.country_id=c.id and c.id=#{country.id} )
                   group by c.id,c.name,lon,lat,c.name,c.code,start_year,end_year"
       else
         @sql="select *
@@ -97,7 +97,7 @@ class GeoregionController < ApplicationController
           extract(year from end_date) as end_year
           from (countries_projects as cp
             inner join projects_sites as ps on cp.project_id=ps.project_id and site_id=#{@site.id})
-            inner join projects as p on ps.project_id=p.id and (p.end_date is null OR p.end_date > now())
+            inner join projects as p on ps.project_id=p.id
             #{category_join}
             inner join countries as c on cp.country_id=c.id and c.id=#{country.id}
           group by c.id,c.name,lon,lat,start_year,end_year) as subq"
@@ -141,7 +141,7 @@ class GeoregionController < ApplicationController
           END as url
           from (projects_regions as pr
             inner join projects_sites as ps on pr.project_id=ps.project_id and site_id=#{@site.id})
-            inner join projects as p on ps.project_id=p.id and (p.end_date is null OR p.end_date > now())
+            inner join projects as p on ps.project_id=p.id
             inner join regions as r on pr.region_id=r.id and r.id=#{@area.id} and r.level=#{@area.level}
             #{category_join}
           group by r.id,r.name,lon,lat) as subq"
@@ -156,7 +156,7 @@ class GeoregionController < ApplicationController
           r.code, 'region' as type
           from (projects_regions as pr
             inner join projects_sites as ps on pr.project_id=ps.project_id and site_id=#{@site.id})
-            inner join projects as p on ps.project_id=p.id and (p.end_date is null OR p.end_date > now())
+            inner join projects as p on ps.project_id=p.id
             inner join regions as r on pr.region_id=r.id and r.parent_region_id=#{@area.id} and r.level=#{@area.level+1}
             #{category_join}
           group by r.id,r.name,lon,lat) as subq"

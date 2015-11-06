@@ -254,7 +254,7 @@ class DonorsController < ApplicationController
                   r.code
                 FROM projects_regions AS pr
                 INNER JOIN projects_sites AS ps ON pr.project_id=ps.project_id AND ps.site_id=#{@site.id}
-                INNER JOIN projects AS p ON pr.project_id=p.id AND (p.end_date is NULL OR p.end_date > now())
+                INNER JOIN projects AS p ON pr.project_id=p.id
                 INNER JOIN regions AS r ON pr.region_id=r.id AND r.level=#{@site.levels_for_region.min} AND r.country_id=#{@filter_by_location.first}
                 INNER JOIN donations on donations.project_id = p.id
                 #{category_join}
@@ -270,7 +270,7 @@ class DonorsController < ApplicationController
                   null as url,
                   c.code
                 FROM projects AS p
-                INNER JOIN projects_sites AS ps ON ps.site_id=#{@site.id} and ps.project_id = p.id AND (p.end_date is NULL OR p.end_date > now())
+                INNER JOIN projects_sites AS ps ON ps.site_id=#{@site.id} and ps.project_id = p.id
                 INNER JOIN donations on donations.project_id = p.id
                 INNER JOIN countries as c ON c.id = #{params[:location_id]}
                 INNER JOIN countries_projects as cp on cp.country_id = c.id AND cp.project_id = p.id
@@ -295,7 +295,7 @@ class DonorsController < ApplicationController
                          r.code
                   FROM projects_regions AS pr
                   INNER JOIN projects_sites AS ps ON pr.project_id=ps.project_id AND ps.site_id=#{@site.id}
-                  INNER JOIN projects AS p ON pr.project_id=p.id AND (p.end_date is NULL OR p.end_date > now())
+                  INNER JOIN projects AS p ON pr.project_id=p.id
                   INNER JOIN regions AS r ON pr.region_id=r.id AND r.level=#{@site.levels_for_region.min} AND r.country_id=#{@filter_by_location.shift} AND r.id IN (#{@filter_by_location.join(',')})
                   INNER JOIN donations on donations.project_id = p.id
                   #{category_join}
