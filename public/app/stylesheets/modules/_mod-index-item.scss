@@ -23,16 +23,18 @@
     @include link-states($color-1, inline-block);
   }
 
+
   span.project_status {
     float: left;
     margin: 2px 0 0 0;
     font: normal 13px Arial;
     color: #666666;
-    padding: 0 0 0 12px; }
-    .active {
-      background: url("/app/images/backoffice/projects/active_icon.png") no-repeat 0 3px; }
-    .closed {
-      background: url("/app/images/backoffice/projects/closed_icon.png") no-repeat 0 3px; }
+    padding: 0 0 0 12px;
+  }
+  span.project_status.active {
+    background: url("/app/images/backoffice/projects/active_icon.png") no-repeat 0 3px; }
+  span.project_status.closed {
+    background: url("/app/images/backoffice/projects/closed_icon.png") no-repeat 0 3px; }
   }
 
 .articles-list li:last-child .mod-index-item {
