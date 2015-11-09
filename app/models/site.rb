@@ -557,7 +557,7 @@ class Site < ActiveRecord::Base
     filter = if geographic_context_country_id? && geographic_context_region_id.blank?
                <<-SQL
                  INNER JOIN countries_projects cp ON cp.country_id = #{self.geographic_context_country_id} AND cp.country_id = c.id
-                 INNER JOIN projects              ON cp.project_id=projects.id AND (projects.end_date IS NULL OR projects.end_date > now())
+                 INNER JOIN projects              ON cp.project_id=projects.id
                SQL
              elsif geographic_context_region_id?
                <<-SQL
@@ -568,13 +568,13 @@ class Site < ActiveRecord::Base
                  INNER JOIN sites s ON ST_Intersects(s.geographic_context_geometry, ST_SetSRID(ST_Point(c.center_lon, c.center_lat), 4326)) AND s.id = #{id}
                  INNER JOIN countries_projects AS pr ON pr.country_id = c.id
                  INNER JOIN projects_sites     AS ps ON pr.project_id = ps.project_id AND ps.site_id = #{id}
-                 INNER JOIN projects           AS p  ON ps.project_id=p.id AND (p.end_date IS NULL OR p.end_date > now())
+                 INNER JOIN projects           AS p  ON ps.project_id=p.id
                SQL
              else
                <<-SQL
                 INNER JOIN countries_projects AS pr ON pr.country_id = c.id
                 INNER JOIN projects_sites     AS ps ON pr.project_id = ps.project_id AND ps.site_id = #{id}
-                INNER JOIN projects           AS p  ON ps.project_id=p.id AND (p.end_date IS NULL OR p.end_date > now())
+                INNER JOIN projects           AS p  ON ps.project_id=p.id
                SQL
              end
 
@@ -617,7 +617,7 @@ SQL
         where level=#{level_for_region}
         and id in (
           select region_id from projects_regions as pr
-          inner join projects as p on p.id = pr.project_id and (p.end_date is null OR p.end_date > now())
+          inner join projects as p on p.id = pr.project_id
           inner join projects_sites as ps on p.id=ps.project_id and site_id=#{self.id}
         )
         order by name
@@ -631,7 +631,6 @@ SQL
       select distinct organization_id as id, organization_name as name
       from data_denormalization
       where site_id = #{self.id}
-            and (end_date is null OR end_date > now())
       order by organization_name
     SQL
     )
@@ -639,7 +638,7 @@ SQL
 
   def donors_select
     Donor.find_by_sql " SELECT distinct d.id as id , d.name as name
-      FROM projects_sites AS ps JOIN projects as p ON ps.project_id = p.id AND ps.site_id = #{self.id} AND p.end_date > NOW()
+      FROM projects_sites AS ps JOIN projects as p ON ps.project_id = p.id AND ps.site_id = #{self.id}
       JOIN donations as dn ON dn.project_id = p.id
       JOIN donors as d on d.id = dn.donor_id
       ORDER BY d.name ASC"
@@ -647,7 +646,7 @@ SQL
 
   def audience_select
     Audience.find_by_sql " SELECT distinct a.id as id , a.name as name
-      FROM projects_sites AS ps JOIN projects as p ON ps.project_id = p.id AND ps.site_id = #{self.id} AND p.end_date > NOW()
+      FROM projects_sites AS ps JOIN projects as p ON ps.project_id = p.id AND ps.site_id = #{self.id}
       JOIN projects_audiences as pa ON pa.project_id = p.id
       JOIN audiences as a on a.id = pa.audience_id
       ORDER BY a.name ASC"
@@ -655,7 +654,7 @@ SQL
 
   def activities_select
     Activity.find_by_sql " SELECT distinct a.id as id , a.name as name
-      FROM projects_sites AS ps JOIN projects as p ON ps.project_id = p.id AND ps.site_id = #{self.id} AND p.end_date > NOW()
+      FROM projects_sites AS ps JOIN projects as p ON ps.project_id = p.id AND ps.site_id = #{self.id}
       JOIN projects_activities as pa ON pa.project_id = p.id
       JOIN activities as a on a.id = pa.activity_id
       ORDER BY a.name ASC"
@@ -663,7 +662,7 @@ SQL
 
   def diseases_select
     Activity.find_by_sql " SELECT distinct a.id as id , a.name as name
-      FROM projects_sites AS ps JOIN projects as p ON ps.project_id = p.id AND ps.site_id = #{self.id} AND p.end_date > NOW()
+      FROM projects_sites AS ps JOIN projects as p ON ps.project_id = p.id AND ps.site_id = #{self.id}
       JOIN diseases_projects as pa ON pa.project_id = p.id
       JOIN diseases as a on a.id = pa.disease_id
       ORDER BY a.name ASC"
@@ -671,7 +670,7 @@ SQL
 
   def medicines_select
     Activity.find_by_sql " SELECT distinct a.id as id , a.name as name
-      FROM projects_sites AS ps JOIN projects as p ON ps.project_id = p.id AND ps.site_id = #{self.id} AND p.end_date > NOW()
+      FROM projects_sites AS ps JOIN projects as p ON ps.project_id = p.id AND ps.site_id = #{self.id}
       JOIN medicines_projects as pa ON pa.project_id = p.id
       JOIN medicines as a on a.id = pa.medicine_id
       ORDER BY a.name ASC"

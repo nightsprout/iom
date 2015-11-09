@@ -6,6 +6,23 @@
           <article class="mod-index-item">
             <h2><a href="<%= project_path(project['project_id']) %>"><%= truncate(project['project_name'], :length=>60) %></a></h2>
             <span><%= subtitle(project, @site) %></span>
+
+            <span>
+              <p class="margin">
+                <span class="project_status <%= project['is_active'] == 't' ? 'active' : 'closed' %>">
+                  &nbsp;
+                </span>
+                <%= project['is_active'] == 't' ? 'Active' : 'Closed' %>
+                <% if project['end_date'].present? %>
+                  <% if project['is_active'] == 't' %>
+                    <%= Date.parse(project['end_date']).strftime("until %b #{Date.parse(project['end_date']).day.ordinalize}, %Y") %>
+                  <% else %>
+                    <%= p project['end_date']; Date.parse(project['end_date']).strftime("since %b #{Date.parse(project['end_date']).day.ordinalize}, %Y") %>
+                  <% end %>
+                <% end %>
+              </p>
+            </span>
+
             <p>
               <%= anglo(truncate(project['project_description'], :length => 175, :omission => "... <a href=\"#{project_path(project['project_id'])}\" class=\"learn_more\">Learn more</a>")) %>
             </p>
