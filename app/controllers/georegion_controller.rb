@@ -167,7 +167,7 @@ class GeoregionController < ApplicationController
 
     if @filter_by_category.present?
       @category_name = (@site.navigate_by_sector?? Sector : Cluster).where(:id => @filter_by_category).first.try(:name)
-      @filter_name =  "#{@georegion_projects_count} #{@category_name} projects"
+      @filter_name =  "#{@georegion_projects_count} #{@category_name} active projects"
     end
 
     raise NotFound if @sql.blank?
