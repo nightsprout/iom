@@ -28,7 +28,7 @@ Iom::Application.configure do
   rails_root    = ENV['RAILS_ROOT'] || File.dirname(__FILE__) + '/../..'
   resque_config = YAML.load_file(rails_root + '/config/resque.yml')
 
-  config.cache_store = :redis_store, resque_config['production']
+  config.cache_store = :redis_store, resque_config['production'].merge({expires_in: 1.day})
 
   # Disable Rails's static asset server
   # In production, Apache or nginx will already do this
