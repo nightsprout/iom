@@ -71,9 +71,9 @@ class ProjectsController < ApplicationController
         @terminal_locations = []
         @nested_locations = {}
         @locations.each do |data|
-          if data["level"] == "0" and location_country_ids.include? data["id"]
+          if data["level"] == "0" and location_country_ids.include? (data["id"] || data["country_id"])
             false
-          elsif location_parent_region_ids.include? data["id"]
+          elsif location_parent_region_ids.include? (data["id"] || data["parent_region_id"])
             false
           else
             if data["parent_region_id"].present?
@@ -88,8 +88,9 @@ class ProjectsController < ApplicationController
             @terminal_locations << data
             @nested_locations[data["country_name"]] ||= []
             @nested_locations[data["country_name"]] << data
-          end            
+          end
         end
+        @terminal_locations << @locations[0] if @locations.count == 1 and @terminal_locations.count == 0
 
         @map_data = @terminal_locations.to_json
 
