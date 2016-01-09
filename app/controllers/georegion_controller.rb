@@ -62,9 +62,9 @@ class GeoregionController < ApplicationController
 
       if @site.navigate_by_regions?
         @sql="select r.id,count(distinct ps.project_id) as count,r.name,r.center_lon as lon,
-                  r.center_lat as lat,r.name,
+                  r.center_lat as lat,r.name,r.path,
                   extract(year from p.start_date) as start_year,
-                  extract(year from p.end_date) as end_year,
+                  extract(year from p.end_date) as end_year,              
                   CASE WHEN count(distinct ps.project_id) > 1 THEN
                       '/location/'||r.path
                   ELSE
@@ -77,9 +77,9 @@ class GeoregionController < ApplicationController
                   #{category_join}
                   group by r.id,r.name,lon,lat,r.name,r.path,r.code,start_year,end_year
                   UNION
-                  select c.id,count(distinct cp.project_id) as count,c.name,c.center_lon as lon, c.center_lat as lat,c.name,
+                  select c.id,count(distinct cp.project_id) as count,c.name,c.center_lon as lon, c.center_lat as lat,c.name,''||c.id as path,
                   extract(year from p.start_date) as start_year,
-                  extract(year from p.end_date) as end_year,                  
+                  extract(year from p.end_date) as end_year,
                   CASE WHEN count(distinct ps.project_id) > 1 THEN
                   '/location/'||c.id
                   ELSE
@@ -127,7 +127,7 @@ class GeoregionController < ApplicationController
 
       @area_parent = country.name
 
-      # If we are in the main level whe only show the projects of
+      # If we are in the main level we only show the projects of
       # this level
       Rails.logger.debug "========"
       Rails.logger.debug [@area.level, @site.levels_for_region.max]
