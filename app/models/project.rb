@@ -201,42 +201,55 @@ class Project < ActiveRecord::Base
     options = {:show_private_fields => false}.merge(options || {})
 
     fields = [
-              'organization', 
-              'interaction_intervention_id', 
-              'org_intervention_id',
-              'project_tags',
               'project_name',
               'project_description',
-              'activities',
-              'additional_information',
-              'start_date',
-              'end_date',
-              'clusters', 
-              'sectors', 
-              'cross_cutting_issues',
-              'budget_numeric',
+              'primary_organization_id',
+              'org_intervention_id',
+              'organization',
               'international_partners',
               'local_partners',
-              'prime_awardee',
-              'estimated_people_reached',
+              'cross_cutting_issues',
+              'start_date',
+              'end_date',
+              'budget_numeric',
               'target_groups',
-              'location',
+              'estimated_people_reached',
+              'calculation_of_number_of_people_reached',
+
               'project_contact_person',
               'project_contact_position',
               'project_contact_email',
               'project_contact_phone_number',
               'project_website',
+
+              'intervention_id',
+              'interaction_intervention_id',
+              'additional_information',
+              'site_specific_information',
+              'prime_awardee',
+
+              'project_needs',
               'date_provided',
-              'date_updated',
-              'status',
-              'donors'
+              'date_updated'
              ]
 
     if options[:show_private_fields]
       fields.concat(['verbatim_location', 'idprefugee_camp'])
     end
-
-    fields
+    
+    fields.concat([
+                   'sectors',
+                   'clusters',
+                   'diseases',
+                   'medicine',
+                   'audience',
+                   'site_ids',
+                   'location',
+                   'project_tags',
+                   'donors',
+                   'activities',
+                   'status'
+                  ])
   end
 
   def self.list_for_export(site, options = {})
@@ -394,6 +407,7 @@ class Project < ActiveRecord::Base
         p.name as project_name,
         p.description as project_description,
         primary_organization_id,
+        p.organization_id as org_intervention_id,
         o.name AS organization,
         implementing_organization as international_partners,
         partner_organizations AS local_partners,
@@ -403,24 +417,33 @@ class Project < ActiveRecord::Base
         CASE WHEN p.budget=0 THEN null ELSE p.budget END AS budget_numeric,
         target as target_groups,
         CASE WHEN p.estimated_people_reached=0 THEN null ELSE p.estimated_people_reached END,
+        CASE WHEN calculation_of_number_of_people_reached=0 THEN null ELSE p.calculation_of_number_of_people_reached END,
+
         contact_person AS project_contact_person,
+        p.contact_position AS project_contact_position,
         p.contact_email AS project_contact_email,
         p.contact_phone_number AS project_contact_phone_number,
+        p.website AS project_website,
+
         intervention_id,
         intervention_id as interaction_intervention_id,
         additional_information,
         site_specific_information,
         awardee_type as prime_awardee,
-        calculation_of_number_of_people_reached,
         project_needs,
         date_provided,
         date_updated,
-        p.contact_position AS project_contact_position,
-        p.website AS project_website,
-        idp_refugee_camp
+
+        idp_refugee_camp,
         verbatim_location,
+
         (SELECT '|' || array_to_string(array_agg(distinct name),'|') ||'|' FROM sectors AS s INNER JOIN projects_sectors AS ps ON s.id=ps.sector_id WHERE ps.project_id=p.id) AS sectors,
         (SELECT '|' || array_to_string(array_agg(distinct name),'|') ||'|' FROM clusters AS c INNER JOIN clusters_projects AS cp ON c.id=cp.cluster_id WHERE cp.project_id=p.id) AS clusters,
+        (SELECT '|' || array_to_string(array_agg(distinct name),'|') ||'|' FROM diseases AS ds INNER JOIN diseases_projects AS dp ON ds.id=dp.disease_id WHERE dp.project_id=p.id) AS diseases,
+        (SELECT '|' || array_to_string(array_agg(distinct name),'|') ||'|' FROM medicines AS m INNER JOIN medicines_projects AS mp ON m.id=mp.medicine_id WHERE mp.project_id=p.id) AS medicine,
+        (SELECT '|' || array_to_string(array_agg(distinct name),'|') ||'|' FROM audiences AS a INNER JOIN audiences_projects AS ap ON a.id=ap.audience_id WHERE ap.project_id=p.id) AS audience,
+
+
         '|' || array_to_string(array_agg(distinct ps.site_id),'|') ||'|' as site_ids,
         COALESCE(
           (SELECT '|' || array_to_string(array_agg(distinct full_name),'|') || '|' FROM r INNER JOIN projects_regions pr ON pr.project_id = p.id AND pr.region_id = r.id WHERE r.level = 3),
@@ -431,7 +454,6 @@ class Project < ActiveRecord::Base
         (SELECT '|' || array_to_string(array_agg(distinct name),'|') ||'|' FROM tags AS t INNER JOIN projects_tags AS pt ON t.id=pt.tag_id WHERE pt.project_id=p.id) AS project_tags,
         (SELECT '|' || array_to_string(array_agg(distinct name),'|') ||'|' FROM donors AS d INNER JOIN donations AS dn ON d.id=dn.donor_id AND dn.project_id=p.id) AS donors,
         (SELECT '|' || array_to_string(array_agg(distinct name),'|') ||'|' FROM activities AS a INNER JOIN projects_activities AS pa ON a.id=pa.activity_id AND pa.project_id=p.id) AS activities,
-        p.organization_id as org_intervention_id,
         CASE WHEN p.end_date > current_date THEN 'active' ELSE 'closed' END AS status
         #{kml_select}
         #{geojson_select}
