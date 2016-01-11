@@ -354,7 +354,7 @@ class Project < ActiveRecord::Base
 
     where = "WHERE #{where.join(' AND ')}" if where.present?
 
-    donor_repor = ''
+    donor_report = ''
     donor_report = "INNER JOIN donations as dn ON dn.project_id = p.id AND dn.donor_id = #{options[:donor]}" if options[:donor]
 
     sql = <<-SQL
@@ -409,11 +409,15 @@ class Project < ActiveRecord::Base
         intervention_id,
         intervention_id as interaction_intervention_id,
         additional_information,
+        site_specific_information,
         awardee_type as prime_awardee,
+        calculation_of_number_of_people_reached,
+        project_needs,
         date_provided,
         date_updated,
         p.contact_position AS project_contact_position,
         p.website AS project_website,
+        idp_refugee_camp
         verbatim_location,
         (SELECT '|' || array_to_string(array_agg(distinct name),'|') ||'|' FROM sectors AS s INNER JOIN projects_sectors AS ps ON s.id=ps.sector_id WHERE ps.project_id=p.id) AS sectors,
         (SELECT '|' || array_to_string(array_agg(distinct name),'|') ||'|' FROM clusters AS c INNER JOIN clusters_projects AS cp ON c.id=cp.cluster_id WHERE cp.project_id=p.id) AS clusters,
@@ -464,7 +468,10 @@ class Project < ActiveRecord::Base
         intervention_id,
         p.organization_id,
         additional_information,
+        site_specific_information,
         awardee_type,
+        calculation_of_number_of_people_reached,
+        project_needs,
         date_provided,
         date_updated,
         p.contact_position,
