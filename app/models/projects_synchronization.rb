@@ -91,6 +91,8 @@ class ProjectsSynchronization < ActiveRecord::Base
         p.cross_cutting_issues      = row.cross_cutting_issues if defined?( row.cross_cutting_issues ) && row.cross_cutting_issues.present? 
         p.target                    = row.target_groups if defined?( row.target_groups) && row.target_groups.present?
         p.verbatim_location         = row.verbatim_location if defined?( row.verbatim_location) && row.verbatim_location.present?
+        p.idp_refugee_camp          = row.idp_refugee_camp if defined?( row.idp_refugee_camp ) && row.idp_refugee_camp.present?
+        p.project_needs             = row.project_needs if defined?( row.project_needs ) && row.project_needs.present?
 
 
         # verbatim locations
