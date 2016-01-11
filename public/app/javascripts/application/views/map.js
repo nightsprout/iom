@@ -134,7 +134,10 @@ define(['underscore', 'backbone', 'pluralize', 'underscoreString'], function(_, 
 
     info.count = (parseInt(marker.count) + parseInt(info.count)).toString();
     if (parseInt(info.count) > 1) {
-      info.url = '/location/' + info.id + '?';
+      if (typeof info.path === 'undefined' || info.path === '') {
+        info.path = info.id;
+      }
+      info.url = '/location/' + info.path + '?';
     }
 
     initializeIOMMarker(marker, info, classname, map);
