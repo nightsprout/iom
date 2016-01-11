@@ -417,7 +417,7 @@ class Project < ActiveRecord::Base
         CASE WHEN p.budget=0 THEN null ELSE p.budget END AS budget_numeric,
         target as target_groups,
         CASE WHEN p.estimated_people_reached=0 THEN null ELSE p.estimated_people_reached END,
-        CASE WHEN calculation_of_number_of_people_reached=0 THEN null ELSE p.calculation_of_number_of_people_reached END,
+        CASE WHEN calculation_of_number_of_people_reached='0' THEN null ELSE p.calculation_of_number_of_people_reached END,
 
         contact_person AS project_contact_person,
         p.contact_position AS project_contact_position,
@@ -483,27 +483,30 @@ class Project < ActiveRecord::Base
         p.budget,
         target,
         p.estimated_people_reached,
+        calculation_of_number_of_people_reached,
         contact_person,
+        conctact_position,
         p.contact_email,
         p.contact_phone_number,
+        website,
         activities,
         intervention_id,
         p.organization_id,
         additional_information,
         site_specific_information,
         awardee_type,
-        calculation_of_number_of_people_reached,
         project_needs,
         date_provided,
         date_updated,
-        p.contact_position,
-        p.website,
         verbatim_location,
         idprefugee_camp,
         status,
         #{serialization_group_by}
         sectors,
-        clusters
+        clusters,
+        audience,
+        diseases,
+        medicine,
         ORDER BY interaction_intervention_id
     SQL
     ActiveRecord::Base.connection.execute(sql)
