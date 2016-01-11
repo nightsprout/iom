@@ -200,14 +200,46 @@ class Project < ActiveRecord::Base
   def self.export_headers(options = {})
     options = {:show_private_fields => false}.merge(options || {})
 
+    fields = [
+              'organization', 
+              'interaction_intervention_id', 
+              'org_intervention_id',
+              'project_tags',
+              'project_name',
+              'project_description',
+              'activities',
+              'additional_information',
+              'start_date',
+              'end_date',
+              'clusters', 
+              'sectors', 
+              'cross_cutting_issues',
+              'budget_numeric',
+              'international_partners',
+              'local_partners',
+              'prime_awardee',
+              'estimated_people_reached',
+              'target_groups',
+              'location',
+              'project_contact_person',
+              'project_contact_position',
+              'project_contact_email',
+              'project_contact_phone_number',
+              'project_website',
+              'date_provided',
+              'date_updated',
+              'status',
+              'donors'
+             ]
+
     if options[:show_private_fields]
-      %w(organization interaction_intervention_id org_intervention_id project_tags project_name project_description activities additional_information start_date end_date clusters sectors cross_cutting_issues budget_numeric international_partners local_partners prime_awardee estimated_people_reached target_groups location verbatim_location idprefugee_camp project_contact_person project_contact_position project_contact_email project_contact_phone_number project_website date_provided date_updated status donors)
-    else
-      %w(organization interaction_intervention_id org_intervention_id project_tags project_name project_description activities additional_information start_date end_date clusters sectors cross_cutting_issues budget_numeric international_partners local_partners prime_awardee estimated_people_reached target_groups location project_contact_person project_contact_position project_contact_email project_contact_phone_number project_website date_provided date_updated status donors)
+      fields.concat(['verbatim_location', 'idprefugee_camp'])
     end
+
+    fields
   end
 
-  def self.list_for_export(site, options)
+  def self.list_for_export(site, options = {})
     where = []
 
     where << "(cp.country_id IS NOT NULL OR pr.region_id IS NOT NULL)"
@@ -374,7 +406,6 @@ class Project < ActiveRecord::Base
         contact_person AS project_contact_person,
         p.contact_email AS project_contact_email,
         p.contact_phone_number AS project_contact_phone_number,
-        activities,
         intervention_id,
         intervention_id as interaction_intervention_id,
         additional_information,
@@ -395,6 +426,7 @@ class Project < ActiveRecord::Base
         ) AS location,
         (SELECT '|' || array_to_string(array_agg(distinct name),'|') ||'|' FROM tags AS t INNER JOIN projects_tags AS pt ON t.id=pt.tag_id WHERE pt.project_id=p.id) AS project_tags,
         (SELECT '|' || array_to_string(array_agg(distinct name),'|') ||'|' FROM donors AS d INNER JOIN donations AS dn ON d.id=dn.donor_id AND dn.project_id=p.id) AS donors,
+        (SELECT '|' || array_to_string(array_agg(distinct name),'|') ||'|' FROM activities AS a INNER JOIN projects_activities AS pa ON a.id=pa.activity_id AND pa.project_id=p.id) AS activities,
         p.organization_id as org_intervention_id,
         CASE WHEN p.end_date > current_date THEN 'active' ELSE 'closed' END AS status
         #{kml_select}
