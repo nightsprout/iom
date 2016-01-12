@@ -80,6 +80,7 @@
         <table collapse="0">
           <tbody>
             <% @projects.each do |project| %>
+              <% next if project.nil? || project.name.nil? %>
               <tr>
                 <td width="625">
                   <span>

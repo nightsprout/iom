@@ -34,7 +34,7 @@
 
         <div class="mod-info mod-reporting-organisation">
           <h3>Reporting organisation</h3>
-          <% if @project.primary_organization.logo.file? %>
+          <% if @project.primary_organization.logo.present? && @project.primary_organization.logo.file? %>
             <a href="<%= organization_path(@project.primary_organization) %>"><%= image_tag(@project.primary_organization.logo.url(:medium)) %></a>
             <%= link_to(@project.primary_organization.name, organization_path(@project.primary_organization)) %>
           <% else %>
