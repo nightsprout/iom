@@ -82,9 +82,18 @@ class ProjectsSynchronization < ActiveRecord::Base
 
         p.contact_person            = row.project_contact_person if defined?( row.project_contact_person ) && row.project_contact_person.present?
         p.contact_email             = row.project_contact_email if defined?( row.project_contact_email ) && row.project_contact_email.present? 
+        p.contact_position          = row.project_contact_position if defined?( row.project_contact_position) && row.project_contact_position.present?
+        p.contact_phone_number      = row.project_contact_phone_number if defined?( row.project_contact_phone_number) && row.project_contact_phone_number.present?
+        p.website                   = row.project_website if defined?( row.project_website) && row.project_website.present?
+
         p.implementing_organization = row.international_partners if defined?( row.international_partners ) && row.international_partners.present? 
         p.partner_organizations     = row.local_partners if defined?( row.local_partners ) && row.local_partners.present?
         p.cross_cutting_issues      = row.cross_cutting_issues if defined?( row.cross_cutting_issues ) && row.cross_cutting_issues.present? 
+        p.target                    = row.target_groups if defined?( row.target_groups) && row.target_groups.present?
+        p.verbatim_location         = row.verbatim_location if defined?( row.verbatim_location) && row.verbatim_location.present?
+        p.idp_refugee_camp          = row.idp_refugee_camp if defined?( row.idp_refugee_camp ) && row.idp_refugee_camp.present?
+        p.project_needs             = row.project_needs if defined?( row.project_needs ) && row.project_needs.present?
+
 
         # verbatim locations
         if row.start_date.blank?
@@ -140,7 +149,7 @@ class ProjectsSynchronization < ActiveRecord::Base
         end
 
         Rails.logger.debug "===== Sector Load"
-        unless row.sectors.blank?
+        unless !defined?(row.sectors) or row.sectors.blank?
           p.sectors.delete_all unless p.new_record?
           row.sectors.split("|").map(&:strip).each do |sec|
             sect = Sector.find_by_name_ilike sec
@@ -153,7 +162,7 @@ class ProjectsSynchronization < ActiveRecord::Base
         end
 
         Rails.logger.debug "===== Audience Load"
-        unless row.target_groups.blank?
+        unless !defined?(row.audience) or row.audience.blank?
           p.audiences.delete_all unless p.new_record?
           row.target_groups.split("|").map(&:strip).each do |aud|
             a = Audience.find_by_name_ilike aud
@@ -166,7 +175,7 @@ class ProjectsSynchronization < ActiveRecord::Base
         end
 
         Rails.logger.debug "===== Activities Load"
-        unless row.activities.blank?
+        unless !defined?(row.activities) or row.activities.blank?
           p.activities.delete_all unless p.new_record?
           row.activities.split("|").map(&:strip).each do |aud|
             a = Activity.find_by_name_ilike aud
@@ -179,7 +188,7 @@ class ProjectsSynchronization < ActiveRecord::Base
         end
 
         Rails.logger.debug "===== Disease Load"
-        unless row.diseases.blank?
+        unless !defined?(row.diseases) or row.diseases.blank?
           p.diseases.delete_all unless p.new_record?
           row.diseases.split("|").map(&:strip).each do |aud|
             a = Disease.find_by_name_ilike aud
@@ -192,7 +201,7 @@ class ProjectsSynchronization < ActiveRecord::Base
         end
 
         Rails.logger.debug "===== Medicine Load"
-        unless row.medicine.blank?
+        unless !defined?(row.medicine) or row.medicine.blank?
           p.medicines.delete_all unless p.new_record?
           row.medicine.split("|").map(&:strip).each do |aud|
             a = Medicine.find_by_name_ilike aud
@@ -206,7 +215,7 @@ class ProjectsSynchronization < ActiveRecord::Base
 
 
         Rails.logger.debug "===== Donors Load"
-        unless row.donors.blank?
+        unless !defined?(row.donors) or row.donors.blank?
           p.donations.delete_all unless p.new_record?
           row.donors.split("|").map(&:strip).each do |don|
             donor = Donor.find_by_name_ilike don.titleize
@@ -241,7 +250,6 @@ class ProjectsSynchronization < ActiveRecord::Base
           Rails.logger.debug "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
           next 
         end
-
       
       rescue Exception => e
         Rails.logger.info "Exception: #{e}"
