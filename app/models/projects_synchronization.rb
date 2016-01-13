@@ -93,6 +93,7 @@ class ProjectsSynchronization < ActiveRecord::Base
         p.verbatim_location         = row.verbatim_location if defined?( row.verbatim_location) && row.verbatim_location.present?
         p.idp_refugee_camp          = row.idp_refugee_camp if defined?( row.idp_refugee_camp ) && row.idp_refugee_camp.present?
         p.project_needs             = row.project_needs if defined?( row.project_needs ) && row.project_needs.present?
+        p.date_provided             = row.date_provided if defined?( row.date_provided ) && row.date_provided.present?
 
 
         # verbatim locations
