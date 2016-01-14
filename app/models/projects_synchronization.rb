@@ -220,7 +220,6 @@ class ProjectsSynchronization < ActiveRecord::Base
           p.donations.delete_all unless p.new_record?
           row.donors.split("|").map(&:strip).each do |don|
             donor = Donor.find_by_name_ilike don.titleize
-            next if donor.nil? && ps.present? # Don't create new records for invalid values
             if donor.nil?
               donor = Donor.create!(:name => don.titleize)
             end
