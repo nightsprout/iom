@@ -165,7 +165,7 @@ class ProjectsSynchronization < ActiveRecord::Base
         Rails.logger.debug "===== Audience Load"
         unless !defined?(row.audience) or row.audience.blank?
           p.audiences.delete_all unless p.new_record?
-          row.target_groups.split("|").map(&:strip).each do |aud|
+          row.audience.split("|").map(&:strip).each do |aud|
             a = Audience.find_by_name_ilike aud
             next if a.nil? && ps.present? # Don't create new records for invalid values
             if a.nil?
