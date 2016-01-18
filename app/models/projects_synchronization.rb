@@ -66,12 +66,17 @@ class ProjectsSynchronization < ActiveRecord::Base
         o = Organization.find_by_name row.organization
         o = Organization.create!( :name => row.organization ) if o.nil?
 
-        p = o.projects.where(:name => row.project_name, :intervention_id => row.org_intervention_id).first
+        if defined?(row.interaction_intervention_id) && row.interaction_intervention_id.present?
+          p = o.projects.where(:name => row.project_name, :organization_id => row.org_intervention_id, :intervention_id => row.interaction_intervention_id).first
+        else
+          p = o.projects.where(:name => row.project_name, :organization_id => row.org_intervention_id).first
+        end
+
         p = Project.new if p.nil?
 
         p.assign_attributes({
           :primary_organization_id  => o.id,
-          :intervention_id          => row.org_intervention_id,
+          :organization_id          => row.org_intervention_id,
           :name                     => row.project_name.present? ? row.project_name.gsub(/\|/, ", ") : nil,
           :description              => row.project_description,
           :additional_information   => row.additional_information,
@@ -79,6 +84,8 @@ class ProjectsSynchronization < ActiveRecord::Base
           :partner_organizations    => row.local_partners,
           :estimated_people_reached => row.estimated_people_reached
         })
+
+        p.intervention_id           = row.interaction_intervention_id if defined?( row.interaction_intervention_id ) && row.interaction_intervention_id.present?
 
         p.contact_person            = row.project_contact_person if defined?( row.project_contact_person ) && row.project_contact_person.present?
         p.contact_email             = row.project_contact_email if defined?( row.project_contact_email ) && row.project_contact_email.present? 
@@ -253,6 +260,7 @@ class ProjectsSynchronization < ActiveRecord::Base
         end
       
       rescue Exception => e
+        raise e
         Rails.logger.info "Exception: #{e}"
 
         nil
