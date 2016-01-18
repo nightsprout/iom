@@ -80,7 +80,7 @@ class Project < ActiveRecord::Base
 
   after_create :generate_intervention_id
   after_save{ Resque.enqueue(CacheProject, self.id) }
-  after_destroy{ Resque.enqueue(CacheProject, self.id) }
+  after_destroy{ Project.connection.execute("DELETE FROM data_denormalization WHERE project_id=#{self.id}") }
   before_validation :strip_urls
 
   def strip_urls
@@ -925,6 +925,8 @@ SQL
   def update_data_denormalization(opts = {levels: [1, 2, 3], force: false, sites: nil})
     if !opts[:force] and self.cached_at.present? and Time.now - self.cached_at < 6.hours
       return
+    else
+      self.update_attribute(:cached_at, Time.now)
     end
 
     while Time.now - self.updated_at < 10.seconds
@@ -934,6 +936,7 @@ SQL
 
     sites = opts[:sites]
     sites ||= Site.where(global: true)
+    sites ||= Site.all
     site_ids = sites.collect { |s| s.id if s.respond_to? :id }
 
     connection = ActiveRecord::Base.connection
