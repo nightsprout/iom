@@ -38,6 +38,8 @@ define([
       'sectors/:id/*params': 'lists',
       'organizations/:id': 'lists',
       'organizations/:id/*params': 'lists',
+      'data_source/:id': 'lists',
+      'data_source/:id/*params': 'lists',
       'donors/:id': 'lists',
       'donors/:id/*params': 'lists',
       'activities/:id': 'lists',

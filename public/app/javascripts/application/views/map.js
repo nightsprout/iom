@@ -784,7 +784,7 @@ define(['underscore', 'backbone', 'pluralize', 'underscoreString'], function(_, 
   }
 
   var MapView = Backbone.View.extend({
-
+    
     el: '#mapView',
 
     // events: {

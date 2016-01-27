@@ -62,6 +62,7 @@ Iom::Application.routes.draw do
   match 'audience/:id'    => 'audience#show', :as => 'audience'
   match 'diseases/:id'    => 'diseases#show', :as => 'disease'
   match 'medicines/:id'   => 'medicines#show', :as => 'medicine'
+  match 'data_source/:id' => 'data_sources#show', :as => 'data_source'
 
   # Request an export document to be mailed
   get 'sites/:id/export', :to => "sites#request_export", :as => :export_site
@@ -72,6 +73,7 @@ Iom::Application.routes.draw do
   get 'audience/:id/export', :to => "audience#request_export", :as => :export_audience
   get 'diseases/:id/export', :to => "diseases#request_export", :as => :export_disease
   get 'medicines/:id/export', :to => "medicines#request_export", :as => :export_medicine
+  get 'data_sources/:id/export', :to => "data_sources#request_export", :as => :export_data_source
   get 'donors/:id/export', :to => "donors#request_export", :as => :export_donor
   get 'organizations/:id/export', :to => "organizations#request_export", :as => :export_organization
 

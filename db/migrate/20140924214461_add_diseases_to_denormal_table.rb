@@ -7,7 +7,7 @@ class AddDiseasesToDenormalTable < ActiveRecord::Migration
      SQL
   end
 
-  def self.down1
+  def self.down
     execute <<-SQL
       ALTER TABLE data_denormalization
         DROP COLUMN IF EXISTS diseases,

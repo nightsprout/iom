@@ -46,12 +46,24 @@
 .organizations-child {
   @include categorie-selector-child($color-6);
 }
+.data-sources-child {
+  @include categorie-selector-child($color-6);
+}
 .donors-child {
+  @include categorie-selector-child($color-7);
+}
+.audience-child {
+  @include categorie-selector-child($color-7);
+}
+.diseases-child {
   @include categorie-selector-child($color-7);
 }
 .countries-child {
    @include categorie-selector-child($color-8);
 }
 .regions-child {
+  @include categorie-selector-child($color-9);
+}
+.activities-child {
   @include categorie-selector-child($color-9);
 }

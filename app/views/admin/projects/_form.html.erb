@@ -192,6 +192,37 @@
     </div>
   </div>
 
+  <div class="field" style="float: none;">
+    <span class="chars">
+      <label>DATA SOURCE
+        <strong>&nbsp;</strong>
+        <!-- FIELD DESCRIPTION -->
+        <div class="field_info">
+          <span class="info">i</span>
+          <div class="field_text">
+            <div class="top">
+              <a href="#close">x</a>
+            </div>
+            <div class="bottom">
+              <h3>Project Data Sources</h3>
+              <span class="scroll">
+              <p>What is the source of the data for this project? Please check all that apply</p>
+              </span>
+            </div>
+          </div>
+        </div>
+        <!-- END FIELD DESCRIPTION -->
+      </label>
+    </span>
+    <div style="margin-left: 25px;">
+      <% DataSource.all.each do |data_source| %>
+        <label style="margin: 5px;">
+          <input type="checkbox" value="<%=data_source.id%>" name="project[data_source_ids][]" <%="checked" if @project.data_source_ids.include?(data_source.id) %> style="float: none;visibility: visible;width: initial;" />
+          <%= data_source.name %>
+        </label>
+      <% end %>
+    </div>
+  </div>
 
   <div class="field" style="float: none;">
     <span class="chars">

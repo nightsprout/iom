@@ -660,6 +660,14 @@ SQL
       ORDER BY a.name ASC"
   end
 
+  def data_source_select
+    DataSource.find_by_sql " SELECT distinct a.id as id , a.name as name
+      FROM projects_sites AS ps JOIN projects as p ON ps.project_id = p.id AND ps.site_id = #{self.id}
+      JOIN data_sources_projects as pa ON pa.project_id = p.id
+      JOIN data_sources as a on a.id = pa.data_source_id
+      ORDER BY a.name ASC"
+  end
+
   def diseases_select
     Activity.find_by_sql " SELECT distinct a.id as id , a.name as name
       FROM projects_sites AS ps JOIN projects as p ON ps.project_id = p.id AND ps.site_id = #{self.id}
