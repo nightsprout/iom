@@ -241,6 +241,18 @@ class ProjectsSynchronization < ActiveRecord::Base
             p.donations << Donation.new( :project => p, :donor => donor) unless p.donations( :donor => donor).count > 0
           end
         end
+        
+        Rails.logger.debug "===== Data Sources Load"
+        unless !defined?(row.data_sources) or row.data_sources.blank?
+          p.data_sources.delete_all unless p.new_record?
+          row.data_sources.split("|").map(&:strip).each do |src|
+            data_source = DataSource.find_by_name_ilike src.titleize
+            if data_source.nil?
+              data_source = DataSource.create!(:name => src.titleize)
+            end
+            p.data_sources << data_source unless p.data_sources.include?( data_source )
+          end
+        end
 
 
         p.save

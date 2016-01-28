@@ -1,0 +1,62 @@
+<%= render 'new_partials/map' %>
+
+<%= render 'new_partials/categories_selector' %>
+
+<div class="main-content">
+  <div class="row">
+    <div class="grid-4">
+      <aside class="layout-sidebar">
+
+      <div class="mod-highlighted-results">
+        <%= render 'new_partials/aside/projects' %>
+      </div>
+
+        <% unless @filter_by_location.present? || @data.projects_regions(@site).empty?%>
+          <div class="project-locations mod-info">
+            <h3>project locations</h3>
+            <div class="mod-project-locations">
+              <%= raw( projects_by_location(@site, @data.projects_countries(@site))) %>
+            </div>
+          </div>
+        <% end %>
+
+
+        <% unless @site.data_source_select.empty? %>
+          <div class="project-sectors mod-info">
+            <h3>Other Data Sources</h3>
+            <div class="mod-project-sectors">
+              <ul id="clustersView">
+                <% @site.data_source_select.each do |category, count| %>
+                  <% next if category == @data %>
+                  <% unless category.name.eql?('N/A') %>
+                    <li>
+                      <a class="<%= category.css_class %> icon_statistics" title="<%= category.name %>" href="<%= url_for(category) %>" data-value="<%= count %>"><%=category.name %></a>
+                    </li>
+                  <% end %>
+                <% end %>
+              </ul>
+            </div>
+          </div>
+        <% end %>
+
+      </aside>
+    </div>
+
+    <div class="grid-12 offset-1">
+      <section class="layout-content" id="content">
+
+        <h1 class="section-title"><%= data_source_projects_list_subtitle %></h1>
+
+        <%= render :partial => 'new_partials/downloads', :locals => { 
+            :csv_path => export_data_source_path(@data, @carry_on_filters.merge(export_format: :csv)),
+            :xls_path => export_data_source_path(@data, @carry_on_filters.merge(export_format: :xls)),
+            :kml_path => export_data_source_path(@data, @carry_on_filters.merge(export_format: :kml))
+          }
+        %>
+
+        <%= render "new_partials/index_projects" %>
+
+      </section>
+    </div>
+  </div>
+</div>

@@ -276,6 +276,8 @@ HTML
           disease_path(pagination_params)
         elsif @data.is_a?(Medicine)
           medicine_path(pagination_params)
+        elsif @data.is_a?(DataSource)
+          data_source_path(pagination_params)
         else
           sector_path(pagination_params)
         end

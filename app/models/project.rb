@@ -46,6 +46,7 @@ class Project < ActiveRecord::Base
   has_and_belongs_to_many :activities, :join_table => "projects_activities"
   has_and_belongs_to_many :diseases, :join_table => "diseases_projects"
   has_and_belongs_to_many :medicines, :join_table => "medicines_projects"
+  has_and_belongs_to_many :data_sources, :join_table => "data_sources_projects"
   has_and_belongs_to_many :regions, :after_add => :add_to_country, :after_remove => :remove_from_country
   has_and_belongs_to_many :countries
   has_and_belongs_to_many :tags, :after_add => :update_tag_counter, :after_remove => :update_tag_counter
@@ -706,6 +707,14 @@ SQL
       where << "countries_ids && '{#{options[:country_id]}}'" if options[:country_id]
 
       sql="select * from data_denormalization where #{where.join(' and ')}"
+    elsif options[:data_source]
+      where << "data_sources_ids && '{#{options[:data_source]}}'"
+      where << "site_id=#{site.id}"
+      where << "level = #{level}"
+      where << "regions_ids && '{#{options[:region_id]}}'" if options[:region_id]
+      where << "countries_ids && '{#{options[:country_id]}}'" if options[:country_id]
+
+      sql="select * from data_denormalization where #{where.join(' and ')}"
     elsif options[:disease]
       where << "diseases_ids && '{#{options[:disease]}}'"
       where << "site_id=#{site.id}"
@@ -723,7 +732,7 @@ SQL
     
     total_entries = ActiveRecord::Base.connection.execute("select count(*) as count from (#{sql}) as q").first['count'].to_i
 
-    options[:per_page] = 1 if options[:per_page] < 1
+    options[:per_page] = 1 if options[:per_page].blank? or options[:per_page] < 1
     if total_entries.to_f == 0.0
       total_pages = 1
     else
@@ -975,6 +984,8 @@ SQL
            activities_ids,
            audiences,
            audiences_ids,
+           data_sources,
+           data_sources_ids,
            diseases,
            diseases_ids,
            is_active,
@@ -1006,8 +1017,10 @@ SQL
                  ('{'||array_to_string(array_agg(distinct act.id),',')||'}')::integer[] AS activities_ids,
                  '|'||array_to_string(array_agg(distinct aud.name),'|')||'|' AS audiences,
                  ('{'||array_to_string(array_agg(distinct aud.id),',')||'}')::integer[] AS audiences_ids,
-                 '|'||array_to_string(array_agg(distinct dis.name),'|')||'|' AS diseASes,
-                 ('{'||array_to_string(array_agg(distinct dis.id),',')||'}')::integer[] AS diseASes_ids,
+                 '|'||array_to_string(array_agg(distinct data_src.name),'|')||'|' AS data_sources,
+                 ('{'||array_to_string(array_agg(distinct data_src.id),',')||'}')::integer[] AS data_sources_ids,
+                 '|'||array_to_string(array_agg(distinct dis.name),'|')||'|' AS diseases,
+                 ('{'||array_to_string(array_agg(distinct dis.id),',')||'}')::integer[] AS diseases_ids,
                  CASE WHEN end_date is null OR p.end_date > now() THEN true ELSE false END AS is_active,
                  ps.site_id AS site_id,
                  p.created_at AS created_at
@@ -1028,10 +1041,12 @@ SQL
                  LEFT JOIN activities AS act ON act.id=actpro.activity_id
                  LEFT JOIN projects_audiences AS audpro ON audpro.project_id=p.id
                  LEFT JOIN audiences AS aud ON aud.id=audpro.audience_id
+                 LEFT JOIN data_sources_projects AS srcpro ON srcpro.project_id=p.id
+                 LEFT JOIN data_sources AS data_src ON data_src.id=srcpro.data_source_id
                  LEFT JOIN diseases_projects AS dispro on dispro.project_id=p.id
                  LEFT JOIN diseases AS dis ON dis.id=dispro.disease_id
                     
-                 where site_id=#{site_id} and p.id = #{self.id}
+                 WHERE site_id=#{site_id} AND p.id=#{self.id}
                  GROUP BY p.id,p.name,o.id,o.name,p.description,p.start_date,p.end_date,ps.site_id,p.created_at
           ) AS subq;
         INSERT_NEW_ROW
