@@ -169,7 +169,6 @@ class ProjectsSynchronization < ActiveRecord::Base
           p.sectors.delete_all unless p.new_record?
           row.sectors.split("|").map(&:strip).each do |sec|
             sect = Sector.find_by_name_ilike sec
-            next if sect.nil? && ps.present? # Don't create new records for invalid values
             if sect.nil?
               sect = Sector.create(:name => sec)
             end
@@ -182,7 +181,6 @@ class ProjectsSynchronization < ActiveRecord::Base
           p.audiences.delete_all unless p.new_record?
           row.audience.split("|").map(&:strip).each do |aud|
             a = Audience.find_by_name_ilike aud
-            next if a.nil? && ps.present? # Don't create new records for invalid values
             if a.nil?
               a = Audience.create(:name => aud)
             end
@@ -195,7 +193,6 @@ class ProjectsSynchronization < ActiveRecord::Base
           p.activities.delete_all unless p.new_record?
           row.activities.split("|").map(&:strip).each do |aud|
             a = Activity.find_by_name_ilike aud
-            next if a.nil? && ps.present? # Don't create new records for invalid values
             if a.nil?
               a = Activity.create(:name => aud)
             end
@@ -208,7 +205,6 @@ class ProjectsSynchronization < ActiveRecord::Base
           p.diseases.delete_all unless p.new_record?
           row.diseases.split("|").map(&:strip).each do |aud|
             a = Disease.find_by_name_ilike aud
-            next if a.nil? && ps.present? # Don't create new records for invalid values
             if a.nil?
               a = Disease.create(:name => aud)
             end
@@ -221,7 +217,6 @@ class ProjectsSynchronization < ActiveRecord::Base
           p.medicines.delete_all unless p.new_record?
           row.medicine.split("|").map(&:strip).each do |aud|
             a = Medicine.find_by_name_ilike aud
-            next if a.nil? && ps.present? # Don't create new records for invalid values
             if a.nil?
               a = Medicine.create(:name => aud)
             end
@@ -243,9 +238,9 @@ class ProjectsSynchronization < ActiveRecord::Base
         end
         
         Rails.logger.debug "===== Data Sources Load"
-        unless !defined?(row.data_sources) or row.data_sources.blank?
+        unless !defined?(row.data_source) or row.data_source.blank?
           p.data_sources.delete_all unless p.new_record?
-          row.data_sources.split("|").map(&:strip).each do |src|
+          row.data_source.split("|").map(&:strip).each do |src|
             data_source = DataSource.find_by_name_ilike src.titleize
             if data_source.nil?
               data_source = DataSource.create!(:name => src.titleize)
