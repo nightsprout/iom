@@ -229,9 +229,9 @@ class ProjectsSynchronization < ActiveRecord::Base
         unless !defined?(row.donors) or row.donors.blank?
           p.donations.delete_all unless p.new_record?
           row.donors.split("|").map(&:strip).each do |don|
-            donor = Donor.find_by_name_ilike don.titleize
+            donor = Donor.find_by_name_ilike don
             if donor.nil?
-              donor = Donor.create!(:name => don.titleize)
+              donor = Donor.create!(:name => don)
             end
             p.donations << Donation.new( :project => p, :donor => donor) unless p.donations( :donor => donor).count > 0
           end
