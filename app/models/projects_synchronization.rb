@@ -241,9 +241,9 @@ class ProjectsSynchronization < ActiveRecord::Base
         unless !defined?(row.data_source) or row.data_source.blank?
           p.data_sources.delete_all unless p.new_record?
           row.data_source.split("|").map(&:strip).each do |src|
-            data_source = DataSource.find_by_name_ilike src.titleize
+            data_source = DataSource.find_by_name_ilike src
             if data_source.nil?
-              data_source = DataSource.create!(:name => src.titleize)
+              data_source = DataSource.create!(:name => src)
             end
             p.data_sources << data_source unless p.data_sources.include?( data_source )
           end
