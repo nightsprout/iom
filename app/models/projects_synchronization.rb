@@ -274,9 +274,7 @@ class ProjectsSynchronization < ActiveRecord::Base
         end
       
       rescue Exception => e
-        raise e
-        Rails.logger.info "Exception: #{e}"
-
+        Rails.logger.info "Exception: #{e}"        
         nil
       end
     end
@@ -299,13 +297,23 @@ class ProjectsSynchronization < ActiveRecord::Base
   private
 
   def process_projects_file_data
+    input = File.read(projects_file.tempfile)
 
-    results = CsvMapper.import( projects_file.tempfile ) do
-      read_attributes_from_file
-    end
+    begin
+      parsed_input = CSV.parse(input)
+    rescue ArgumentError => e
+      input = File.read(projects_file.tempfile, encoding: "ISO-8859-1")
+      parsed_input = CSV.parse(input)
+    end      
+
+    headers = parsed_input[0]
+    body = parsed_input[1..-1]
+
+    sync_row = Struct.new(*headers.map(&:to_sym))
+
+    results = body.map { |row| sync_row.new(*row) }
 
     ProjectsSynchronization.load_project_files( results, self )
-
   end
 
   def save_projects_if_no_errors
