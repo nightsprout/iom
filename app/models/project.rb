@@ -56,7 +56,7 @@ class Project < ActiveRecord::Base
   has_many :donors, :through => :donations
   has_many :cached_sites, :class_name => 'Site', :finder_sql => proc { "select * from sites, projects_sites where projects_sites.project_id = #{id} and projects_sites.site_id = sites.id" }
 
-  has_one :site
+  has_and_belongs_to_many :sites
 
   scope :active, where("end_date > ?", Date.today.to_s(:db))
   scope :closed, where("end_date < ?", Date.today.to_s(:db))

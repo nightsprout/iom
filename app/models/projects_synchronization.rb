@@ -250,7 +250,9 @@ class ProjectsSynchronization < ActiveRecord::Base
         end
 
 
-        p.save
+        if p.save
+          p.sites << Site.find_by_name("global")
+        end
 
         if ps.present?
           if p.invalid?
@@ -274,7 +276,7 @@ class ProjectsSynchronization < ActiveRecord::Base
         end
       
       rescue Exception => e
-        Rails.logger.info "Exception: #{e}"        
+        Rails.logger.info "Exception: #{e}"
         nil
       end
     end
