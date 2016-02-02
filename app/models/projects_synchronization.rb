@@ -308,7 +308,7 @@ class ProjectsSynchronization < ActiveRecord::Base
       parsed_input = CSV.parse(input)
     end      
 
-    headers = parsed_input[0]
+    headers = parsed_input[0].map { |column| column.present? ? column.to_sym : :"_none_" }
     body = parsed_input[1..-1]
 
     sync_row = Struct.new(*headers.map(&:to_sym))
