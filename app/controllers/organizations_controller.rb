@@ -114,7 +114,7 @@ class OrganizationsController < ApplicationController
                           '/projects/'||(array_to_string(array_agg(distinct ps.project_id),''))
                       END as url
                       ,r.code,
-                      (select count(*) from data_denormalization where regions_ids && ('{'||r.id||'}')::integer[]) and site_id=#{@site.id}) as total_in_region
+                      (select count(*) from data_denormalization where regions_ids && ('{'||r.id||'}')::integer[] and site_id=#{@site.id}) as total_in_region
                 from ((((
                   projects as p inner join organizations as o on o.id=p.primary_organization_id and
                   o.id=#{params[:id].sanitize_sql!.to_i})
@@ -198,8 +198,8 @@ class OrganizationsController < ApplicationController
                             '/projects/'||(array_to_string(array_agg(distinct ps.project_id),''))
                         END as url,
                         c.iso2_code as code,
-                        (select count(*) from data_denormalization where countries_ids && ('{'||c.id||'}')::integer[]) and site_id=#{@site.id}) as total_in_region
-                  from ((((
+                        (select count(*) from data_denormalization where countries_ids && ('{'||c.id||'}')::integer[] and site_id=#{@site.id}) as total_in_region
+                  from (((((
                     projects as p inner join organizations as o on o.id=p.primary_organization_id and o.id=#{params[:id].sanitize_sql!.to_i})
                     inner join projects_sites as ps on p.id=ps.project_id and ps.site_id=#{@site.id}) inner join countries_projects as cp on cp.project_id=p.id)
                     inner join projects as prj on ps.project_id=prj.id)
