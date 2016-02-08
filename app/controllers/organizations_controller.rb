@@ -114,12 +114,12 @@ class OrganizationsController < ApplicationController
                           '/projects/'||(array_to_string(array_agg(distinct ps.project_id),''))
                       END as url
                       ,r.code,
-                      (select count(*) from data_denormalization where regions_ids && ('{'||r.id||'}')::integer[] and (end_date is null OR end_date > now()) and site_id=#{@site.id}) as total_in_region
+                      (select count(*) from data_denormalization where regions_ids && ('{'||r.id||'}')::integer[]) and site_id=#{@site.id}) as total_in_region
                 from ((((
                   projects as p inner join organizations as o on o.id=p.primary_organization_id and
                   o.id=#{params[:id].sanitize_sql!.to_i})
                   inner join projects_sites as ps on p.id=ps.project_id and ps.site_id=#{@site.id})
-                  inner join projects as prj on ps.project_id=prj.id and (prj.end_date is null OR prj.end_date > now())
+                  inner join projects as prj on ps.project_id=prj.id)
                   inner join projects_regions as pr on pr.project_id=p.id)
                   inner join regions as r on pr.region_id=r.id and r.level=#{@site.level_for_region} #{location_filter})
                   #{category_join}
@@ -198,11 +198,11 @@ class OrganizationsController < ApplicationController
                             '/projects/'||(array_to_string(array_agg(distinct ps.project_id),''))
                         END as url,
                         c.iso2_code as code,
-                        (select count(*) from data_denormalization where countries_ids && ('{'||c.id||'}')::integer[] and (end_date is null OR end_date > now()) and site_id=#{@site.id}) as total_in_region
+                        (select count(*) from data_denormalization where countries_ids && ('{'||c.id||'}')::integer[]) and site_id=#{@site.id}) as total_in_region
                   from ((((
                     projects as p inner join organizations as o on o.id=p.primary_organization_id and o.id=#{params[:id].sanitize_sql!.to_i})
                     inner join projects_sites as ps on p.id=ps.project_id and ps.site_id=#{@site.id}) inner join countries_projects as cp on cp.project_id=p.id)
-                    inner join projects as prj on ps.project_id=prj.id and (prj.end_date is null OR prj.end_date > now())
+                    inner join projects as prj on ps.project_id=prj.id)
                     inner join countries as c on cp.country_id=c.id)
                     #{category_join}
                   group by c.id,c.name,lon,lat,c.name,c.iso2_code"
