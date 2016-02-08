@@ -18,7 +18,7 @@ class Disease < ActiveRecord::Base
   def css_class; ''; end
 
   def self.find_by_name_ilike( name )
-    where("name ilike ?", "%#{name}%" ).first
+    where("name ilike ?", "#{name}%" ).first
   end
 
   # Array of arrays

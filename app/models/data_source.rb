@@ -6,7 +6,7 @@ class DataSource < ActiveRecord::Base
   end
 
   def self.find_by_name_ilike(name)
-    where("name ILIKE ?", "%#{name}%").first
+    where("name ILIKE ?", "#{name}%").first
   end
 
   def css_class; ''; end
