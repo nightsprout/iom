@@ -265,22 +265,23 @@ HTML
     if @area
       location_path(pagination_params)
     else
-      if @data
-        if @data.is_a?(Cluster)
+      case @data.class.name
+      when 'Cluster'
           cluster_path(pagination_params)
-        elsif @data.is_a?(Activity)
-          activity_path(pagination_params)
-        elsif @data.is_a?(Audience)
+      when 'Activity'
+        activity_path(pagination_params)
+      when 'Audience'
           audience_path(pagination_params)
-        elsif @data.is_a?(Disease)
-          disease_path(pagination_params)
-        elsif @data.is_a?(Medicine)
-          medicine_path(pagination_params)
-        elsif @data.is_a?(DataSource)
-          data_source_path(pagination_params)
-        else
-          sector_path(pagination_params)
-        end
+      when 'Disease'
+        disease_path(pagination_params)
+      when 'Medicine'
+        medicine_path(pagination_params)
+      when 'DataSource'
+        data_source_path(pagination_params)
+      when 'Organization'
+        organization_path(pagination_params)
+      when 'Sector'
+        sector_path(pagination_params)
       else
         pagination_params
       end
