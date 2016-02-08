@@ -64,7 +64,7 @@ class ActivitiesController < ApplicationController
                  '/projects/'||array_to_string(array_agg(distinct pa.project_id),'')
                END as url,
                r.code,
-              (select count(*) from data_denormalization where regions_ids && ('{'||r.id||'}')::integer[] and (end_date is null OR end_date > now()) and site_id=#{@site.id}) as total_in_region
+              (select count(*) from data_denormalization where regions_ids && ('{'||r.id||'}')::integer[]) and site_id=#{@site.id}) as total_in_region
               from regions as r
                 inner join projects_regions as pr on r.id=pr.region_id and r.level=#{@site.level_for_region}
                 inner join projects_sites as ps on pr.project_id=ps.project_id and ps.site_id=#{@site.id}
@@ -86,7 +86,7 @@ class ActivitiesController < ApplicationController
                    '/projects/'||(array_to_string(array_agg(distinct pa.project_id),''))
                  END AS url,
                  r.code,
-                 (select count(*) from data_denormalization where regions_ids && ('{'||r.id||'}')::integer[] and (end_date is null OR end_date > now()) and site_id=#{@site.id}) as total_in_region
+                 (select count(*) from data_denormalization where regions_ids && ('{'||r.id||'}')::integer[]) and site_id=#{@site.id}) as total_in_region
                  from projects_regions as pr
                  inner join projects_sites as ps on pr.project_id=ps.project_id and ps.site_id=#{@site.id}
                  inner join projects as p on pr.project_id=p.id
@@ -124,7 +124,7 @@ class ActivitiesController < ApplicationController
                  '/projects/'||array_to_string(array_agg(distinct pa.project_id),'')
                END as url,
                c.code,
-               (select count(*) from data_denormalization where countries_ids && ('{'||c.id||'}')::integer[] and (end_date is null OR end_date > now()) and site_id=#{@site.id}) as total_in_region
+               (select count(*) from data_denormalization where countries_ids && ('{'||c.id||'}')::integer[]) and site_id=#{@site.id}) as total_in_region
                 from countries as c
                   inner join countries_projects as cp on c.id=cp.country_id
                   inner join projects_sites as ps on cp.project_id=ps.project_id and ps.site_id=#{@site.id}
