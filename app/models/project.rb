@@ -429,20 +429,20 @@ class Project < ActiveRecord::Base
         intervention_id,
         intervention_id as interaction_intervention_id,
         additional_information,
-        site_specific_information,
+        p.site_specific_information,
         awardee_type as prime_awardee,
         project_needs,
         date_provided,
         date_updated,
 
-        idp_refugee_camp,
+        idprefugee_camp,
         verbatim_location,
 
         (SELECT '|' || array_to_string(array_agg(distinct name),'|') ||'|' FROM sectors AS s INNER JOIN projects_sectors AS ps ON s.id=ps.sector_id WHERE ps.project_id=p.id) AS sectors,
         (SELECT '|' || array_to_string(array_agg(distinct name),'|') ||'|' FROM clusters AS c INNER JOIN clusters_projects AS cp ON c.id=cp.cluster_id WHERE cp.project_id=p.id) AS clusters,
         (SELECT '|' || array_to_string(array_agg(distinct name),'|') ||'|' FROM diseases AS ds INNER JOIN diseases_projects AS dp ON ds.id=dp.disease_id WHERE dp.project_id=p.id) AS diseases,
         (SELECT '|' || array_to_string(array_agg(distinct name),'|') ||'|' FROM medicines AS m INNER JOIN medicines_projects AS mp ON m.id=mp.medicine_id WHERE mp.project_id=p.id) AS medicine,
-        (SELECT '|' || array_to_string(array_agg(distinct name),'|') ||'|' FROM audiences AS a INNER JOIN audiences_projects AS ap ON a.id=ap.audience_id WHERE ap.project_id=p.id) AS audience,
+        (SELECT '|' || array_to_string(array_agg(distinct name),'|') ||'|' FROM audiences AS a INNER JOIN projects_audiences AS ap ON a.id=ap.audience_id WHERE ap.project_id=p.id) AS audience,
 
 
         '|' || array_to_string(array_agg(distinct ps.site_id),'|') ||'|' as site_ids,
@@ -486,15 +486,15 @@ class Project < ActiveRecord::Base
         p.estimated_people_reached,
         calculation_of_number_of_people_reached,
         contact_person,
-        conctact_position,
+        p.contact_position,
         p.contact_email,
         p.contact_phone_number,
-        website,
+        project_website,
         activities,
         intervention_id,
         p.organization_id,
         additional_information,
-        site_specific_information,
+        p.site_specific_information,
         awardee_type,
         project_needs,
         date_provided,
@@ -507,7 +507,7 @@ class Project < ActiveRecord::Base
         clusters,
         audience,
         diseases,
-        medicine,
+        medicine
         ORDER BY interaction_intervention_id
     SQL
     ActiveRecord::Base.connection.execute(sql)
