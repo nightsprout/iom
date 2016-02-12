@@ -238,7 +238,7 @@ class Admin::ProjectsController < Admin::AdminController
             project_params['audience_ids'] << audience.id
           end
         end
-        project_params.delete('activity_names')
+        project_params.delete('audience_names')
 
       when 'data_source_names'
         value.each do |value|

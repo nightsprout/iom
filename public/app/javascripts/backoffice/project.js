@@ -848,7 +848,17 @@ function removeCountryIsoCode(country_id) {
 function newPropertyButtonClick(event) {
   var buttonElement = event.target;
   var propertyType = buttonElement.attributes['data-property-type'].value;
-  var propertyName = $("input#new-project-"+propertyType).val();
+  var textInput = $('input#new-project-'+propertyType);
+  var propertyName = textInput.val();
   var newPropertyInputWrapper = $(buttonElement).parent();
-  $('<label style="margin: 5px;"><input type="checkbox" value="'+propertyName+'" name="project['+propertyType+'_names][]" style="float: none;visibility: visible;width: initial;"/>'+propertyName+'</label>').insertBefore(buttonElement);
+
+  var checkbox = $('<input type="checkbox" value="'+propertyName+'" name="project['+propertyType+'_names][]" style="float: none;visibility: visible;width: initial;"/>');
+  var wrappedCheckbox = $('<label style="margin: 5px;"></label>').append(checkbox).append(propertyName);
+
+  propertyName = propertyName.replace(/\s+/g, ' ').replace(/^\s/, '').replace(/\s$/, '');
+  if (propertyName.length > 0) {
+    wrappedCheckbox.insertBefore(newPropertyInputWrapper);
+    textInput.val('');
+    checkbox.attr('checked', true);
+  }
 }
