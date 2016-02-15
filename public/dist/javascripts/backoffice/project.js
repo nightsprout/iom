@@ -11,6 +11,7 @@ var sectorToAdd              = 12; // sectorToAdd_
 var country_iso_codes        = [];
 var current_year_last_digits = (new Date()).getFullYear().toString().substr(2, 2);
 $(document).ready(function(ev){
+  $('button.new-project-property').click(newPropertyButtonClick);
 
   $('div.long_search form.search select').change(function(){
     $(this).closest('form').submit();
@@ -839,4 +840,25 @@ function removeCountryIsoCode(country_id) {
   var iso_code = countries_iso_codes[country_id];
   country_iso_codes.splice(country_iso_codes.indexOf(iso_code), 1)
   update_project_intervention_id();
+}
+
+
+// Custom project properties
+
+function newPropertyButtonClick(event) {
+  var buttonElement = event.target;
+  var propertyType = buttonElement.attributes['data-property-type'].value;
+  var textInput = $('input#new-project-'+propertyType);
+  var propertyName = textInput.val();
+  var newPropertyInputWrapper = $(buttonElement).parent();
+
+  var checkbox = $('<input type="checkbox" value="'+propertyName+'" name="project['+propertyType+'_names][]" style="float: none;visibility: visible;width: initial;"/>');
+  var wrappedCheckbox = $('<label style="margin: 5px;"></label>').append(checkbox).append(propertyName);
+
+  propertyName = propertyName.replace(/\s+/g, ' ').replace(/^\s/, '').replace(/\s$/, '');
+  if (propertyName.length > 0) {
+    wrappedCheckbox.insertBefore(newPropertyInputWrapper);
+    textInput.val('');
+    checkbox.attr('checked', true);
+  }
 }

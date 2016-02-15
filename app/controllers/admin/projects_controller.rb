@@ -96,7 +96,7 @@ class Admin::ProjectsController < Admin::AdminController
   end
 
   def create
-    @project = new_project( params[:project] )
+    @project = new_project( project_params )
     @project.intervention_id = nil
     @project.updated_by = current_user
 
@@ -126,7 +126,7 @@ class Admin::ProjectsController < Admin::AdminController
   def update
     @project = find_project(params[:id])
     @sectors = @project.sectors
-    @project.attributes = params[:project]
+    @project.attributes = project_params
     @project.updated_by = current_user
     if params[:project][:sector_ids].nil? && !@project.sectors.empty?
         @organizations_ids    = organizations_ids
@@ -213,5 +213,73 @@ class Admin::ProjectsController < Admin::AdminController
     Hash[Country.select([:id, :iso2_code]).all.map{|o| [o.id, o.iso2_code]}]
   end
   private :countries_iso_codes
+
+  private
+  def process_project_property_names(project_params)
+    project_params.each_pair do |key, value|
+      case key
+      when 'activity_names'
+        value.each do |value|
+          title = value.titleize
+          activity = Activity.find_by_name_ilike(title) || Activity.create(name: title)
+          if activity.present?
+            project_params['activity_ids'] ||= []
+            project_params['activity_ids'] << activity.id
+          end
+        end
+        project_params.delete('activity_names')
+
+      when 'audience_names'
+        value.each do |value|
+          title = value.titleize
+          audience = Audience.find_by_name_ilike(title) || Audience.create(name: title)
+          if audience.present?
+            project_params['audience_ids'] ||= []
+            project_params['audience_ids'] << audience.id
+          end
+        end
+        project_params.delete('audience_names')
+
+      when 'data_source_names'
+        value.each do |value|
+          title = value.titleize
+          data_source = DataSource.find_by_name_ilike(title) || DataSource.create(name: title)
+          if data_source.present?
+            project_params['data_source_ids'] ||= []
+            project_params['data_source_ids'] << data_source.id
+          end
+        end
+        project_params.delete('data_source_names')
+
+      when 'disease_names'
+        value.each do |value|
+          title = value.titleize
+          disease = Disease.find_by_name_ilike(title) || Disease.create(name: title)
+          if disease.present?
+            project_params['disease_ids'] ||= []
+            project_params['disease_ids'] << disease.id
+          end
+        end
+        project_params.delete('disease_names')
+
+      when 'medicine_names'
+        value.each do |value|
+          title = value.titleize
+          medicine = Medicine.find_by_name_ilike(title) || Medicine.create(name: title)
+          if medicine.present?
+            project_params['medicine_ids'] ||= []
+            project_params['medicine_ids'] << medicine.id
+          end
+        end
+        project_params.delete('medicine_names')
+      end
+    end
+    
+    return project_params
+  end
+
+  def project_params
+    process_project_property_names(params[:project])
+  end
 
 end
