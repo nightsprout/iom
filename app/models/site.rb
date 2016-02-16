@@ -721,19 +721,18 @@ SQL
     ActiveRecord::Base.connection.execute("insert into projects_sites select subsql.id as project_id, #{self.id} as site_id from (#{projects_sql({ :limit => nil, :offset => nil }).to_sql}) as subsql")
     #Work on the denormalization
 
-    set_cached_projects_by_level( 1 ) if navigate_by_level1?
-    set_cached_projects_by_level( 2 ) if navigate_by_level2?
-    set_cached_projects_by_level( 3 ) if navigate_by_level3?
+    levels = []
+    levels << 1 if navigate_by_level1?
+    levels << 2 if navigate_by_level1?
+    levels << 3 if navigate_by_level1?
+
+    Project.select([:id, :updated_at, :cached_at]).where("updated_at > ?", Time.now - 24.hours).where("cached_at IS NULL OR cached_at < ?", Time.now - 24.hours).find_each do |project|
+      project.update_data_denormalization
+    end
 
     projects_countries( true )
 
     update_attributes( :cached_at => Time.now )
-  end
-
-  def set_cached_projects_by_level(level)
-    Project.where("updated_at > ?", Time.now - 24.hours).where("cached_at IS NULL OR cached_at < ?", Time.now - 24.hours).find_each do |project|
-      project.update_data_denormalization
-    end
   end
 
   def remove_cached_projects

@@ -1051,14 +1051,14 @@ SQL
           ) AS subq;
         INSERT_NEW_ROW
       end  
+    end
 
-      # set cached_at only if called with default options
-      if opts[:levels] == [1,2,3] and opts[:force] == false and opts[:sites].nil?
-        self.update_attribute(:cached_at, Time.now)
-      end
+    # set cached_at only if called with default options
+    if opts[:levels] == [1,2,3] and opts[:force] == false and opts[:sites].nil?
+      self.update_attribute(:cached_at, Time.now)
     end
   end
-
+  
   ##############################
   # PROJECT SYNCHRONIZATION
 
