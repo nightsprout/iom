@@ -731,12 +731,9 @@ SQL
   end
 
   def set_cached_projects_by_level(level)
-    Project.where("updated_at > ?", Time.now - 24.hours).where("cached_at IS NULL OR cached_at < ?", Time.now - 24.hours).find_in_batches(batch_size: 100) do |batch|
-      batch.each do |project|
-        project.update_data_denormalization
-      end
+    Project.where("updated_at > ?", Time.now - 24.hours).where("cached_at IS NULL OR cached_at < ?", Time.now - 24.hours).find_each do |project|
+      project.update_data_denormalization
     end
-
   end
 
   def remove_cached_projects
