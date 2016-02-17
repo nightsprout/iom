@@ -1,14 +1,14 @@
 module DiseasesHelper
   def diseases_projects_list_subtitle
     if @filter_by_location
-      pluralize(@disease_project_count, "#{@data.name} project", "#{@data.name} projects") + " in #{@location_name}"
+      pluralize(@projects.total_entries, "#{@data.name} project", "#{@data.name} projects") + " in #{@location_name}"
     else
        location = if @site.navigate_by_country?
          pluralize(@data.total_countries(@site), 'country', 'countries')
        else
          pluralize(@data.total_regions(@site), @site.word_for_regions.singularize, @site.word_for_regions)
        end
-       pluralize(@disease_project_count, "#{@data.name} project", "#{@data.name} projects") + " in #{location}"
+       pluralize(@projects.total_entries, "#{@data.name} project", "#{@data.name} projects") + " in #{location}"
     end
   end
 
