@@ -80,7 +80,6 @@ class Project < ActiveRecord::Base
   end)
 
   after_create :generate_intervention_id
-  after_save{ Resque.enqueue(CacheProject, self.id) }
   after_destroy{ Project.connection.execute("DELETE FROM data_denormalization WHERE project_id=#{self.id}") }
   before_validation :strip_urls
 
@@ -946,21 +945,22 @@ SQL
     generate_intervention_id if Project.where('intervention_id = ? AND id <> ?', intervention_id, id).count > 0
   end
 
-  def update_data_denormalization(opts = {levels: [1, 2, 3], force: false, sites: nil})
-    if !opts[:force] and self.cached_at.present? and Time.now - self.cached_at < 6.hours
+  def update_data_denormalization(opts = {levels: [1, 2, 3], force: false, sites: nil, sleep: 10})
+    # don't cache projects that have been recently cached
+    if !opts[:force] and self.cached_at.present? and Time.now - self.cached_at < 12.hours
       return
-    else
-      self.update_attribute(:cached_at, Time.now)
     end
 
-    while Time.now - self.updated_at < 10.seconds
-      sleep 10
-      self.reload
+    # don't cache projects that have been updated since the last time they were cached
+    if !opts[:force] and self.cached_at.present? and self.updated_at < self.cached_at
+      return
     end
+
+    sleep opts[:sleep] if opts[:sleep].is_a? Integer
 
     sites = opts[:sites]
-    sites ||= Site.where(global: true)
-    sites ||= Site.all
+    sites ||= Site.where(global: true).to_a
+    sites = Site.all if sites.length == 0
     site_ids = sites.collect { |s| s.id if s.respond_to? :id }
 
     connection = ActiveRecord::Base.connection
@@ -1068,9 +1068,12 @@ SQL
       end  
     end
 
-    self.update_attribute(:cached_at, Time.now)
+    # set cached_at only if called with default options
+    if opts[:levels] == [1,2,3] and opts[:force] == false and opts[:sites].nil?
+      self.update_attribute(:cached_at, Time.now)
+    end
   end
-
+  
   ##############################
   # PROJECT SYNCHRONIZATION
 
