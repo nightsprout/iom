@@ -436,7 +436,7 @@ class Site < ActiveRecord::Base
   def total_projects(options = {})
     Rails.cache.fetch("site_#{self.id}_total_projects", {:expires_in => 1.day}) do 
       sql = "select count(distinct projects_sites.project_id) as count from projects_sites, projects where projects_sites.site_id = #{self.id}
-                    and projects_sites.project_id = projects.id and (projects.end_date is null OR projects.end_date > now())"
+                    and projects_sites.project_id = projects.id"
       ActiveRecord::Base.connection.execute(sql).first['count'].to_i
     end
   end
@@ -457,22 +457,21 @@ class Site < ActiveRecord::Base
   end
 
   def organizations_count
-    sql = "select count(o.id) as count from organizations as o where id in (
-    select p.primary_organization_id from projects as p inner join projects_sites as ps on p.id=ps.project_id and site_id=#{self.id} where (p.end_date is null OR p.end_date > now())) "
+    sql = "select count(o.id) as count from organizations as o"
     ActiveRecord::Base.connection.execute(sql).first['count'].to_i
   end
 
   def clusters
     Cluster.find_by_sql("select c.* from clusters as c where id in (
         select cp.cluster_id from (clusters_projects as cp inner join projects as p on cp.project_id=p.id)
-        inner join projects_sites as ps on p.id=ps.project_id and site_id=#{self.id} where p.end_date >= current_date)
+        inner join projects_sites as ps on p.id=ps.project_id and site_id=#{self.id})
         order by c.name")
   end
 
   def sectors
     Sector.find_by_sql("select s.* from sectors as s where id in (
         select pse.sector_id from (projects_sectors as pse inner join projects as p on pse.project_id=p.id)
-        inner join projects_sites as ps on p.id=ps.project_id and site_id=#{self.id} where p.end_date >= current_date)
+        inner join projects_sites as ps on p.id=ps.project_id and site_id=#{self.id})
         order by s.name")
   end
 

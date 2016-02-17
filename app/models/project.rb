@@ -621,8 +621,6 @@ SQL
       time_window_left  = Time.at(options[:time_window][:left].to_i).strftime('%Y-%m-%d')
       time_window_right = Time.at(options[:time_window][:right].to_i).strftime('%Y-%m-%d')
 
-      options[:time_window][:left] = 
-
       where << "end_date >= '#{time_window_left}' and start_date <= '#{time_window_right}'"
     end
     
@@ -726,11 +724,10 @@ SQL
     else
       where << "site_id=#{site.id}"
       where << "level = #{level}"
-      where << "(end_date is null OR end_date > now())"
       sql="select * from data_denormalization where #{where.join(' and ')}"
     end
     
-    total_entries = ActiveRecord::Base.connection.execute("select count(*) as count from (#{sql}) as q").first['count'].to_i
+    total_entries = ActiveRecord::Base.connection.execute("select count(1) as count from (#{sql}) as q").first['count'].to_i
 
     options[:per_page] = 1 if options[:per_page].blank? or options[:per_page] < 1
     if total_entries.to_f == 0.0
@@ -794,6 +791,24 @@ SQL
 
   end
 
+  def self.distinct_countries(ids = [])
+    if ids.length == 0
+      where_clause = ''
+    else
+      where_clause = "WHERE project_id = ANY('{#{ids.to_s[1...-1]}}'::int[])"
+    end
+
+    sql = <<-SQL
+        SELECT array_length(array_agg(id), 1)
+        FROM (
+               SELECT DISTINCT unnest(countries_ids)
+               FROM data_denormalization
+               #{where_clause}
+             ) AS record(id)
+      SQL
+    ActiveRecord::Base.connection.execute(sql).first["array_length"].to_i
+  end
+  
   def self.custom_fields
     (columns.map{ |c| c.name }).map{ |c| "#{self.table_name}.#{c}" }
   end
