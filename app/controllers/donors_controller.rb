@@ -72,7 +72,7 @@ class DonorsController < ApplicationController
       :donor_id => @donor.id,
       :per_page => 10,
       :page => params[:page],
-      :order => 'created_at DESC',
+      :order         => 'is_active DESC, created_at DESC',
       :start_in_page => params[:start_in_page],
       :organization_filter => params[:organization_id],
       :category_id => params[:category_id]
@@ -103,7 +103,7 @@ class DonorsController < ApplicationController
       pageless_options = {
         :donor_id => @donor.id,
         :per_page => Project.all.size,
-        :order => 'created_at DESC',
+        :order => 'is_active DESC, created_at DESC',
         :organization_filter => params[:organization_id],
         :category_id => params[:category_id]
       }
@@ -136,7 +136,7 @@ class DonorsController < ApplicationController
       :donor      => @donor.id,
       :per_page      => 10,
       :page          => params[:page],
-      :order         => 'created_at DESC',
+      :order         => 'is_active DESC, created_at DESC',
       :start_in_page => params[:start_in_page]
     }
 

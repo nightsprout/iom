@@ -29,7 +29,7 @@ class DiseasesController < ApplicationController
       :disease       => @data.id,
       :per_page      => 10,
       :page          => params[:page],
-      :order         => 'created_at DESC',
+      :order         => 'is_active DESC, created_at DESC',
       :start_in_page => params[:start_in_page],
       :time_window   => {
                           :left  => params[:time_window_left],

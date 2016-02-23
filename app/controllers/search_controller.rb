@@ -97,7 +97,7 @@ class SearchController < ApplicationController
 
     sql = "select * from data_denormalization as dn
               #{where}
-              order by created_at DESC
+              order by is_active DESC, created_at DESC
               limit #{limit} offset #{limit * (@current_page - 1)}"
 
     @projects = ActiveRecord::Base.connection.execute(sql)
