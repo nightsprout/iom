@@ -564,7 +564,7 @@ class Project < ActiveRecord::Base
       (select path from regions where id=regions_ids[1]) as path
       from data_denormalization where
       organization_id = #{self.primary_organization_id}
-      and project_id!=#{self.id} and site_id=#{site.id} and (end_date is null OR end_date > now())
+      and project_id!=#{self.id} and site_id=#{site.id}
       and (select center_lat from regions where id=regions_ids[1]) is not null
       limit #{limit}
 SQL
@@ -579,7 +579,7 @@ SQL
           (select path from regions where id=regions_ids[1]) as path
           from data_denormalization where
           regions_ids && (select ('{'||array_to_string(array_agg(distinct region_id),',')||'}')::integer[] as regions_ids from projects_regions where project_id=#{self.id})
-          and project_id!=#{self.id} and site_id=#{site.id} and (end_date is null OR end_date > now())
+          and project_id!=#{self.id} and site_id=#{site.id}
           and (select center_lat from regions where id=regions_ids[1]) is not null
           limit #{limit}
 SQL
@@ -592,7 +592,7 @@ SQL
           (select center_lon from regions where id=regions_ids[1]) as center_lon,
           (select path from regions where id=regions_ids[1]) as path
           from data_denormalization where
-          project_id!=#{self.id} and site_id=#{site.id} and (end_date is null OR end_date > now())
+          project_id!=#{self.id} and site_id=#{site.id}
           limit #{limit}
 SQL
     )

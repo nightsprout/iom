@@ -80,7 +80,7 @@ class DataSource < ActiveRecord::Base
   def projects_for_csv(site)
     sql = "select p.id, p.name, p.description, p.primary_organization_id, p.implementing_organization, p.partner_organizations, p.cross_cutting_issues, p.start_date, p.end_date, p.budget, p.target, p.estimated_people_reached, p.contact_person, p.contact_email, p.contact_phone_number, p.site_specific_information, p.created_at, p.updated_at, p.data_sources, p.intervention_id, p.additional_information, p.awardee_type, p.date_provided, p.date_updated, p.contact_position, p.website, p.verbatim_location, p.calculation_of_number_of_people_reached, p.project_needs, p.idprefugee_camp
     from data_sources_projects as ps
-    inner join projects as p on p.id=ps.project_id and (p.end_date is null OR p.end_date > now())
+    inner join projects as p on p.id=ps.project_id
     inner join projects_sites as psi on p.id=psi.project_id and psi.site_id=#{site.id}
     where ps.data_source_id=#{self.id}"
     ActiveRecord::Base.connection.execute(sql)
@@ -89,7 +89,7 @@ class DataSource < ActiveRecord::Base
   def projects_for_kml(site)
     sql = "select p.name, ST_AsKML(p.the_geom) as the_geom
     from data_sources_projects as ps
-    inner join projects as p on p.id=ps.project_id and (p.end_date is null OR p.end_date > now())
+    inner join projects as p on p.id=ps.project_id
     inner join projects_sites as psi on p.id=psi.project_id and psi.site_id=#{site.id}
     where ps.data_source_id=#{self.id}"
     ActiveRecord::Base.connection.execute(sql)
@@ -98,7 +98,7 @@ class DataSource < ActiveRecord::Base
   def projects_for_geojson(site)
     sql = "select p.name, ST_AsGeoJSON(p.the_geom) as the_geom
     from data_sources_projects as cp
-    inner join projects as p on p.id=cp.project_id and (p.end_date is null OR p.end_date > now())
+    inner join projects as p on p.id=cp.project_id
     inner join projects_sites as psi on p.id=psi.project_id and psi.site_id=#{site.id}
     where cp.cluster_id=#{self.id}"
     ActiveRecord::Base.connection.execute(sql)
