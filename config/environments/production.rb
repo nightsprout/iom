@@ -42,11 +42,13 @@ Iom::Application.configure do
   config.action_mailer.delivery_method = :smtp
   config.action_mailer.default_url_options = { :host => "partnersmap.org" }
   config.action_mailer.smtp_settings = {
-    address:              'smtp.mandrillapp.com',
+    address:              'smtp.sendgrid.net',
     port:                 587,
     domain:               'partnersmap.org',
-    user_name:            'app29189861@heroku.com',
-    password:             '2MTJv9pQxLZ47YX3R6u6Ww',
+    user_name:            ENV['SENDGRID_USERNAME'],
+    password:             ENV['SENDGRID_PASSWORD'],
+    domain:               'heroku.com',
+    enable_starttls_auto: true,
     authentication:       'plain'
   }
 
