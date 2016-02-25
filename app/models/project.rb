@@ -258,8 +258,6 @@ class Project < ActiveRecord::Base
     where << "(cp.country_id IS NOT NULL OR pr.region_id IS NOT NULL)"
     where << "site_id = #{site.id}" if site
 
-    where << '(p.end_date is null OR p.end_date > now())' if !options[:include_non_active]
-    
     if options[:geojson]
       geojson_select = <<-SQL
         , CASE WHEN pr.region_id IS NOT NULL THEN
