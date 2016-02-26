@@ -82,10 +82,6 @@
             <%= f.hidden_field :project_context_cluster_id  %>
             <div class="wrapper">
               <ul class="clusters_or_sectors scroll_pane">
-                <li class="section"><p>CLUSTERS</p></li>
-                <% Cluster.get_select_values.each do |cluster| %>
-                  <li><a class="cluster_value" id="cluster_<%= cluster.id %>"><%= truncate(cluster.name, :length => 30)  %></a></li>
-                <%end -%>
                 <%= f.hidden_field :project_context_sector_id  %>
                 <li class="section"><p>SECTORS</p></li>
                 <% Sector.get_select_values.each do |sector| %>

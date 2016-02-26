@@ -426,53 +426,6 @@
 <!-- ##################### CONTEXT ##################### -->
 
   <h3 class="section museo_sans">CONTEXT</h3>
-  <div id="clusters_content" class="field">
-    <label>CLUSTERS <span class="info">(Only valid for UN-coordinated emergencies.)</span>
-      <!-- FIELD DESCRIPTION -->
-      <div class="field_info">
-        <span class="info">i</span>
-        <div class="field_text">
-          <div class="top">
-            <a href="#close">x</a>
-          </div>
-          <div class="bottom">
-            <h3>Cluster</h3>
-            <span class="scroll">
-            <p>United Nations Cluster to which a project or donation is reported. Only applicable for certain emergencies.</p>
-            </span>
-          </div>
-        </div>
-      </div>
-      <!-- END FIELD DESCRIPTION -->
-
-
-    </label>
-
-      <ul class="clusters">
-        <% unless @project.clusters.empty? %>
-          <% @project.clusters.each do |cluster| %>
-          <li id="cluster_<%= cluster.id %>">
-            <p><%= cluster.name %></p><input id="<%= cluster.id %>" type="checkbox" name="project[cluster_ids][]" value="<%= cluster.id %>" checked="true"/><a href="#cluster_<%= cluster.id %>" class="remove_this close"></a>
-          </li>
-          <% end -%>
-        <% end -%>
-      </ul>
-    <div class="cluster_options">
-      <span class="combo_cluster_options">
-        <%= errors_for_span(@project, :clusters) %>
-        <p id="clusters_0">Select more clusters</p>
-        <div class="wrapper">
-          <ul class="options scroll_pane">
-          <% Cluster.get_select_values.collect do |cluster| %>
-            <li><a id="clusters_<%= cluster.id %>"><%= cluster.name %></a></li>
-          <% end %>
-            <li class="last"></li>
-          </ul>
-        </div>
-      </span>
-      <a id="add_cluster_bttn" class="add_cluster museo_sans shadow_green">add cluster</a>
-    </div>
-  </div>
   <div class="field">
     <label>SECTORS  <strong>*</strong></label>
 <!--     <span id="hidden" class="combo_large <%= 'error' if @project.errors[:sectors].present? %>">
