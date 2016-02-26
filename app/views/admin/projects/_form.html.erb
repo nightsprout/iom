@@ -674,18 +674,6 @@
     </span>
   </div>
 
-  <div id="idprefugee_camp" class="field">
-    <span class="chars">
-      <label>IDP/REFUGEE CAMP</label>
-      <% idprefugee_camp = f.object.idprefugee_camp || '' %>
-      <p id="chars_left_camp"><%= 150 - idprefugee_camp.length %> chars left</p>
-    </span>
-
-    <span class="textarea">
-      <%= f.text_area :idprefugee_camp, :onkeyup=>"limitChars('project_idprefugee_camp', 150, 'chars_left_camp')" %>
-    </span>
-  </div>
-
 <!-- ##################### CONTACT INFORMATION ##################### -->
 
   <h3 class="section museo_sans">CONTACT INFORMATION</h3>
