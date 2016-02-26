@@ -38,7 +38,7 @@ class OrganizationsController < ApplicationController
       :organization  => @organization.id,
       :per_page      => 10,
       :page          => params[:page],
-      :order         => 'created_at DESC',
+      :order         => 'is_active DESC, created_at DESC',
       :start_in_page => params[:start_in_page]
     })
     @projects_custom_find_options[:organization_category_id] = @filter_by_category if filter_by_category_valid?

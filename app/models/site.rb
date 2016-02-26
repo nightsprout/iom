@@ -312,7 +312,7 @@ class Site < ActiveRecord::Base
       sql="select c.id,c.name,count(ps.*) as count from clusters as c
       inner join clusters_projects as cp on c.id=cp.cluster_id
       inner join projects_sites as ps on cp.project_id=ps.project_id and ps.site_id=#{self.id}
-      inner join projects as p on ps.project_id=p.id and (p.end_date is null OR p.end_date > now())
+      inner join projects as p on ps.project_id=p.id
       group by c.id,c.name order by count desc limit 20"
       Cluster.find_by_sql(sql).map do |c|
         [c,c.count.to_i]
@@ -332,8 +332,6 @@ class Site < ActiveRecord::Base
             and prs.project_id = p.id
             and prs.sector_id = s.id
             and prs.project_id = p.id
-            and p.end_date >= current_date
-            and p.end_date is not null
           group by s.id,s.name
           order by count desc
           limit 20
@@ -351,7 +349,7 @@ class Site < ActiveRecord::Base
       sql="select #{Region.custom_fields.join(',')},count(ps.*) as count from regions
         inner join projects_regions as pr on regions.id=pr.region_id and regions.level=#{self.level_for_region}
         inner join projects_sites as ps on pr.project_id=ps.project_id and ps.site_id=#{self.id}
-        inner join projects as p on ps.project_id=p.id and (p.end_date is null OR p.end_date > now())
+        inner join projects as p on ps.project_id=p.id
         group by #{Region.custom_fields.join(',')} order by count DESC"
       Region.find_by_sql(sql).map do |r|
         [r,r.count.to_i]
@@ -364,7 +362,7 @@ class Site < ActiveRecord::Base
       sql="select count(distinct(regions.id)) as count from regions
         inner join projects_regions as pr on pr.region_id=regions.id and regions.level=#{self.level_for_region}
         inner join projects_sites as ps on pr.project_id=ps.project_id and ps.site_id=#{self.id}
-        inner join projects as p on ps.project_id=p.id and (p.end_date is null OR p.end_date > now());"
+        inner join projects as p on ps.project_id=p.id"
       ActiveRecord::Base.connection.execute(sql).first['count'].to_i
     end
   end
@@ -387,7 +385,7 @@ class Site < ActiveRecord::Base
                <<-SQL
                 INNER JOIN countries_projects AS pr ON pr.country_id = c.id
                 INNER JOIN projects_sites     AS ps ON pr.project_id = ps.project_id AND ps.site_id = #{id}
-                INNER JOIN projects           AS p  ON ps.project_id=p.id AND (p.end_date IS NULL OR p.end_date > now())
+                INNER JOIN projects           AS p  ON ps.project_id=p.id
                SQL
              end
 
@@ -406,7 +404,7 @@ class Site < ActiveRecord::Base
       sql="select #{fields.join(',')},count(distinct ps.project_id) as count from countries
         inner join countries_projects as pr on pr.country_id=countries.id
         inner join projects_sites as ps on pr.project_id=ps.project_id and ps.site_id=#{self.id}
-        inner join projects as p on ps.project_id=p.id and (p.end_date is null OR p.end_date > now())
+        inner join projects as p on ps.project_id=p.id
         group by countries.id order by count DESC"
       Country.find_by_sql(sql).map do |c|
         [c, c.count.to_i]
@@ -420,7 +418,7 @@ class Site < ActiveRecord::Base
       sql="select o.id,o.name,count(distinct ps.project_id) as count from organizations as o
         inner join projects as p on o.id=p.primary_organization_id
         inner join projects_sites as ps on p.id=ps.project_id and ps.site_id=#{self.id}
-        inner join projects as pr on ps.project_id=pr.id and (pr.end_date is null OR pr.end_date > now())
+        inner join projects as pr on ps.project_id=pr.id
         group by o.id,o.name order by count DESC"
       Organization.find_by_sql(sql).map do |o|
           [o,o.count.to_i]
@@ -743,24 +741,21 @@ SQL
   def projects_for_csv
     sql = "select p.id, p.name, p.description, p.primary_organization_id, p.implementing_organization, p.partner_organizations, p.cross_cutting_issues, p.start_date, p.end_date, p.budget, p.target, p.estimated_people_reached, p.contact_person, p.contact_email, p.contact_phone_number, p.site_specific_information, p.created_at, p.updated_at, p.activities, p.intervention_id, p.additional_information, p.awardee_type, p.date_provided, p.date_updated, p.contact_position, p.website, p.verbatim_location, p.calculation_of_number_of_people_reached, p.project_needs, p.idprefugee_camp
     from projects as p
-    inner join projects_sites as ps on p.id=ps.project_id and ps.site_id=#{self.id}
-    where (p.end_date is null OR p.end_date > now())"
+    inner join projects_sites as ps on p.id=ps.project_id and ps.site_id=#{self.id}"
     ActiveRecord::Base.connection.execute(sql)
   end
 
   def projects_for_kml
     sql = "select p.name, ST_AsKML(p.the_geom) as the_geom
     from projects as p
-    inner join projects_sites as ps on p.id=ps.project_id and ps.site_id=#{self.id}
-    where (p.end_date is null OR p.end_date > now())"
+    inner join projects_sites as ps on p.id=ps.project_id and ps.site_id=#{self.id}"
     ActiveRecord::Base.connection.execute(sql)
   end
 
   def projects_for_geojson
     sql = "select p.name, ST_AsGeoJSON(p.the_geom) as the_geom
     from projects as p
-    inner join projects_sites as ps on p.id=ps.project_id and ps.site_id=#{self.id}
-    where (p.end_date is null OR p.end_date > now())"
+    inner join projects_sites as ps on p.id=ps.project_id and ps.site_id=#{self.id}"
     ActiveRecord::Base.connection.execute(sql)
   end
 

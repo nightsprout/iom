@@ -53,7 +53,7 @@ class GeoregionController < ApplicationController
       @projects_custom_find_options.merge!({
         :country => country.id,
         :level => 1,
-        :order => 'created_at DESC'
+        :order => 'is_active DESC, created_at DESC',
       })
       @projects_custom_find_options[:country_category_id] = @filter_by_category if @filter_by_category.present?
 
@@ -121,7 +121,7 @@ class GeoregionController < ApplicationController
       @projects_custom_find_options.merge!({
         :region   => @area.id,
         :level    => @site.levels_for_region & [@area.level],
-        :order    => 'created_at DESC'
+        :order    => 'is_active DESC, created_at DESC',
       })
       @projects_custom_find_options[:region_category_id] = @filter_by_category if @filter_by_category.present?
 
@@ -167,7 +167,7 @@ class GeoregionController < ApplicationController
 
     if @filter_by_category.present?
       @category_name = (@site.navigate_by_sector?? Sector : Cluster).where(:id => @filter_by_category).first.try(:name)
-      @filter_name =  "#{@georegion_projects_count} #{@category_name} active projects"
+      @filter_name =  "#{@georegion_projects_count} #{@category_name} projects"
     end
 
     raise NotFound if @sql.blank?

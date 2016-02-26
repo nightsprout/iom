@@ -1,6 +1,6 @@
 module SitesHelper
   def site_project_count
-    output = "#{pluralize(@site.total_projects, 'active project', 'active projects')} in "
+    output = "#{pluralize(@site.total_projects, 'project', 'projects')} in "
 
     if @site.navigate_by_country?
       output << pluralize(@site.total_countries, 'country', 'countries').strip

@@ -29,7 +29,7 @@ class ActivitiesController < ApplicationController
       :activity      => @data.id,
       :per_page      => 10,
       :page          => params[:page],
-      :order         => 'created_at DESC',
+      :order         => 'is_active DESC, created_at DESC',
       :start_in_page => params[:start_in_page]
     })
 

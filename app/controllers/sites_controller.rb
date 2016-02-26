@@ -24,7 +24,7 @@ class SitesController < ApplicationController
   def site_home
     @projects = Project.custom_find @site, :per_page => 10,
                                            :page => params[:page],
-                                           :order => 'created_at DESC'
+                                           :order => 'is_active DESC, created_at DESC'
     @countries = Project.distinct_countries
 
     @footer_sites = @site.present? ? @site.sites_for_footer : []

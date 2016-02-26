@@ -27,7 +27,7 @@ class Donor < ActiveRecord::Base
   has_many :resources, :conditions => "resources.element_type = #{Iom::ActsAsResource::DONOR_TYPE}", :foreign_key => :element_id, :dependent => :destroy
   has_many :media_resources, :conditions => "media_resources.element_type = #{Iom::ActsAsResource::DONOR_TYPE}", :foreign_key => :element_id, :dependent => :destroy, :order => 'position ASC'
   has_many :donations, :dependent => :destroy
-  has_many :donated_projects, :through => :donations, :source => :project, :uniq => true, :conditions => "(projects.end_date is null or projects.end_date > now())"
+  has_many :donated_projects, :through => :donations, :source => :project, :uniq => true
   has_many :all_donated_projects, :through => :donations, :source => :project, :uniq => true
   has_many :offices, :dependent => :destroy
 
@@ -56,34 +56,20 @@ class Donor < ActiveRecord::Base
     where("name ilike ?", "%#{name}%" ).first
   end
 
-  def donated_projects_count(site, options = nil)
+  def donated_projects_count(site, options = {})
     if options[:organization_id]
       sql = "select count(distinct(d.project_id)) from donations d
-      inner join projects as p on d.project_id = p.id and (p.end_date is null OR p.end_date > now())
+      inner join projects as p on d.project_id = p.id
       inner join projects_sites as ps on d.project_id=ps.project_id and ps.site_id=#{site.id}
       where d.donor_id=#{self.id} and p.primary_organization_id=#{options[:organization_id]}"
     else
       sql = "select count(distinct(d.project_id)) from donations d
-      inner join projects as p on d.project_id = p.id and (p.end_date is null OR p.end_date > now())
+      inner join projects as p on d.project_id = p.id
       inner join projects_sites as ps on d.project_id=ps.project_id and ps.site_id=#{site.id}
       where d.donor_id=#{self.id}"
     end
     ActiveRecord::Base.connection.execute(sql).first['count'].to_i
   end
-  # def donated_projects_count(site, options = nil)
-  #   where = []
-  #   where << "d.donor_id = #{self.id}"
-  #   where << "p.primary_organization_id=#{options[:organization_id]}" if options[:organization_id]
-  #   where <<
-  #   joins = []
-  #   joins << "inner join projects as p on d.project_id = p.id and (p.end_date is null OR p.end_date > now())"
-  #   joins << "inner join projects_sites as ps on d.project_id=ps.project_id and ps.site_id=#{site.id}"
-  #   if options[:organization_id]
-
-  #   end
-  #   sql = "select count(distinct(d.project_id)) from donations d #{joins.join(' ')} WHERE #{where.join(' and ')}"
-  #   ActiveRecord::Base.connection.execute(sql).first['count'].to_i
-  # end
 
   def donations_amount
     donations.inject(0){
@@ -121,7 +107,7 @@ class Donor < ActiveRecord::Base
       sql="select s.id,s.name,count(ps.*) as count from sectors as s
       inner join projects_sectors as ps on s.id=ps.sector_id
       inner join projects_sites as psi on ps.project_id=psi.project_id and psi.site_id=#{site.id}
-      inner join projects as p on ps.project_id=p.id and (p.end_date is null OR p.end_date > now()) #{organization_condition}
+      inner join projects as p on ps.project_id=p.id #{organization_condition}
       inner join donations as d on psi.project_id=d.project_id and d.donor_id=#{self.id}
       #{location_join}
       group by s.id,s.name order by count DESC"
@@ -132,7 +118,7 @@ class Donor < ActiveRecord::Base
       sql="select c.id,c.name,count(ps.*) as count from clusters as c
       inner join clusters_projects as cp on c.id=cp.cluster_id
       inner join projects_sites as ps on cp.project_id=ps.project_id and ps.site_id=#{site.id}
-      inner join projects as p on ps.project_id=p.id and (p.end_date is null OR p.end_date > now()) #{organization_condition}
+      inner join projects as p on ps.project_id=p.id #{organization_condition}
       inner join donations as d on ps.project_id=d.project_id and d.donor_id=#{self.id}
       #{location_join}
       group by c.id,c.name order by count DESC"
@@ -142,40 +128,6 @@ class Donor < ActiveRecord::Base
     end
   end
 
-  # Array of arrays
-  # [[region, count], [region, count]]
-#   def projects_regions(site, category_id = nil)
-#     Region.find_by_sql(
-# <<-SQL
-#   select r.id,r.name,r.level,r.parent_region_id, r.path, r.country_id,count(ps.*) as count from regions as r
-#     inner join projects_regions as pr on r.id=pr.region_id
-#     inner join projects_sites as ps on pr.project_id=ps.project_id and ps.site_id=#{site.id}
-#     inner join projects as p on ps.project_id=p.id and (p.end_date is null OR p.end_date > now())
-#     inner join donations as d on ps.project_id=d.project_id and d.donor_id=#{self.id}
-#     where r.level=#{site.level_for_region}
-#     group by r.id,r.name,r.level,r.parent_region_id, r.path, r.country_id order by count DESC
-# SQL
-#     ).map do |r|
-#       [r, r.count.to_i]
-#     end
-#   end
-
-#   # Array of arrays
-#   # [[country, count], [country, count]]
-#   def projects_countries(site, category_id = nil)
-#     Country.find_by_sql(
-# <<-SQL
-#   select c.id,c.name,count(ps.*) as count from countries as c
-#     inner join countries_projects as pr on c.id=pr.country_id
-#     inner join projects_sites as ps on pr.project_id=ps.project_id and ps.site_id=#{site.id}
-#     inner join projects as p on ps.project_id=p.id and (p.end_date is null OR p.end_date > now())
-#     inner join donations as d on ps.project_id=d.project_id and d.donor_id=#{self.id}
-#     group by c.id,c.name order by count DESC
-# SQL
-#     ).map do |r|
-#       [r, r.count.to_i]
-#     end
-#   end
  # Array of arrays
   # [[region, count], [region, count]]
   def projects_regions(site, category_id = nil, organization_id = nil, location_id = nil)
@@ -199,7 +151,7 @@ class Donor < ActiveRecord::Base
 <<-SQL
 select r.id,r.name,r.level,r.parent_region_id, r.path, r.country_id,count(ps.*) as count from regions as r
   inner join projects_regions as pr on r.id=pr.region_id #{location_filter}
-  inner join projects as p on p.id=pr.project_id and (p.end_date is null OR p.end_date > now()) #{organization_filter}
+  inner join projects as p on p.id=pr.project_id #{organization_filter}
   inner join projects_sites as ps on p.id=ps.project_id and ps.site_id=#{site.id}
   inner join donations as dn on dn.project_id = p.id
   #{category_join}
@@ -235,7 +187,7 @@ SQL
 <<-SQL
 select c.id,c.name,count(ps.*) as count from countries as c
   inner join countries_projects as pr on c.id=pr.country_id #{location_filter}
-  inner join projects as p on p.id=pr.project_id and (p.end_date is null OR p.end_date > now()) #{organization_filter}
+  inner join projects as p on p.id=pr.project_id #{organization_filter}
   inner join projects_sites as ps on p.id=ps.project_id and ps.site_id=#{site.id}
   inner join donations as dn on dn.project_id = p.id
   #{category_join}
@@ -265,7 +217,7 @@ SQL
     sql="select s.id,s.name,count(ps.*) as count from sectors as s
     inner join projects_sectors as cp on s.id=cp.sector_id
     inner join projects_sites as ps on cp.project_id=ps.project_id and ps.site_id=#{site_id}
-    inner join projects as p on ps.project_id=p.id and (p.end_date is null OR p.end_date > now())
+    inner join projects as p on ps.project_id=p.id
     inner join donations as d on ps.project_id = d.project.id and d.donor_id = #{self.id}
     group by s.id,s.name order by count DESC limit 20"
     Sector.find_by_sql(sql).map do |s|
@@ -273,18 +225,7 @@ SQL
     end
   end
 
-  # def donor_projects_sectors_or_clusters(site)
-  #   if site.navigate_by_sector?
-  #     categories = projects_sectors
-  #   elsif navigate_by_cluster?
-  #     categories = projects_clusters
-  #   end
-
-  #   categories.sort!{|x, y| x.first.class.name <=> y.first.class.name}
-  #   categories
-  # end
-
-def projects_clusters_sectors(site, location_id = nil)
+  def projects_clusters_sectors(site, location_id = nil)
     if location_id.present?
       location_id = [location_id] unless location_id.is_a? Array
       
@@ -300,7 +241,7 @@ def projects_clusters_sectors(site, location_id = nil)
            (select distinct c.id as id, c.name as name, p.id as project_id
             from clusters_as c
             inner join projects_sites as ps on cp.project_id=ps.project_id and ps.site_id=#{site.id}
-            inner join projects as p on ps.project_id=p.id and (p.end_date is null OR p.end_date > now())
+            inner join projects as p on ps.project_id=p.id
             #{location_join}
            ) as subq
           group by subq.id,subq.name order by count desc"
@@ -313,7 +254,7 @@ def projects_clusters_sectors(site, location_id = nil)
             from sectors as s
             inner join projects_sectors as pjs on s.id=pjs.sector_id
             inner join projects_sites as ps on pjs.project_id=ps.project_id and ps.site_id=#{site.id}
-            inner join projects as p on ps.project_id=p.id and (p.end_date is null OR p.end_date > now())
+            inner join projects as p on ps.project_id=p.id
             #{location_join}
           ) as subq
           group by subq.id,subq.name order by count desc"
