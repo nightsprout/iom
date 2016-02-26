@@ -82,10 +82,6 @@
             <%= f.hidden_field :project_context_cluster_id  %>
             <div class="wrapper">
               <ul class="clusters_or_sectors scroll_pane">
-                <li class="section"><p>CLUSTERS</p></li>
-                <% Cluster.get_select_values.each do |cluster| %>
-                  <li><a class="cluster_value" id="cluster_<%= cluster.id %>"><%= truncate(cluster.name, :length => 30)  %></a></li>
-                <%end -%>
                 <%= f.hidden_field :project_context_sector_id  %>
                 <li class="section"><p>SECTORS</p></li>
                 <% Sector.get_select_values.each do |sector| %>
@@ -111,15 +107,6 @@
               </ul>
             </div>
           </div>
-        </span>
-      </div>
-    </li>
-    <li id="include_tags" class="<%= 'selected' if @site.project_context_tags? %>">
-      <a class="check">Include only matching some tags</a>
-      <div class="content">
-        <span class="tags_site">
-          <%= f.text_field :project_context_tags, {:id => 'pc_tags_section'} %>
-
         </span>
       </div>
     </li>

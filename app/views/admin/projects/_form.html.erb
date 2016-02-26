@@ -61,12 +61,6 @@
       <%= f.text_field :organization_id %>
     </span>
   </div>
-  <div class="field">
-    <p class="title">TAGS <span class="info">Use comma (",") to separate project tags</span></p>
-    <span id="tags_combo" class="input_large">
-      <%= f.text_field :tags, :value => @project.tags.map{ |tag| tag.name }.join(', ') %>
-    </span>
-  </div>
 
 <!-- ##################### PROJECT DETAILS ##################### -->
 
@@ -432,53 +426,6 @@
 <!-- ##################### CONTEXT ##################### -->
 
   <h3 class="section museo_sans">CONTEXT</h3>
-  <div id="clusters_content" class="field">
-    <label>CLUSTERS <span class="info">(Only valid for UN-coordinated emergencies.)</span>
-      <!-- FIELD DESCRIPTION -->
-      <div class="field_info">
-        <span class="info">i</span>
-        <div class="field_text">
-          <div class="top">
-            <a href="#close">x</a>
-          </div>
-          <div class="bottom">
-            <h3>Cluster</h3>
-            <span class="scroll">
-            <p>United Nations Cluster to which a project or donation is reported. Only applicable for certain emergencies.</p>
-            </span>
-          </div>
-        </div>
-      </div>
-      <!-- END FIELD DESCRIPTION -->
-
-
-    </label>
-
-      <ul class="clusters">
-        <% unless @project.clusters.empty? %>
-          <% @project.clusters.each do |cluster| %>
-          <li id="cluster_<%= cluster.id %>">
-            <p><%= cluster.name %></p><input id="<%= cluster.id %>" type="checkbox" name="project[cluster_ids][]" value="<%= cluster.id %>" checked="true"/><a href="#cluster_<%= cluster.id %>" class="remove_this close"></a>
-          </li>
-          <% end -%>
-        <% end -%>
-      </ul>
-    <div class="cluster_options">
-      <span class="combo_cluster_options">
-        <%= errors_for_span(@project, :clusters) %>
-        <p id="clusters_0">Select more clusters</p>
-        <div class="wrapper">
-          <ul class="options scroll_pane">
-          <% Cluster.get_select_values.collect do |cluster| %>
-            <li><a id="clusters_<%= cluster.id %>"><%= cluster.name %></a></li>
-          <% end %>
-            <li class="last"></li>
-          </ul>
-        </div>
-      </span>
-      <a id="add_cluster_bttn" class="add_cluster museo_sans shadow_green">add cluster</a>
-    </div>
-  </div>
   <div class="field">
     <label>SECTORS  <strong>*</strong></label>
 <!--     <span id="hidden" class="combo_large <%= 'error' if @project.errors[:sectors].present? %>">
@@ -510,34 +457,6 @@
       </span>
       <a class="add_sector museo_sans shadow_green">add sector</a>
     </div>
-  </div>
-  <div id="cross_cutting" class="field">
-    <span class="chars">
-      <label>CROSS-CUTTING ISSUES
-        <strong>&nbsp;</strong>
-        <!-- FIELD DESCRIPTION -->
-        <div class="field_info">
-          <span class="info">i</span>
-          <div class="field_text">
-            <div class="top">
-              <a href="#close">x</a>
-            </div>
-            <div class="bottom">
-              <h3>Cross-cutting issues</h3>
-              <span class="scroll">
-              <p>Issues that cut across more than one sector, or that should not be managed as a sector, such as gender or the environment. Separate multiple entries with a comma.</p>
-              </span>
-            </div>
-          </div>
-        </div>
-        <!-- END FIELD DESCRIPTION -->
-      </label>
-      <% cross_cutting_issues = f.object.cross_cutting_issues || '' %>
-      <p id="chars_left_cross_cutting_issues"><%= 2000 - cross_cutting_issues.length %> chars left</p>
-    </span>
-    <span class="textarea">
-      <%= f.text_area :cross_cutting_issues, :onkeyup=>"limitChars('project_cross_cutting_issues', 2000, 'chars_left_cross_cutting_issues')" %>
-    </span>
   </div>
 
 <!-- ##################### PROJECT MANAGEMENT ##################### -->
@@ -620,31 +539,6 @@
       <%= f.text_field :partner_organizations %>
     </span>
   </div> <!-- field -->
-  <div class="field">
-    <label>PRIME AWARDEE
-      <strong>&nbsp;</strong>
-      <!-- FIELD DESCRIPTION -->
-      <div class="field_info">
-        <span class="info">i</span>
-        <div class="field_text">
-          <div class="top">
-            <a href="#close">x</a>
-          </div>
-          <div class="bottom">
-            <h3>Prime Awardee</h3>
-            <span class="scroll">
-            <p>Name of the organization that received the funding directly from the donor.</p>
-            </span>
-          </div>
-        </div>
-      </div>
-      <!-- END FIELD DESCRIPTION -->
-
-    </label>
-    <span class="input_large">
-      <%= f.text_field :awardee_type %>
-    </span>
-  </div>
 
 <!-- ##################### PROJECT IMPACT ##################### -->
 
@@ -777,18 +671,6 @@
 
     <span class="textarea">
       <%= f.text_area :verbatim_location, :onkeyup=>"limitChars('project_verbatim_location', 2000, 'chars_left_location')" %>
-    </span>
-  </div>
-
-  <div id="idprefugee_camp" class="field">
-    <span class="chars">
-      <label>IDP/REFUGEE CAMP</label>
-      <% idprefugee_camp = f.object.idprefugee_camp || '' %>
-      <p id="chars_left_camp"><%= 150 - idprefugee_camp.length %> chars left</p>
-    </span>
-
-    <span class="textarea">
-      <%= f.text_area :idprefugee_camp, :onkeyup=>"limitChars('project_idprefugee_camp', 150, 'chars_left_camp')" %>
     </span>
   </div>
 

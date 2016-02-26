@@ -84,13 +84,6 @@
           </div>
         <% end %>
 
-        <% if @project.awardee_type.present? %>
-          <div class="mod-info">
-            <h3>Prime Awardee</h3>
-            <p><%= @project.awardee_type %></p>
-          </div>
-        <% end %>
-
         <% if @project.implementing_organization? %>
           <div class="mod-info">
             <h3>International Partners</h3>
@@ -210,13 +203,6 @@
                 <p> <%= raw(@project.additional_information) %> </p>
               <%end%>
               </section>
-
-              <section>
-              <%unless @project.cross_cutting_issues.blank? %>
-                <h2 class="<%= (@project.activities.blank? && @project.additional_information.blank?)? 'first':''%>">Cross-cutting issues</h2>
-                <p> <%= raw(@project.cross_cutting_issues) %> </p>
-              <%end%>
-            </section>
 
             <section>
               <%if @locations.present? && @locations.to_a.join.present? %>
