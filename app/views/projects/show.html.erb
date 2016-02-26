@@ -84,13 +84,6 @@
           </div>
         <% end %>
 
-        <% if @project.awardee_type.present? %>
-          <div class="mod-info">
-            <h3>Prime Awardee</h3>
-            <p><%= @project.awardee_type %></p>
-          </div>
-        <% end %>
-
         <% if @project.implementing_organization? %>
           <div class="mod-info">
             <h3>International Partners</h3>
