@@ -90,7 +90,10 @@ class ProjectsController < ApplicationController
             @nested_locations[data["country_name"]] << data
           end
         end
-        @terminal_locations << @locations[0] if @locations.count == 1 and @terminal_locations.count == 0
+        if @locations.count == 1 and @terminal_locations.count == 0
+          @terminal_locations << @locations[0]
+          @nested_locations[@locations[0]["country_name"]] = @locations[0]
+        end
 
         @map_data = @terminal_locations.to_json
 
