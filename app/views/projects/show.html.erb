@@ -211,13 +211,6 @@
               <%end%>
               </section>
 
-              <section>
-              <%unless @project.cross_cutting_issues.blank? %>
-                <h2 class="<%= (@project.activities.blank? && @project.additional_information.blank?)? 'first':''%>">Cross-cutting issues</h2>
-                <p> <%= raw(@project.cross_cutting_issues) %> </p>
-              <%end%>
-            </section>
-
             <section>
               <%if @locations.present? && @locations.to_a.join.present? %>
                 <h2 class="<%= (@project.activities.blank? && @project.additional_information.blank? && @project.cross_cutting_issues.blank?)? 'first':''%>">

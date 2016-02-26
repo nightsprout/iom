@@ -458,34 +458,6 @@
       <a class="add_sector museo_sans shadow_green">add sector</a>
     </div>
   </div>
-  <div id="cross_cutting" class="field">
-    <span class="chars">
-      <label>CROSS-CUTTING ISSUES
-        <strong>&nbsp;</strong>
-        <!-- FIELD DESCRIPTION -->
-        <div class="field_info">
-          <span class="info">i</span>
-          <div class="field_text">
-            <div class="top">
-              <a href="#close">x</a>
-            </div>
-            <div class="bottom">
-              <h3>Cross-cutting issues</h3>
-              <span class="scroll">
-              <p>Issues that cut across more than one sector, or that should not be managed as a sector, such as gender or the environment. Separate multiple entries with a comma.</p>
-              </span>
-            </div>
-          </div>
-        </div>
-        <!-- END FIELD DESCRIPTION -->
-      </label>
-      <% cross_cutting_issues = f.object.cross_cutting_issues || '' %>
-      <p id="chars_left_cross_cutting_issues"><%= 2000 - cross_cutting_issues.length %> chars left</p>
-    </span>
-    <span class="textarea">
-      <%= f.text_area :cross_cutting_issues, :onkeyup=>"limitChars('project_cross_cutting_issues', 2000, 'chars_left_cross_cutting_issues')" %>
-    </span>
-  </div>
 
 <!-- ##################### PROJECT MANAGEMENT ##################### -->
 
