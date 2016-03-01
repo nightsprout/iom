@@ -147,10 +147,18 @@ class ClustersSectorsController < ApplicationController
               group by r.id,r.name,lon,lat,r.path,r.code"
           else
 
-            if @filter_by_location
-              region_location_filter = @filter_by_location.size == 1 ? "r.country_id = #{@filter_by_location.first}" : "r.id = #{@filter_by_location.last}"
+            if @filter_by_location              
+              region_location_filter = case @filter_by_location.length
+                                       when 1
+                                         "r.country_id = #{@filter_by_location.first} and r.level = 1"
+                                       when 2
+                                         "r.parent_region_id = #{@filter_by_location.last}"
+                                       when 3
+                                         "r.id = #{@filter_by_location.last}"
+                                       end
+              
               country_location_filter = @filter_by_location.size == 1 ? "c.id = #{@filter_by_location.first}" : "c.id = #{@filter_by_location.last}"
-
+              
               sql = <<-SQL
                 SELECT r.id AS id,
                        r.name ,
@@ -228,6 +236,7 @@ class ClustersSectorsController < ApplicationController
           r['url'] = uri.to_s
           r
         end.compact.to_json
+
         @overview_map_chco = @site.theme.data[:overview_map_chco]
         @overview_map_chf = @site.theme.data[:overview_map_chf]
         @overview_map_marker_source = @site.theme.data[:overview_map_marker_source]
