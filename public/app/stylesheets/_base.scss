@@ -129,3 +129,15 @@ input {
   color: $color-5;
   font-size: 14px;
 }
+
+div.info-box {
+  padding: 20px;
+  background-color: #dff0d8;
+  border: 1px solid #d6e9c6;
+  border-radius: 10px;
+  margin: 0px 10px 30px 10px;
+  a {
+      text-decoration: underline;
+      display: inline;
+  }
+}
