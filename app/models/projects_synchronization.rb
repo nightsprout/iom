@@ -168,6 +168,7 @@ class ProjectsSynchronization < ActiveRecord::Base
         unless !defined?(row.sectors) or row.sectors.blank?
           p.sectors.delete_all unless p.new_record?
           row.sectors.split("|").map(&:strip).each do |sec|
+            sec = CGI::escapeHTML(sec)
             sect = Sector.find_by_name_ilike sec
             if sect.nil?
               sect = Sector.create(:name => sec)
@@ -180,6 +181,7 @@ class ProjectsSynchronization < ActiveRecord::Base
         unless !defined?(row.audience) or row.audience.blank?
           p.audiences.delete_all unless p.new_record?
           row.audience.split("|").map(&:strip).each do |aud|
+            aud = CGI::escapeHTML(aud)
             a = Audience.find_by_name_ilike aud
             if a.nil?
               a = Audience.create(:name => aud)
@@ -191,10 +193,11 @@ class ProjectsSynchronization < ActiveRecord::Base
         Rails.logger.debug "===== Activities Load"
         unless !defined?(row.activities) or row.activities.blank?
           p.activities.delete_all unless p.new_record?
-          row.activities.split("|").map(&:strip).each do |aud|
-            a = Activity.find_by_name_ilike aud
+          row.activities.split("|").map(&:strip).each do |act|
+            act = CGI::escapeHTML(act)
+            a = Activity.find_by_name_ilike act
             if a.nil?
-              a = Activity.create(:name => aud)
+              a = Activity.create(:name => act)
             end
             p.activities << a unless p.activities.include?( a )
           end
@@ -203,10 +206,11 @@ class ProjectsSynchronization < ActiveRecord::Base
         Rails.logger.debug "===== Disease Load"
         unless !defined?(row.diseases) or row.diseases.blank?
           p.diseases.delete_all unless p.new_record?
-          row.diseases.split("|").map(&:strip).each do |aud|
-            a = Disease.find_by_name_ilike aud
+          row.diseases.split("|").map(&:strip).each do |dis|
+            dis = CGI::escapeHTML(dis)
+            a = Disease.find_by_name_ilike dis
             if a.nil?
-              a = Disease.create(:name => aud)
+              a = Disease.create(:name => dis)
             end
             p.diseases << a unless p.diseases.include?( a )
           end
@@ -215,10 +219,11 @@ class ProjectsSynchronization < ActiveRecord::Base
         Rails.logger.debug "===== Medicine Load"
         unless !defined?(row.medicine) or row.medicine.blank?
           p.medicines.delete_all unless p.new_record?
-          row.medicine.split("|").map(&:strip).each do |aud|
-            a = Medicine.find_by_name_ilike aud
+          row.medicine.split("|").map(&:strip).each do |med|
+            med = CGI::escapeHTML(med)
+            a = Medicine.find_by_name_ilike med
             if a.nil?
-              a = Medicine.create(:name => aud)
+              a = Medicine.create(:name => med)
             end
             p.medicines << a unless p.medicines.include?( a )
           end
@@ -229,6 +234,7 @@ class ProjectsSynchronization < ActiveRecord::Base
         unless !defined?(row.donors) or row.donors.blank?
           p.donations.delete_all unless p.new_record?
           row.donors.split("|").map(&:strip).each do |don|
+            don = CGI::escapeHTML(don)
             donor = Donor.find_by_name_ilike don
             if donor.nil?
               donor = Donor.create!(:name => don)
@@ -241,6 +247,7 @@ class ProjectsSynchronization < ActiveRecord::Base
         unless !defined?(row.data_source) or row.data_source.blank?
           p.data_sources.delete_all unless p.new_record?
           row.data_source.split("|").map(&:strip).each do |src|
+            src = CGI::escapeHTML(src)
             data_source = DataSource.find_by_name_ilike src
             if data_source.nil?
               data_source = DataSource.create!(:name => src)
