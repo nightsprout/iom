@@ -95,6 +95,9 @@ class ProjectsController < ApplicationController
           @nested_locations[@locations[0]["country_name"]] = @locations[0]
         end
 
+        Rails.logger.info("********** @nested_locations ************")
+        Rails.logger.info(@nested_locations)
+
         @map_data = @terminal_locations.to_json
 
         @overview_map_chco = @site.theme.data[:overview_map_chco]
