@@ -65,6 +65,10 @@
     @include icons-sprite(icon-humanitarian-aid);
   }
 
+  .immunization:before {
+    @include icons-sprite(icon-health);
+  }
+
   .logistics:before {
     @include icons-sprite(icon-logistics);
   }
@@ -73,12 +77,16 @@
     @include icons-sprite(icon-mining-and-extractive-resources);
   }
 
-  .non-food-relief-items {
+  .non-food-relief-items:before {
     @include icons-sprite(icon-non-food-relief-items);
   }
 
+  .ntds:before {
+    @include icons-sprite(icon-humanitarian-aid);
+  }
+
   .nutrition:before {
-    @include icons-sprite(icon-other);
+    @include icons-sprite(icon-nutrition);
   }
 
   .other:before {
