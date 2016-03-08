@@ -183,6 +183,10 @@ SQL
        'shelter'
     elsif (name.include? 'Water')
        'water_sanitation'
+    elsif (name.include? 'Immunization')
+      'immunization'
+    elsif (name.include? 'NTD')
+      'ntds'
     else
        'other'
     end
