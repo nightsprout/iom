@@ -92,7 +92,7 @@ class ProjectsController < ApplicationController
         end
         if @locations.count == 1 and @terminal_locations.count == 0
           @terminal_locations << @locations[0]
-          @nested_locations[@locations[0]["country_name"]] = @locations[0]
+          @nested_locations[@locations[0]["country_name"]] = [@locations[0]]
         end
 
         Rails.logger.info("********** @nested_locations ************")
