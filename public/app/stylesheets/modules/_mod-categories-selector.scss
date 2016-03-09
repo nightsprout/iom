@@ -132,6 +132,11 @@
     background-position: sprite-position($icons, icon-humanitarian-aid, 4px, 5px);
   }
 
+  .immunization:before {
+    @include icons-sprite(icon-health);
+    background-position: sprite-position($icons, icon-health, 4px, 5px);
+  }
+
   .logistics:before {
     @include icons-sprite(icon-logistics);
     background-position: sprite-position($icons, icon-logistics, 4px, 5px);
@@ -147,9 +152,14 @@
     background-position: sprite-position($icons, icon-non-food-relief-items, 4px, 5px);
   }
 
+  .ntds:before {
+    @include icons-sprite(icon-humanitarian-aid);
+    background-position: sprite-position($icons, icon-humanitarian-aid, 4px, 5px);
+  }
+
   .nutrition:before {
-    @include icons-sprite(icon-other);
-    background-position: sprite-position($icons, icon-other, 4px, 5px);
+    @include icons-sprite(icon-nutrition);
+    background-position: sprite-position($icons, icon-nutrition, 4px, 5px);
   }
 
   .other:before {

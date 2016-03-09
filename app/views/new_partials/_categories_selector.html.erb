@@ -21,7 +21,7 @@
                           <a class="<%= category.css_class %>" href="<%= category.is_a?(Cluster) ? cluster_path(category) : sector_path(category) %>">
                             <%= category.name %>
                           </a>
-                          <span><% unless @site.featured? %><%= category.projects.reject{|p| p.end_date < DateTime.now.to_date}.size %> projects<% end %></span>
+                          <span><% unless @site.featured? %><%= category.projects.size %> projects<% end %></span>
                         </li>
                       <% end %>
                     </ul>
