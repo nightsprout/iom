@@ -17,6 +17,9 @@
   ul {
     @include clearfix();
   }
+  li:first-child {
+   margin-left: 5%;
+  }
   li {
     float: left;
     position: relative;
@@ -24,8 +27,7 @@
     font-size: 14px;
     text-transform: uppercase;
     line-height: 1;
-    margin-right: 1%;
-
+    margin-right: 1%;    
     .father {
       display: block;
       padding: 6px 15%;
