@@ -17,8 +17,8 @@
   ul {
     @include clearfix();
   }
-  li:first-child {
-   margin-left: 5%;
+  li:first-child.dropdown-parent {
+   margin-left: 8%;
   }
   li {
     float: left;

@@ -6,13 +6,13 @@
           <nav>
             <ul>
               <% if @site.cluster %>
-                <li class="menu-item sector"><span class="father"><a href="<%= cluster_path(@site.cluster) %>"><%= @site.word_for_cluster_sector.upcase.singularize %></a></span></li>
+                <li class="menu-item sector dropdown-parent"><span class="father"><a href="<%= cluster_path(@site.cluster) %>"><%= @site.word_for_cluster_sector.upcase.singularize %></a></span></li>
               <% elsif @site.sector %>
                 <li class="menu-item sector">
                   <span class="father"><a href="<%= sector_path(@site.sector) %>"><%= @site.word_for_cluster_sector.upcase.singularize %></a></span>
                 </li>
               <% else %>
-                <li class="menu-item sector" id="<%= @site.navigate_by_cluster? ? 'cluster' : 'sector' %>_option">
+                <li class="menu-item sector dropdown-parent" id="<%= @site.navigate_by_cluster? ? 'cluster' : 'sector' %>_option">
                   <span class="father"><%= @site.word_for_cluster_sector.upcase %></span>
                   <div class="mod-go-up-menu menu">
                     <ul class="mod-categories-child sector-child submenu">
@@ -29,7 +29,7 @@
                 </li>
               <% end %>
 
-              <li class="audience">
+              <li class="dropdown-parent" class="audience">
                 <span class="father">Audience</span>
                 <div class="mod-go-up-menu menu">
                   <ul class="mod-categories-child audience-child">
@@ -41,7 +41,7 @@
                 </div>
               </li>
 
-              <li class="activities">
+              <li class="dropdown-parent" class="activities">
                 <span class="father">Activities</span>
                 <div class="mod-go-up-menu menu">
                   <ul class="mod-categories-child activities-child">
@@ -53,7 +53,7 @@
                 </div>
               </li>
 
-              <li class="diseases">
+              <li class="dropdown-parent" class="diseases">
                 <span class="father">Diseases</span>
                 <div class="mod-go-up-menu menu">
                   <ul class="mod-categories-child diseases-child">
@@ -65,7 +65,7 @@
                 </div>
               </li>
 
-              <li class="organizations">
+              <li class="dropdown-parent" class="organizations">
                 <span class="father">Organizations</span>
                 <div class="mod-go-up-menu menu">
                   <ul class="mod-categories-child organizations-child">
@@ -78,7 +78,7 @@
               </li>
 
             <% if @site.navigate_by == :country %>
-              <li class="countries">
+              <li class="dropdown-parent" class="countries">
                 <span class="father">Countries</span>
                 <div class="mod-go-up-menu menu">
                   <ul class="mod-categories-child countries-child">
@@ -90,7 +90,7 @@
                 </div>
               </li>
             <% else %>
-              <li class="regions">
+              <li class="dropdown-parent" class="regions">
                 <span class="father">Regions</span>
                 <div class="mod-go-up-menu menu">
                   <ul class="mod-categories-child regions-child">
@@ -103,7 +103,7 @@
               </li>
             <% end %>
 
-              <li class="data-sources">
+              <li class="dropdown-parent" class="data-sources">
                 <span class="father">Data&nbsp;Source</span>
                 <div class="mod-go-up-menu menu">
                   <ul class="mod-categories-child data-sources-child">
