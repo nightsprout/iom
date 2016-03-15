@@ -143,7 +143,7 @@ class User < ActiveRecord::Base
   end
 
   def sites_names
-    Site.find(site_id).map(&:name).join(', ')
+    site_id.map { |id| Site.where(id: id).first }.compact.map(&:name).join(', ')
   end
 
   def organization_id=(value)
