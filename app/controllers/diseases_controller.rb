@@ -143,7 +143,8 @@ class DiseasesController < ApplicationController
                   inner join projects as p on ps.project_id=p.id
                   inner join diseases_projects as pa on pa.project_id=p.id and pa.disease_id=#{params[:id].sanitize_sql!.to_i}
                   #{location_filter}
-                  group by c.id,c.name,lon,lat,c.name,start_year,end_year"
+                  group by c.id,c.name,lon,lat,c.name,start_year,end_year
+                  order by count DESC"
         end
 
 
