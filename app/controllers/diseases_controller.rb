@@ -119,6 +119,14 @@ class DiseasesController < ApplicationController
                  group by r.id,r.name,lon,lat,r.path,r.code,start_year,end_year"
         else
           location_filter = "where c.id = #{@filter_by_location.first}" if @filter_by_location
+
+          Rails.logger.info("************")
+          Rails.logger.info(@carry_on_filters)
+          Rails.logger.info(carry_on_url)
+          Rails.logger.info(@filter_by_location)
+          Rails.logger.info(location_filter)
+          Rails.logger.info("^^^^^^^^^^^^")
+          
           sql="select c.id,c.name,count(distinct pa.project_id) as count,c.center_lon as lon,c.center_lat as lat,c.name,
                 extract(year from start_date) as start_year,
                 extract(year from end_date) as end_year,
