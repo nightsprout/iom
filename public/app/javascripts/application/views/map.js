@@ -137,7 +137,7 @@ define(['underscore', 'backbone', 'pluralize', 'underscoreString'], function(_, 
       if (typeof info.path === 'undefined' || info.path === '') {
         info.path = info.id;
       }
-      info.url = '/location/' + info.path + '?';
+//      info.url = '/location/' + info.path + '?';
     }
 
     initializeIOMMarker(marker, info, classname, map);
@@ -147,7 +147,13 @@ define(['underscore', 'backbone', 'pluralize', 'underscoreString'], function(_, 
     var isRegion = !!(!info.total_in_region && info.code === null && info.region_name);
 
     marker.latlng_ = new google.maps.LatLng(parseFloat(info.lat), parseFloat(info.lon));
-    marker.url = info.url;
+
+    if (typeof marker.url === 'undefined' || marker.url === '') {
+      marker.url = info.url;
+    } else if (!info.url.match(/\/location\//) and marker.url.match(/\/location\//) {
+      marker.url = info.url;
+    }
+
     marker.count = info.count;
     marker.total_in_region = info.total_in_region;
 
