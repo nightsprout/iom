@@ -70,6 +70,7 @@ class GeoregionController < ApplicationController
                   ELSE
                       '/projects/'||(array_to_string(array_agg(distinct ps.project_id),''))
                   END as url,
+                  '#{@carry_on_url}'||r.path as carry_on_url,
                   r.code, 'region' as type
                   from ((projects_regions as pr inner join projects_sites as ps on pr.project_id=ps.project_id and ps.site_id=#{@site.id})
                   inner join projects as p on pr.project_id=p.id
@@ -85,6 +86,7 @@ class GeoregionController < ApplicationController
                   ELSE
                   '/projects/'||(array_to_string(array_agg(distinct ps.project_id),''))
                   END as url,
+                  '#{@carry_on_url}'||c.id as carry_on_url,
                   c.code, 'country' as type
                   from ((countries_projects as cp inner join projects_sites as ps on cp.project_id=ps.project_id and ps.site_id=#{@site.id}) inner join projects as p
                   on cp.project_id=p.id and (cp.country_id=#{country.id}) inner join countries as c on cp.country_id=c.id and c.id=#{country.id} )
@@ -139,6 +141,7 @@ class GeoregionController < ApplicationController
           ELSE
               '/projects/'||(array_to_string(array_agg(distinct ps.project_id),''))
           END as url
+          '#{@carry_on_url}'||r.path as carry_on_url,
           from (projects_regions as pr
             inner join projects_sites as ps on pr.project_id=ps.project_id and site_id=#{@site.id})
             inner join projects as p on ps.project_id=p.id
@@ -153,6 +156,7 @@ class GeoregionController < ApplicationController
           ELSE
               '/projects/'||(array_to_string(array_agg(distinct ps.project_id),''))
           END as url,
+          '#{@carry_on_url}'||r.path as carry_on_url,
           r.code, 'region' as type
           from (projects_regions as pr
             inner join projects_sites as ps on pr.project_id=ps.project_id and site_id=#{@site.id})

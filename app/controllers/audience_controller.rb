@@ -60,7 +60,7 @@ class AudienceController < ApplicationController
     respond_to do |format|
       format.html do
         
-        carry_on_url = audience_path(@data, @carry_on_filters.merge(:location_id => ''))
+        @carry_on_url = audience_path(@data, @carry_on_filters.merge(:location_id => ''))
         if @site.geographic_context_country_id
           location_filter = "where r.id = #{@filter_by_location.last}" if @filter_by_location
 
@@ -69,10 +69,11 @@ class AudienceController < ApplicationController
                extract(year from start_date) as start_year,
                extract(year from end_date) as end_year,
                CASE WHEN count(distinct pa.project_id) > 1 THEN
-                 '#{carry_on_url}'||r.path
+                 '#{@carry_on_url}'||r.path
                ELSE
                  '/projects/'||array_to_string(array_agg(distinct pa.project_id),'')
                END as url,
+               '#{@carry_on_url}'||r.path as carry_on_url,
                r.code,
               (select count(*) from data_denormalization where regions_ids && ('{'||r.id||'}')::integer[] and site_id=#{@site.id}) as total_in_region
               from regions as r
@@ -91,10 +92,11 @@ class AudienceController < ApplicationController
                  extract(year from start_date) as start_year,
                  extract(year from end_date) as end_year,
                  CASE WHEN count(distinct pa.project_id) > 1 THEN
-                   '#{carry_on_url}'||r.path
+                   '#{@carry_on_url}'||r.path
                  ELSE
                    '/projects/'||(array_to_string(array_agg(distinct pa.project_id),''))
                  END AS url,
+                 '#{@carry_on_url}'||r.path as carry_on_url,
                  r.code,
                  (select count(*) from data_denormalization where regions_ids && ('{'||r.id||'}')::integer[] and site_id=#{@site.id}) as total_in_region
                  from projects_regions as pr
@@ -112,10 +114,11 @@ class AudienceController < ApplicationController
                  extract(year from start_date) as start_year,
                  extract(year from end_date) as end_year,
                  CASE WHEN count(distinct pa.project_id) > 1 THEN
-                   '#{carry_on_url}'||r.path
+                   '#{@carry_on_url}'||r.path
                  ELSE
                    '/projects/'||(array_to_string(array_agg(distinct pa.project_id),''))
                  END AS url,
+                 '#{@carry_on_url}'||r.path as carry_on_url,
                  r.code
                  from projects_regions as pr
                  inner join projects_sites as ps on pr.project_id=ps.project_id and ps.site_id=#{@site.id}
@@ -128,10 +131,11 @@ class AudienceController < ApplicationController
                  extract(year from start_date) as start_year,
                  extract(year from end_date) as end_year,
                  CASE WHEN count(distinct pa.project_id) > 1 THEN
-                   '#{carry_on_url}'||c.id
+                   '#{@carry_on_url}'||c.id
                  ELSE
                    '/projects/'||array_to_string(array_agg(distinct pa.project_id),'')
                  END as url,
+                '#{@carry_on_url}'||c.id as carry_on_url,
                 c.code,
                 (select count(*) from data_denormalization where countries_ids && ('{'||c.id||'}')::integer[] and site_id=#{@site.id}) as total_in_region
                 from countries as c
@@ -156,11 +160,6 @@ class AudienceController < ApplicationController
           r['url'] = uri.to_s
           r
         end.compact.to_json
-
-        require 'pp'
-        p "-------------------------------------------------------------------------"
-        pp @map_data
-        p "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 
         @overview_map_chco = @site.theme.data[:overview_map_chco]
         @overview_map_chf = @site.theme.data[:overview_map_chf]
