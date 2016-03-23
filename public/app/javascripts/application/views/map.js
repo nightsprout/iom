@@ -150,7 +150,7 @@ define(['underscore', 'backbone', 'pluralize', 'underscoreString'], function(_, 
 
     if (typeof marker.url === 'undefined' || marker.url === '') {
       marker.url = info.url;
-    } else if (!info.url.match(/\/location\//) and marker.url.match(/\/location\//) {
+    } else if (!info.url.match(/\/location\//) && marker.url.match(/\/location\//)) {
       marker.url = info.url;
     }
 
