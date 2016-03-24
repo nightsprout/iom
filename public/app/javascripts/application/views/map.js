@@ -137,7 +137,6 @@ define(['underscore', 'backbone', 'pluralize', 'underscoreString'], function(_, 
       if (typeof info.path === 'undefined' || info.path === '') {
         info.path = info.id;
       }
-//      info.url = '/location/' + info.path + '?';
     }
 
     initializeIOMMarker(marker, info, classname, map);
