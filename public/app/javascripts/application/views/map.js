@@ -147,14 +147,14 @@ define(['underscore', 'backbone', 'pluralize', 'underscoreString'], function(_, 
 
     marker.latlng_ = new google.maps.LatLng(parseFloat(info.lat), parseFloat(info.lon));
 
-    if (typeof marker.url === 'undefined' || marker.url === '') {
+    marker.count = parseInt(info.count);
+    marker.total_in_region = parseInt(info.total_in_region);
+    
+    if (marker.count === 1) {
       marker.url = info.url;
-    } else if (!info.url.match(/\/location\//) && marker.url.match(/\/location\//)) {
-      marker.url = info.url;
+    } else {
+      marker.url = info.carry_on_url;
     }
-
-    marker.count = info.count;
-    marker.total_in_region = info.total_in_region;
 
     marker.map_ = map;
     marker.name = info.full_region_name || info.name;

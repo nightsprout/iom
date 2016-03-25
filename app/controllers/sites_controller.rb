@@ -42,6 +42,7 @@ class SitesController < ApplicationController
                       ELSE
                         '/projects/'||array_to_string(array_agg(distinct ps.project_id),'')
                       END as url,
+                      '/location/'||r.path as carry_on_url,
                       r.code
                       from projects_regions as pr 
                       inner join projects_sites as ps on pr.project_id=ps.project_id
@@ -57,7 +58,7 @@ class SitesController < ApplicationController
                       ELSE
                           '/projects/'||array_to_string(array_agg(distinct ps.project_id),'')
                       END as url,
-
+                      '/location/'||c.id as carry_on_url,
                       iso2_code as code
                       from countries_projects as cp
                       inner join projects_sites as ps on cp.project_id=ps.project_id and site_id=#{@site.id}

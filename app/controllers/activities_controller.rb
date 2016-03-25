@@ -50,7 +50,7 @@ class ActivitiesController < ApplicationController
     respond_to do |format|
       format.html do
         
-        carry_on_url = activity_path(@data, @carry_on_filters.merge(:location_id => ''))
+        @carry_on_url = activity_path(@data, @carry_on_filters.merge(:location_id => ''))
         if @site.geographic_context_country_id
           location_filter = "where r.id = #{@filter_by_location.last}" if @filter_by_location
 
@@ -59,7 +59,7 @@ class ActivitiesController < ApplicationController
                extract(year from start_date) as start_year,
                extract(year from end_date) as end_year,
                CASE WHEN count(distinct pa.project_id) > 1 THEN
-                 '#{carry_on_url}'||r.path
+                 '#{@carry_on_url}'||r.path
                ELSE
                  '/projects/'||array_to_string(array_agg(distinct pa.project_id),'')
                END as url,
@@ -81,10 +81,11 @@ class ActivitiesController < ApplicationController
                  extract(year from p.start_date) as start_year,
                  extract(year from p.end_date) as end_year,
                  CASE WHEN count(distinct pa.project_id) > 1 THEN
-                   '#{carry_on_url}'||r.path
+                   '#{@carry_on_url}'||r.path
                  ELSE
                    '/projects/'||(array_to_string(array_agg(distinct pa.project_id),''))
                  END AS url,
+                 '#{@carry_on_url}'||r.path AS carry_on_url,
                  r.code,
                  (select count(*) from data_denormalization where regions_ids && ('{'||r.id||'}')::integer[] and site_id=#{@site.id} and level=r.level) as total_in_region
                  from projects_regions as pr
@@ -102,10 +103,11 @@ class ActivitiesController < ApplicationController
                  extract(year from p.start_date) as start_year,
                  extract(year from p.end_date) as end_year,
                  CASE WHEN count(distinct pa.project_id) > 1 THEN
-                   '#{carry_on_url}'||r.path
+                   '#{@carry_on_url}'||r.path
                  ELSE
                    '/projects/'||(array_to_string(array_agg(distinct pa.project_id),''))
                  END AS url,
+                 '#{@carry_on_url}'||r.path AS carry_on_url,
                  r.code
                  from projects_regions as pr
                  inner join projects_sites as ps on pr.project_id=ps.project_id and ps.site_id=#{@site.id}
@@ -119,10 +121,11 @@ class ActivitiesController < ApplicationController
                extract(year from p.start_date) as start_year,
                extract(year from p.end_date) as end_year,
                CASE WHEN count(distinct pa.project_id) > 1 THEN
-                 '#{carry_on_url}'||c.id
+                 '#{@carry_on_url}'||c.id
                ELSE
                  '/projects/'||array_to_string(array_agg(distinct pa.project_id),'')
                END as url,
+               '#{@carry_on_url}'||c.id AS carry_on_url,
                c.code,
                (select count(*) from data_denormalization where countries_ids && ('{'||c.id||'}')::integer[] and site_id=#{@site.id} and level=1) as total_in_region
                 from countries as c

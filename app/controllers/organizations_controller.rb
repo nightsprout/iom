@@ -97,11 +97,11 @@ class OrganizationsController < ApplicationController
         end
 
         #Map data
-        carry_on_url = organization_path(@organization, @carry_on_filters.merge(:location_id => ''))
+        @carry_on_url = organization_path(@organization, @carry_on_filters.merge(:location_id => ''))
         #if params[:location_id]
-        #  carry_on_url = organization_path(@organization, @carry_on_filters.merge(:location_id => params[:location_id]))
+        #  @carry_on_url = organization_path(@organization, @carry_on_filters.merge(:location_id => params[:location_id]))
         #else
-        #  carry_on_url = organization_path(@organization, @carry_on_filters.merge(:location_id => ''))
+        #  @carry_on_url = organization_path(@organization, @carry_on_filters.merge(:location_id => ''))
         #end
 
         if @site.geographic_context_country_id
@@ -109,11 +109,12 @@ class OrganizationsController < ApplicationController
 
           sql="select r.id,count(distinct ps.project_id) as count,r.name,r.center_lon as lon,r.center_lat as lat,
                       CASE WHEN count(distinct ps.project_id) > 1 THEN
-                          '#{carry_on_url}'||r.path
+                          '#{@carry_on_url}'||r.path
                       ELSE
                           '/projects/'||(array_to_string(array_agg(distinct ps.project_id),''))
-                      END as url
-                      ,r.code,
+                      END as url,
+                      '#{@carry_on_url}'||r.path AS carry_on_url,
+                      r.code,
                       (select count(*) from data_denormalization where regions_ids && ('{'||r.id||'}')::integer[] and site_id=#{@site.id} and level=r.level) as total_in_region
                 from ((((
                   projects as p inner join organizations as o on o.id=p.primary_organization_id and
@@ -136,10 +137,11 @@ class OrganizationsController < ApplicationController
                         r.center_lon AS lon,
                         r.center_lat AS lat,
                         CASE WHEN count(distinct ps.project_id) > 1 THEN
-                          '#{carry_on_url}'||r.path
+                          '#{@carry_on_url}'||r.path
                         ELSE
                           '/projects/'||(array_to_string(array_agg(distinct ps.project_id),''))
                         END AS url,
+                        '#{@carry_on_url}'||r.path AS carry_on_url,
                         r.code
                       FROM projects_regions AS pr
                       INNER JOIN projects_sites AS ps ON pr.project_id=ps.project_id AND ps.site_id=#{@site.id}
@@ -155,7 +157,7 @@ class OrganizationsController < ApplicationController
                         c.center_lon AS lon,
                         c.center_lat AS lat,
 
-                        '#{carry_on_url}' url,
+                        '#{@carry_on_url}' url,
                         c.code
                       FROM projects AS p
                       INNER JOIN projects_sites AS ps ON ps.site_id=#{@site.id} and ps.project_id = p.id
@@ -174,10 +176,11 @@ class OrganizationsController < ApplicationController
                          r.center_lon AS lon,
                          r.center_lat AS lat,
                          CASE WHEN count(distinct ps.project_id) > 1 THEN
-                           '#{carry_on_url}'||r.path
+                           '#{@carry_on_url}'||r.path
                          ELSE
                            '/projects/'||(array_to_string(array_agg(distinct ps.project_id),''))
                          END AS url,
+                         '#{@carry_on_url}'||r.path AS carry_on_url,
                          r.code
                   FROM projects_regions AS pr
                   INNER JOIN projects_sites AS ps ON pr.project_id=ps.project_id AND ps.site_id=#{@site.id}
@@ -193,10 +196,11 @@ class OrganizationsController < ApplicationController
             sql="select c.id,count(distinct ps.project_id) as count,c.name,c.center_lon as lon,
                         c.center_lat as lat,c.name,
                         CASE WHEN count(distinct ps.project_id) > 1 THEN
-                            '#{carry_on_url}'||c.id
+                            '#{@carry_on_url}'||c.id
                         ELSE
                             '/projects/'||(array_to_string(array_agg(distinct ps.project_id),''))
                         END as url,
+                        '#{@carry_on_url}'||c.id AS carry_on_url,
                         c.iso2_code as code,
                         (select count(*) from data_denormalization where countries_ids && ('{'||c.id||'}')::integer[] and site_id=#{@site.id} and level=1) as total_in_region
                   from (((((

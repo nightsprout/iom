@@ -98,13 +98,14 @@ class ClustersSectorsController < ApplicationController
       format.html do
 
         if @data.is_a?(Cluster)
-          carry_on_url = cluster_path(@data, @carry_on_filters.merge(:location_id => ''))
+          @carry_on_url = cluster_path(@data, @carry_on_filters.merge(:location_id => ''))
           if @site.geographic_context_country_id
             location_filter = "where r.id = #{@filter_by_location.last}" if @filter_by_location
 
             # Get the data for the map depending on the region definition of the site (country or region)
-            sql="select r.id,r.name,count(distinct cp.project_id) as count,r.center_lon as lon,r.center_lat as lat,r.name,'#{carry_on_url}'||r.path as url,r.code,
-                (select count(*) from data_denormalization where regions_ids && ('{'||r.id||'}')::integer[] and site_id=#{@site.id} and level=r.level) as total_in_region
+            sql="select r.id,r.name,count(distinct cp.project_id) as count,r.center_lon as lon,r.center_lat as lat,r.name,'#{@carry_on_url}'||r.path as url,
+              '#{@@carry_on_url}'||r.path AS carry_on_url,r.code,
+               (select count(*) from data_denormalization where regions_ids && ('{'||r.id||'}')::integer[] and site_id=#{@site.id} and level=r.level) as total_in_region
             from regions as r
               inner join projects_regions as pr on r.id=pr.region_id and r.level=#{@site.level_for_region}
               inner join projects_sites as ps on pr.project_id=ps.project_id and ps.site_id=#{@site.id}
@@ -114,7 +115,8 @@ class ClustersSectorsController < ApplicationController
               group by r.id,r.name,lon,lat,r.name,url,r.code"
           else
              location_filter = "where c.id = #{@filter_by_location.first}" if @filter_by_location
-             sql="select c.id,c.name,count(distinct cp.project_id) as count,c.center_lon as lon,c.center_lat as lat,c.name,'#{carry_on_url}'||c.id as url,
+             sql="select c.id,c.name,count(distinct cp.project_id) as count,c.center_lon as lon,c.center_lat as lat,c.name,'#{@carry_on_url}'||c.id as url,
+                '#{@@carry_on_url}'||c.id AS carry_on_url,
                   (select count(*) from data_denormalization where countries_ids && ('{'||c.id||'}')::integer[] and site_id=#{@site.id} and level=1) as total_in_region
               from countries as c
                 inner join countries_projects as cp on c.id=cp.country_id
@@ -125,17 +127,18 @@ class ClustersSectorsController < ApplicationController
                 group by c.id,c.name,lon,lat,c.name,url"
           end
         else
-          carry_on_url = sector_path(@data, @carry_on_filters.merge(:location_id => ''))
+          @carry_on_url = sector_path(@data, @carry_on_filters.merge(:location_id => ''))
           if @site.geographic_context_country_id
             location_filter = "where r.id = #{@filter_by_location.last}" if @filter_by_location
 
             # Get the data for the map depending on the region definition of the site (country or region)
             sql="select r.id,r.name,count(distinct cp.project_id) as count,r.center_lon as lon,r.center_lat as lat,r.name,
             CASE WHEN count(distinct cp.project_id) > 1 THEN
-                '#{carry_on_url}'||r.path
+                '#{@carry_on_url}'||r.path
             ELSE
                 '/projects/'||(array_to_string(array_agg(distinct ps.project_id),''))
             END as url,
+            '#{@@carry_on_url}'||r.path AS carry_on_url,
             r.code,
                 (select count(*) from data_denormalization where regions_ids && ('{'||r.id||'}')::integer[] and site_id=#{@site.id} and level=r.level) as total_in_region
             from regions as r
@@ -167,9 +170,10 @@ class ClustersSectorsController < ApplicationController
                        r.center_lat AS lat,
                        c.name as country_name,
                        CASE
-                           WHEN COUNT(DISTINCT ps.project_id) > 1 THEN '#{carry_on_url}'||r.path
+                           WHEN COUNT(DISTINCT ps.project_id) > 1 THEN '#{@carry_on_url}'||r.path
                            ELSE '/projects/'||(array_to_string(array_agg(distinct ps.project_id),''))
                        END AS url,
+                  '#{@@carry_on_url}'||r.path AS carry_on_url,
                   (SELECT COUNT(*)
                    FROM data_denormalization
                    WHERE regions_ids && ('{'||r.id||'}')::integer[] and site_id=#{@site.id} and level=r.level) as total_in_region
@@ -188,9 +192,10 @@ class ClustersSectorsController < ApplicationController
                  c.center_lon as lon,
                  c.center_lat as lat,
                  c.name as country_name,
-                 CASE WHEN count(distinct pse.project_id) > 1 THEN '#{carry_on_url}'||c.id
+                 CASE WHEN count(distinct pse.project_id) > 1 THEN '#{@carry_on_url}'||c.id
                  ELSE '/projects/'||(array_to_string(array_agg(distinct ps.project_id),''))
                  END as url,
+                 '#{@@carry_on_url}'||c.id AS carry_on_url,
                  (select count(*) from data_denormalization
                  where countries_ids && ('{'||c.id||'}')::integer[] AND site_id=#{@site.id} and level=1) AS total_in_region
 
@@ -207,11 +212,16 @@ class ClustersSectorsController < ApplicationController
             else
               sql="select c.id,c.name,count(distinct pse.project_id) as count,c.center_lon as lon,c.center_lat as lat,c.name,
                 CASE WHEN count(distinct ps.project_id) > 1 THEN
-                    '#{carry_on_url}'||c.id
+                    '#{@carry_on_url}'||c.id
                 ELSE
                     '/projects/'||(array_to_string(array_agg(distinct ps.project_id),''))
                 END as url,
+<<<<<<< HEAD
+                '#{@@carry_on_url}'||c.id AS carry_on_url,
+                    (select count(*) from data_denormalization where countries_ids && ('{'||c.id||'}')::integer[] and site_id=#{@site.id}) as total_in_region
+=======
                     (select count(*) from data_denormalization where countries_ids && ('{'||c.id||'}')::integer[] and site_id=#{@site.id} and level=1) as total_in_region
+>>>>>>> 97de4c43939b1bf46ad79c26082599af2219a084
                 from countries as c
                   inner join countries_projects as cp on c.id=cp.country_id
                   inner join projects_sites as ps on cp.project_id=ps.project_id and ps.site_id=#{@site.id}

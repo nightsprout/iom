@@ -199,12 +199,12 @@ class DonorsController < ApplicationController
       location_url_param = '&location_id='
     end
 
-    #carry_on_url = donor_path(@donor, @carry_on_filters.merge(:location_id => ''))
+    #@carry_on_url = donor_path(@donor, @carry_on_filters.merge(:location_id => ''))
     filters_for_url = @carry_on_filters.clone
     if params[:location_id]
-      carry_on_url = donor_path(@donor, filters_for_url.except!(:location_id))
+      @carry_on_url = donor_path(@donor, filters_for_url.except!(:location_id))
     else
-      carry_on_url = donor_path(@donor, filters_for_url)
+      @carry_on_url = donor_path(@donor, filters_for_url)
     end
 
     organization_location_condition = "AND p.primary_organization_id = #{params[:organization_id].sanitize_sql!.to_i}" if params[:organization_id]
@@ -224,10 +224,11 @@ class DonorsController < ApplicationController
           location_filter = "and r.id = #{@filter_by_location.last}" if @filter_by_location
           sql = """ SELECT r.id, count(distinct projects_sites.project_id) as count,r.name,r.center_lon as lon,r.center_lat as lat,
                 CASE WHEN count(distinct projects_sites.project_id) > 1 THEN
-                    '#{carry_on_url}'|| '#{location_url_param}' || r.path
+                    '#{@carry_on_url}'|| '#{location_url_param}' || r.path
                 ELSE
                     '/projects/'||(array_to_string(array_agg(distinct projects_sites.project_id),''))
                 END as url
+                '#{@carry_on_url}'||r.path as carry_on_url,
                 ,r.code,
                 (select count(*) from data_denormalization where regions_ids && ('{'||r.id||'}')::integer[] and site_id=#{@site.id} and level=r.level) as total_in_region
                 FROM donations as dn JOIN projects ON dn.project_id = projects.id) #{projects_organization_condition}
@@ -247,10 +248,11 @@ class DonorsController < ApplicationController
                   r.center_lon AS lon,
                   r.center_lat AS lat,
                   CASE WHEN count(ps.project_id) > 1 THEN
-                   '#{carry_on_url}' || '#{location_url_param}' || r.path
+                   '#{@carry_on_url}' || '#{location_url_param}' || r.path
                   ELSE
                    '/projects/'||(array_to_string(array_agg(distinct ps.project_id),''))
                   END AS url,
+                  '#{@carry_on_url}'||r.path as carry_on_url,
                   r.code
                 FROM projects_regions AS pr
                 INNER JOIN projects_sites AS ps ON pr.project_id=ps.project_id AND ps.site_id=#{@site.id}
@@ -288,10 +290,11 @@ class DonorsController < ApplicationController
                          r.center_lat AS lat,
                          r.name,
                          CASE WHEN count(ps.project_id) > 1 THEN
-                           '#{carry_on_url}'|| '#{location_url_param}' || r.path
+                           '#{@carry_on_url}'|| '#{location_url_param}' || r.path
                          ELSE
                            '/projects/'||(array_to_string(array_agg(distinct ps.project_id),''))
                          END AS url,
+                         '#{@carry_on_url}'||r.path as carry_on_url,
                          r.code
                   FROM projects_regions AS pr
                   INNER JOIN projects_sites AS ps ON pr.project_id=ps.project_id AND ps.site_id=#{@site.id}
@@ -307,10 +310,11 @@ class DonorsController < ApplicationController
             sql="select c.id,count(distinct ps.project_id) as count,c.name,c.center_lon as lon,
                         c.center_lat as lat,c.name,
                         CASE WHEN count(distinct ps.project_id) > 1 THEN
-                          '#{carry_on_url}' || '#{location_url_param}' || c.id
+                          '#{@carry_on_url}' || '#{location_url_param}' || c.id
                         ELSE
                           '/projects/'||(array_to_string(array_agg(distinct ps.project_id),''))
                         END as url,
+                        '#{@carry_on_url}'||c.id as carry_on_url,
                         c.iso2_code as code,
                         (select count(*) from data_denormalization where countries_ids && ('{'||c.id||'}')::integer[] and site_id=#{@site.id} and level=1) as total_in_region
                   from ((((
