@@ -115,7 +115,7 @@ class OrganizationsController < ApplicationController
                       END as url,
                       '#{@carry_on_url}'||r.path AS carry_on_url,
                       r.code,
-                      (select count(*) from data_denormalization where regions_ids && ('{'||r.id||'}')::integer[] and site_id=#{@site.id}) as total_in_region
+                      (select count(*) from data_denormalization where regions_ids && ('{'||r.id||'}')::integer[] and site_id=#{@site.id} and level=r.level) as total_in_region
                 from ((((
                   projects as p inner join organizations as o on o.id=p.primary_organization_id and
                   o.id=#{params[:id].sanitize_sql!.to_i})
@@ -202,7 +202,7 @@ class OrganizationsController < ApplicationController
                         END as url,
                         '#{@carry_on_url}'||c.id AS carry_on_url,
                         c.iso2_code as code,
-                        (select count(*) from data_denormalization where countries_ids && ('{'||c.id||'}')::integer[] and site_id=#{@site.id}) as total_in_region
+                        (select count(*) from data_denormalization where countries_ids && ('{'||c.id||'}')::integer[] and site_id=#{@site.id} and level=1) as total_in_region
                   from (((((
                     projects as p inner join organizations as o on o.id=p.primary_organization_id and o.id=#{params[:id].sanitize_sql!.to_i})
                     inner join projects_sites as ps on p.id=ps.project_id and ps.site_id=#{@site.id}) inner join countries_projects as cp on cp.project_id=p.id)

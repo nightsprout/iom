@@ -69,7 +69,7 @@ class DataSourcesController < ApplicationController
                END as url,
                '#{@carry_on_url}'||r.path as carry_on_url,
                r.code,
-              (select count(*) from data_denormalization where regions_ids && ('{'||r.id||'}')::integer[] and site_id=#{@site.id}) as total_in_region
+              (select count(*) from data_denormalization where regions_ids && ('{'||r.id||'}')::integer[] and site_id=#{@site.id} and level=r.level) as total_in_region
               from regions as r
                 inner join projects_regions as pr on r.id=pr.region_id and r.level=#{@site.level_for_region}
                 inner join projects_sites as ps on pr.project_id=ps.project_id and ps.site_id=#{@site.id}
@@ -92,7 +92,7 @@ class DataSourcesController < ApplicationController
                  END AS url,
                  '#{@carry_on_url}'||r.path as carry_on_url,
                  r.code,
-                 (select count(*) from data_denormalization where regions_ids && ('{'||r.id||'}')::integer[] and site_id=#{@site.id}) as total_in_region
+                 (select count(*) from data_denormalization where regions_ids && ('{'||r.id||'}')::integer[] and site_id=#{@site.id} and level=r.level) as total_in_region
                  from projects_regions as pr
                  inner join projects_sites as ps on pr.project_id=ps.project_id and ps.site_id=#{@site.id}
                  inner join projects as p on pr.project_id=p.id
@@ -132,7 +132,7 @@ class DataSourcesController < ApplicationController
                 END as url,
                 '#{@carry_on_url}'||c.id as carry_on_url,
                 c.code,
-                (select count(*) from data_denormalization where countries_ids && ('{'||c.id||'}')::integer[] and site_id=#{@site.id}) as total_in_region
+                (select count(*) from data_denormalization where countries_ids && ('{'||c.id||'}')::integer[] and site_id=#{@site.id} and level=1) as total_in_region
                 from countries as c
                   inner join countries_projects as cp on c.id=cp.country_id
                   inner join projects_sites as ps on cp.project_id=ps.project_id and ps.site_id=#{@site.id}

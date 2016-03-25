@@ -105,7 +105,7 @@ class ClustersSectorsController < ApplicationController
             # Get the data for the map depending on the region definition of the site (country or region)
             sql="select r.id,r.name,count(distinct cp.project_id) as count,r.center_lon as lon,r.center_lat as lat,r.name,'#{@carry_on_url}'||r.path as url,
               '#{@@carry_on_url}'||r.path AS carry_on_url,r.code,
-                (select count(*) from data_denormalization where regions_ids && ('{'||r.id||'}')::integer[] and site_id=#{@site.id}) as total_in_region
+               (select count(*) from data_denormalization where regions_ids && ('{'||r.id||'}')::integer[] and site_id=#{@site.id} and level=r.level) as total_in_region
             from regions as r
               inner join projects_regions as pr on r.id=pr.region_id and r.level=#{@site.level_for_region}
               inner join projects_sites as ps on pr.project_id=ps.project_id and ps.site_id=#{@site.id}
@@ -117,7 +117,7 @@ class ClustersSectorsController < ApplicationController
              location_filter = "where c.id = #{@filter_by_location.first}" if @filter_by_location
              sql="select c.id,c.name,count(distinct cp.project_id) as count,c.center_lon as lon,c.center_lat as lat,c.name,'#{@carry_on_url}'||c.id as url,
                 '#{@@carry_on_url}'||c.id AS carry_on_url,
-                  (select count(*) from data_denormalization where countries_ids && ('{'||c.id||'}')::integer[] and site_id=#{@site.id}) as total_in_region
+                  (select count(*) from data_denormalization where countries_ids && ('{'||c.id||'}')::integer[] and site_id=#{@site.id} and level=1) as total_in_region
               from countries as c
                 inner join countries_projects as cp on c.id=cp.country_id
                 inner join projects_sites as ps on cp.project_id=ps.project_id and ps.site_id=#{@site.id}
@@ -140,7 +140,7 @@ class ClustersSectorsController < ApplicationController
             END as url,
             '#{@@carry_on_url}'||r.path AS carry_on_url,
             r.code,
-                (select count(*) from data_denormalization where regions_ids && ('{'||r.id||'}')::integer[] and site_id=#{@site.id}) as total_in_region
+                (select count(*) from data_denormalization where regions_ids && ('{'||r.id||'}')::integer[] and site_id=#{@site.id} and level=r.level) as total_in_region
             from regions as r
               inner join projects_regions as pr on r.id=pr.region_id and r.level=#{@site.level_for_region}
               inner join projects_sites as ps on pr.project_id=ps.project_id and ps.site_id=#{@site.id}
@@ -176,7 +176,7 @@ class ClustersSectorsController < ApplicationController
                   '#{@@carry_on_url}'||r.path AS carry_on_url,
                   (SELECT COUNT(*)
                    FROM data_denormalization
-                   WHERE regions_ids && ('{'||r.id||'}')::integer[] and site_id=#{@site.id}) as total_in_region
+                   WHERE regions_ids && ('{'||r.id||'}')::integer[] and site_id=#{@site.id} and level=r.level) as total_in_region
                    from regions as r
                    inner join projects_regions as pr on r.id=pr.region_id
                    inner join projects_sites as ps on pr.project_id=ps.project_id and ps.site_id=#{@site.id}
@@ -197,7 +197,7 @@ class ClustersSectorsController < ApplicationController
                  END as url,
                  '#{@@carry_on_url}'||c.id AS carry_on_url,
                  (select count(*) from data_denormalization
-                 where countries_ids && ('{'||c.id||'}')::integer[] AND site_id=#{@site.id}) AS total_in_region
+                 where countries_ids && ('{'||c.id||'}')::integer[] AND site_id=#{@site.id} and level=1) AS total_in_region
 
                   FROM countries AS c
                   INNER JOIN countries_projects AS cp ON c.id=cp.country_id
@@ -216,8 +216,12 @@ class ClustersSectorsController < ApplicationController
                 ELSE
                     '/projects/'||(array_to_string(array_agg(distinct ps.project_id),''))
                 END as url,
+<<<<<<< HEAD
                 '#{@@carry_on_url}'||c.id AS carry_on_url,
                     (select count(*) from data_denormalization where countries_ids && ('{'||c.id||'}')::integer[] and site_id=#{@site.id}) as total_in_region
+=======
+                    (select count(*) from data_denormalization where countries_ids && ('{'||c.id||'}')::integer[] and site_id=#{@site.id} and level=1) as total_in_region
+>>>>>>> 97de4c43939b1bf46ad79c26082599af2219a084
                 from countries as c
                   inner join countries_projects as cp on c.id=cp.country_id
                   inner join projects_sites as ps on cp.project_id=ps.project_id and ps.site_id=#{@site.id}
