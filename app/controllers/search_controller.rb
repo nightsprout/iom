@@ -88,10 +88,11 @@ class SearchController < ApplicationController
                  project_description ilike '#{q}' OR
                  organization_name ilike '#{q}' OR
                  sectors ilike '#{q}' OR
-                 regions ilike '#{q}' )"
+                 regions ilike '#{q}' )"      
     end
 
-    where << "(end_date is null OR end_date >= now())"
+    where << "site_id = #{@site.id}"
+    where << "level = 1"
 
     where = where.present? ? "WHERE #{where.join(' AND ')}" : ''
 
@@ -118,7 +119,7 @@ class SearchController < ApplicationController
             FROM clusters AS c
             INNER JOIN clusters_projects AS cp ON c.id=cp.cluster_id
             INNER JOIN projects_sites AS ps ON cp.project_id=ps.project_id AND ps.site_id=#{@site.id}
-            INNER JOIN projects AS p ON ps.project_id=p.id AND (p.end_date is NULL OR p.end_date > now()) #{q_filter}
+            INNER JOIN projects AS p ON ps.project_id=p.id #{q_filter}
             #{filtered_clusters_where}
           SQL
           @clusters = Cluster.find_by_sql(sql)
@@ -128,7 +129,7 @@ class SearchController < ApplicationController
             FROM sectors AS s
             INNER JOIN projects_sectors AS ps ON s.id=ps.sector_id
             INNER JOIN projects_sites AS psi ON psi.project_id=ps.project_id AND psi.site_id=#{@site.id}
-            INNER JOIN projects AS p ON psi.project_id=p.id AND (p.end_date is NULL OR p.end_date > now()) #{q_filter}
+            INNER JOIN projects AS p ON psi.project_id=p.id #{q_filter}
             #{filtered_sectors_where}
           SQL
           @sectors = Sector.find_by_sql(sql)
@@ -141,7 +142,7 @@ class SearchController < ApplicationController
           FROM regions AS r
           INNER JOIN projects_regions AS pr ON r.id=pr.region_id AND r.level=#{@site.level_for_region}
           INNER JOIN projects_sites AS ps ON pr.project_id=ps.project_id AND ps.site_id=#{@site.id}
-          INNER JOIN projects AS p ON ps.project_id=p.id AND (p.end_date is NULL OR p.end_date > now()) #{q_filter}
+          INNER JOIN projects AS p ON ps.project_id=p.id #{q_filter}
           INNER JOIN countries AS c ON c.id = r.country_id
           #{filtered_regions_where}
           ORDER BY subtitle, title
@@ -151,7 +152,7 @@ class SearchController < ApplicationController
         sql = <<-SQL
           SELECT DISTINCT o.id, o.name AS title
           FROM organizations AS o
-          INNER JOIN projects AS p ON (p.end_date is NULL OR p.end_date > now()) AND p.primary_organization_id = o.id #{q_filter}
+          INNER JOIN projects AS p ON p.primary_organization_id = o.id #{q_filter}
           INNER JOIN projects_sites AS ps ON ps.project_id = p.id AND ps.site_id = #{@site.id}
           #{filtered_organizations_where}
           ORDER BY title
@@ -161,7 +162,7 @@ class SearchController < ApplicationController
         sql = <<-SQL
           SELECT DISTINCT d.id, d.name AS title
           FROM donors AS d
-          INNER JOIN projects AS p ON (p.end_date is NULL OR p.end_date > now()) #{q_filter}
+          INNER JOIN projects AS p ON (p.id > 0) #{q_filter}
           INNER JOIN projects_sites AS ps ON ps.project_id = p.id AND ps.site_id = #{@site.id}
           INNER JOIN donations AS dn ON dn.donor_id = d.id AND dn.project_id = p.id
           #{filtered_donors_where}
