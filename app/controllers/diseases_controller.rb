@@ -78,11 +78,12 @@ class DiseasesController < ApplicationController
                 #{location_filter}
                 group by r.id,r.name,lon,lat,r.name,r.code,start_year,end_year"
         elsif @filter_by_location.present? and @filter_by_location.size == 1
-          sql = "select r.id,
-                 count (distinct pa.project_id) as count,
-                 r.name,
-                 r.center_lon as lon,
-                 r.center_lat as lat,
+          sql = <<-SQL
+                 SELECT r.id,
+                        count (distinct pa.project_id) as count,
+                        r.name,
+                        r.center_lon as lon,
+                        r.center_lat as lat,
                  extract(year from start_date) as start_year,
                  extract(year from end_date) as end_year,
                  CASE WHEN count(distinct pa.project_id) > 1 THEN
@@ -157,6 +158,7 @@ class DiseasesController < ApplicationController
           r['url'] = uri.to_s
           r
         end.compact.to_json
+
         @overview_map_chco = @site.theme.data[:overview_map_chco]
         @overview_map_chf = @site.theme.data[:overview_map_chf]
         @overview_map_marker_source = @site.theme.data[:overview_map_marker_source]
