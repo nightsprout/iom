@@ -128,31 +128,29 @@ class OrganizationsController < ApplicationController
         elsif @filter_by_location and @filter_by_location.size == 1
           sql = <<-SQL
                 SELECT r.id,
-                       r.level as level,
                        count(distinct ps.project_id) AS count,
                        r.name,
                        r.center_lon AS lon,
                        r.center_lat AS lat,
-                CASE WHEN count(distinct ps.project_id) > 1 THEN
-                  '#{@carry_on_url}'||r.path
-                ELSE
-                  '/projects/'||(array_to_string(array_agg(distinct ps.project_id),''))
-                END AS url,
-                  '#{@carry_on_url}'||r.path AS carry_on_url,
-                r.code,
-                extract(year from start_date) as start_year,
-                extract(year from end_date) as end_year,
-                (select count(*) from data_denormalization where regions_ids && ('{'||r.id||'}')::integer[] and site_id=#{@site.id} and level = r.level) as total_in_region
+                       CASE WHEN count(distinct ps.project_id) > 1 THEN
+                         '#{@carry_on_url}'||r.path
+                       ELSE
+                         '/projects/'||(array_to_string(array_agg(distinct ps.project_id),''))
+                       END AS url,
+                         '#{@carry_on_url}'||r.path AS carry_on_url,
+                       r.code,
+                       extract(year from start_date) as start_year,
+                       extract(year from end_date) as end_year,
+                       (select count(*) from data_denormalization where regions_ids && ('{'||r.id||'}')::integer[] and site_id=#{@site.id} and level = r.level) as total_in_region
                 FROM projects_regions AS pr
                 INNER JOIN projects_sites AS ps ON pr.project_id=ps.project_id AND ps.site_id=#{@site.id}
                 INNER JOIN projects AS p ON pr.project_id=p.id
                 INNER JOIN regions AS r ON pr.region_id=r.id AND r.level=#{@site.levels_for_region.min} AND r.country_id=#{@filter_by_location.first}
                 #{category_join}
                 WHERE p.primary_organization_id = #{params[:id].sanitize_sql!.to_i}
-                GROUP BY r.id,level,r.name,lon,lat,r.name,r.path,r.code,start_year,end_year
+                GROUP BY r.id,r.name,lon,lat,r.name,r.path,r.code,start_year,end_year
                 UNION
                 SELECT c.id,
-                       0 as level,
                        count(distinct ps.project_id) AS count,
                        c.name as name,
                        c.center_lon AS lon,
@@ -160,17 +158,17 @@ class OrganizationsController < ApplicationController
                        '#{@carry_on_url}' AS url,
                        '#{@carry_on_url}' AS carry_on_url,
                        c.code,
-                       extract(year from start_date) as start_year,
-                       extract(year from end_date) as end_year,
+                       extract(year from p.start_date) as start_year,
+                       extract(year from p.end_date) as end_year,
                        (select count(*) from data_denormalization where countries_ids && ('{'||c.id||'}')::integer[] and site_id=#{@site.id}) as total_in_region
                 FROM projects AS p
                 INNER JOIN projects_sites AS ps ON ps.site_id=#{@site.id} and ps.project_id = p.id
-                INNER JOIN donations on donations.project_id = p.id
-                INNER JOIN countries as c ON c.id = #{params[:location_id]}
+                INNER JOIN countries as c ON c.id = #{@filter_by_location.first}
                 INNER JOIN countries_projects as cp on cp.country_id = c.id AND cp.project_id = p.id
+                INNER JOIN data_denormalization as dd on dd.project_id = p.id AND dd.site_id = #{@site.id} AND dd.regions_ids = ('{}')::integer[] AND dd.level = 1
                 #{category_join}
                 WHERE p.primary_organization_id = #{params[:id].sanitize_sql!.to_i}
-                GROUP BY c.id,level,c.name,lon,lat,c.code,start_year,end_year,total_in_region
+                GROUP BY c.id,c.name,lon,lat,c.code,start_year,end_year,total_in_region
                 SQL
         elsif @filter_by_location.present? and @filter_by_location.size > 1
                 <<-SQL
