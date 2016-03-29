@@ -200,11 +200,11 @@ class ClustersSectorsController < ApplicationController
                  where countries_ids && ('{'||c.id||'}')::integer[] AND site_id=#{@site.id} and level=1) AS total_in_region
 
                   FROM countries AS c
-                  INNER JOIN data_denormalization as dd on dd.project_id = p.id AND dd.site_id = #{@site.id} AND dd.regions_ids = ('{}')::integer[] AND dd.level = #{@filter_by_location.size}
                   INNER JOIN countries_projects AS cp ON c.id=cp.country_id
                   INNER JOIN projects_sites AS ps ON cp.project_id=ps.project_id
                   AND ps.site_id=#{@site.id}
                   INNER JOIN projects AS p ON ps.project_id=p.id
+                  INNER JOIN data_denormalization as dd on dd.project_id = p.id AND dd.site_id = #{@site.id} AND dd.regions_ids = ('{}')::integer[] AND dd.level = #{@filter_by_location.size}
                   INNER JOIN projects_sectors AS pse ON pse.project_id=p.id
                   AND pse.sector_id=#{params[:id].sanitize_sql!.to_i}
                   AND #{country_location_filter}
