@@ -276,6 +276,7 @@ class DonorsController < ApplicationController
                 INNER JOIN donations on donations.project_id = p.id
                 INNER JOIN countries as c ON c.id = #{params[:location_id]}
                 INNER JOIN countries_projects as cp on cp.country_id = c.id AND cp.project_id = p.id
+                INNER JOIN data_denormalization as dd on dd.project_id = p.id AND dd.site_id = #{@site.id} AND dd.regions_ids = ('{}')::integer[] AND dd.level = 1
                 #{category_join} #{organization_location_condition}
                 WHERE donations.donor_id = #{params[:id].sanitize_sql!.to_i}
                 GROUP BY c.id,c.name,lon,lat,c.code

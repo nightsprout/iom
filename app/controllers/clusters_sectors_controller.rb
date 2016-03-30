@@ -184,7 +184,7 @@ class ClustersSectorsController < ApplicationController
                     left outer join projects_sectors as pse on pse.project_id=p.id and pse.sector_id=#{params[:id].sanitize_sql!.to_i}
                     inner join countries c on r.country_id = c.id
                     where #{region_location_filter}
-                     group by r.id,r.name,lon,lat,r.path,c.name
+                    group by r.id,r.name,lon,lat,r.path,c.name
                 UNION
                  SELECT c.id as id,
                  c.name as name,
@@ -204,6 +204,7 @@ class ClustersSectorsController < ApplicationController
                   INNER JOIN projects_sites AS ps ON cp.project_id=ps.project_id
                   AND ps.site_id=#{@site.id}
                   INNER JOIN projects AS p ON ps.project_id=p.id
+                  INNER JOIN data_denormalization as dd on dd.project_id = p.id AND dd.site_id = #{@site.id} AND dd.regions_ids = ('{}')::integer[] AND dd.level = #{@filter_by_location.size}
                   INNER JOIN projects_sectors AS pse ON pse.project_id=p.id
                   AND pse.sector_id=#{params[:id].sanitize_sql!.to_i}
                   AND #{country_location_filter}
