@@ -97,7 +97,6 @@ SQL
     inner join projects_sites as psi on p.id=psi.project_id and psi.site_id=#{site.id}
     #{location_join}
     where ps.sector_id=#{self.id}
-          and p.end_date >= current_date
     "
     ActiveRecord::Base.connection.execute(sql).first['count'].to_i
   end
