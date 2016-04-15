@@ -187,8 +187,7 @@ class OrganizationsController < ApplicationController
                   FROM projects_regions AS pr
                   INNER JOIN projects_sites AS ps ON pr.project_id=ps.project_id AND ps.site_id=#{@site.id}
                   INNER JOIN projects AS p ON pr.project_id=p.id
-                  INNER JOIN regions AS r ON pr.region_id=r.id AND r.level=#{@site.levels_for_region.min} AND r.country_id=#{@filter_by_location.shift} AND r.id IN (#{@filter_by_location.join(',')})
-                  #{category_join}
+                  inner join regions as r on pr.region_id=r.id and r.level=#{@site.levels_for_region.min + 1} and r.country_id=#{@filter_by_location.shift} and r.parent_region_id in (#{@filter_by_location.join(',')})                  #{category_join}
                   WHERE p.primary_organization_id = #{params[:id].sanitize_sql!.to_i}
                   GROUP BY r.id,r.name,lon,lat,r.path,r.code
                 SQL

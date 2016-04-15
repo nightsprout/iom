@@ -138,7 +138,7 @@ class DiseasesController < ApplicationController
                  from projects_regions as pr
                  inner join projects_sites as ps on pr.project_id=ps.project_id and ps.site_id=#{@site.id}
                  inner join projects as p on pr.project_id=p.id
-                 inner join regions as r on pr.region_id=r.id and r.level=#{@site.levels_for_region.min} and r.country_id=#{@filter_by_location.shift} and r.id in (#{@filter_by_location.join(',')})
+                 inner join regions as r on pr.region_id=r.id and r.level=#{@site.levels_for_region.min + 1} and r.country_id=#{@filter_by_location.shift} and r.parent_region_id in (#{@filter_by_location.join(',')})
                  inner join diseases_projects as pa on pa.project_id=p.id and pa.disease_id=#{params[:id].sanitize_sql!.to_i}
                  group by r.id,r.name,lon,lat,r.path,r.code,start_year,end_year"
         else
