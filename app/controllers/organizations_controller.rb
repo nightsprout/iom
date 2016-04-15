@@ -104,7 +104,7 @@ class OrganizationsController < ApplicationController
         #  @carry_on_url = organization_path(@organization, @carry_on_filters.merge(:location_id => ''))
         #end
 
-        if @site.geographic_context_country_id
+        if @site.geographic_context_country_id          
           location_filter = "and r.id = #{@filter_by_location.last}" if @filter_by_location
 
           sql="select r.id,count(distinct ps.project_id) as count,r.name,r.center_lon as lon,r.center_lat as lat,
@@ -171,7 +171,7 @@ class OrganizationsController < ApplicationController
                 GROUP BY c.id,c.name,lon,lat,c.code,start_year,end_year,total_in_region
                 SQL
         elsif @filter_by_location.present? and @filter_by_location.size > 1
-                <<-SQL
+          sql=<<-SQL
                   SELECT r.id,
                          count(distinct ps.project_id) AS count,
                          r.name,
@@ -192,7 +192,7 @@ class OrganizationsController < ApplicationController
                   WHERE p.primary_organization_id = #{params[:id].sanitize_sql!.to_i}
                   GROUP BY r.id,r.name,lon,lat,r.path,r.code
                 SQL
-          else
+        else
             sql="select c.id,count(distinct ps.project_id) as count,c.name,c.center_lon as lon,
                         c.center_lat as lat,c.name,
                         CASE WHEN count(distinct ps.project_id) > 1 THEN
@@ -211,7 +211,7 @@ class OrganizationsController < ApplicationController
                     #{category_join}
                   group by c.id,c.name,lon,lat,c.name,c.iso2_code"
         end
-
+        
         result=ActiveRecord::Base.connection.execute(sql)
 
         @map_data = result.map do |r|
