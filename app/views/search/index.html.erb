@@ -31,7 +31,7 @@
               <h3><%= @site.word_for_clusters %></h3>
               <select name="sectors_ids[]" multiple placeholder="All sectors">
                 <% @sectors.each do |sector| %>
-                  <option value="<%= sector.id %>"><%= sector.title %></option>
+                  <option value="<%= sector.id %>"><%= CGI.unescapeHTML(sector.title) %></option>
                 <% end %>
                 <% @filtered_sectors.each do |region| %>
                   <option selected value="<%= region.id %>"><%= region.title %></option>
@@ -47,7 +47,7 @@
                 <option value="<%= organization.id %>"><%= organization.title %></option>
               <% end %>
               <% @filtered_organizations.each do |region| %>
-                <option selected value="<%= region.id %>"><%= region.title %></option>
+                <option selected value="<%= region.id %>"><%= CGI.unescapeHTML(region.title) %></option>
               <% end %>
             </select>
           </div>
@@ -56,7 +56,7 @@
             <h3>Donor</h3>
             <select name="donors_ids[]" multiple placeholder="All donors">
               <% @donors.each do |donor| %>
-                <option value="<%= donor.id %>"><%= donor.title %></option>
+                <option value="<%= donor.id %>"><%= CGI.unescapeHTML(donor.title) %></option>
               <% end %>
               <% @filtered_donors.each do |region| %>
                 <option selected value="<%= region.id %>"><%= region.title %></option>
