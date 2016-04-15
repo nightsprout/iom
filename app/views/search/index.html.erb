@@ -12,6 +12,19 @@
             <%= text_field_tag :q, params[:q], :placeholder => 'Search' %>
             <%= submit_tag '' %>
           </div>
+          
+          <div class="block country">
+            <h3>Countries</h3>
+            <select name="countries_ids[]" multiple placeholder="All countries">
+              <% @countries.each do |country| %>
+                <option value="<%= country.id %>"><%= country.title %></option>
+              <% end %>
+              <% @filtered_countries.each do |country| %>
+                <option selected value="<%= country.id %>"><%= country.title %></option>
+              <% end %>
+            </select>
+          </div>
+
 
           <div class="block region">
             <h3><%= @site.word_for_regions %></h3>
@@ -59,6 +72,42 @@
                 <option value="<%= donor.id %>"><%= CGI.unescapeHTML(donor.title) %></option>
               <% end %>
               <% @filtered_donors.each do |region| %>
+                <option selected value="<%= region.id %>"><%= region.title %></option>
+              <% end %>
+            </select>
+          </div>
+
+          <div class="block donor">
+            <h3>Activity</h3>
+            <select name="activities_ids[]" multiple placeholder="All activities">
+              <% @activities.each do |activity| %>
+                <option value="<%= activity.id %>"><%= CGI.unescapeHTML(activity.title) %></option>
+              <% end %>
+              <% @filtered_activities.each do |region| %>
+                <option selected value="<%= region.id %>"><%= region.title %></option>
+              <% end %>
+            </select>
+          </div>
+
+          <div class="block donor">
+            <h3>Disease</h3>
+            <select name="diseases_ids[]" multiple placeholder="All diseases">
+              <% @diseases.each do |disease| %>
+                <option value="<%= disease.id %>"><%= CGI.unescapeHTML(disease.title) %></option>
+              <% end %>
+              <% @filtered_diseases.each do |region| %>
+                <option selected value="<%= region.id %>"><%= region.title %></option>
+              <% end %>
+            </select>
+          </div>
+
+          <div class="block donor">
+            <h3>Data Source</h3>
+            <select name="data_sources_ids[]" multiple placeholder="All data sources">
+              <% @data_sources.each do |data_source| %>
+                <option value="<%= data_source.id %>"><%= CGI.unescapeHTML(data_source.title) %></option>
+              <% end %>
+              <% @filtered_data_sources.each do |region| %>
                 <option selected value="<%= region.id %>"><%= region.title %></option>
               <% end %>
             </select>

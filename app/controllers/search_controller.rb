@@ -6,9 +6,16 @@ class SearchController < ApplicationController
     where  = ["site_id=#{@site.id}"]
     limit = 20
     @current_page = params[:page] ? params[:page].to_i : 1
-    @clusters = @regions = @filtered_regions = @filtered_sectors = @filtered_clusters = @filtered_organizations = @filtered_donors = []
+    @clusters = @regions = @filtered_countries = @filtered_regions = @filtered_sectors = @filtered_clusters = @filtered_organizations = []
+    @filtered_donors = @filtered_activities = @filtered_diseases = @filtered_data_sources = []
     @navigate_by_cluster = @site.navigate_by_cluster?
 
+    if params[:countries_ids].present?
+      @filtered_countries = Country.find_by_sql("select c.id, c.name as title from countries as c where c.id in (#{params[:countries_ids].join(",")})")
+      filtered_countries_where = "where c.id not in (#{params[:countries_ids].join(",")})"
+      where << params[:countries_ids].map{|country_id| "countries_ids && ('{'||#{country_id}||'}')::integer[]"}.join(' OR ')
+    end
+    
     if params[:regions_ids].present?
       @filtered_regions = Region.find_by_sql("select r.id, r.name as title, c.name as subtitle from regions as r inner join countries as c on c.id = r.country_id where r.id in (#{params[:regions_ids].join(",")})")
       filtered_regions_where = "where r.id not in (#{params[:regions_ids].join(",")})"
@@ -33,7 +40,7 @@ class SearchController < ApplicationController
     end
 
     if params[:organizations_ids].present?
-      @filtered_organizations = Cluster.find_by_sql("select o.id, o.name as title from organizations as o where o.id in (#{params[:organizations_ids].join(",")})")
+      @filtered_organizations = Organization.find_by_sql("select o.id, o.name as title from organizations as o where o.id in (#{params[:organizations_ids].join(",")})")
       filtered_organizations_where = "where o.id not in (#{params[:organizations_ids].join(",")})"
       where << "organization_id IN (#{params[:organizations_ids].join(",")})"
     end
@@ -43,6 +50,26 @@ class SearchController < ApplicationController
       filtered_donors_where = "where d.id not in (#{params[:donors_ids].join(",")})"
       where << params[:donors_ids].map{|donor_id| "donors_ids && ('{'||#{donor_id}||'}')::integer[]"}.join(' OR ')
     end
+
+    if params[:activities_ids].present?
+      @filtered_activities = Activity.find_by_sql("select a.id, a.name as title from activities as a where a.id in (#{params[:activities_ids].join(",")})")
+      filtered_activities_where = "where a.id not in (#{params[:activities_ids].join(",")})"
+      where << params[:activities_ids].map{|activity_id| "activities_ids && ('{'||#{activity_id}||'}')::integer[]"}.join(' OR ')
+    end
+
+    if params[:diseases_ids].present?
+      @filtered_diseases = Disease.find_by_sql("select d.id, d.name as title from diseases as d where d.id in (#{params[:diseases_ids].join(",")})")
+      filtered_diseases_where = "where d.id not in (#{params[:diseases_ids].join(",")})"
+      where << params[:diseases_ids].map{|disease_id| "diseases_ids && ('{'||#{disease_id}||'}')::integer[]"}.join(' OR ')
+    end
+
+    if params[:data_sources_ids].present?
+      @filtered_data_sources = DataSource.find_by_sql("select d.id, d.name as title from data_sources as d where d.id in (#{params[:data_sources_ids].join(",")})")
+      filtered_data_sources_where = "where d.id not in (#{params[:data_sources_ids].join(",")})"
+      where << params[:data_sources_ids].map{|data_source_id| "data_sources_ids && ('{'||#{data_source_id}||'}')::integer[]"}.join(' OR ')
+    end
+
+
 
     if params[:status].present? and params[:status] != 'Any'
       case params[:status]
@@ -137,6 +164,18 @@ class SearchController < ApplicationController
 
         sql = <<-SQL
           SELECT DISTINCT
+            c.id, c.name AS title
+          FROM countries AS c
+          INNER JOIN countries_projects AS pc ON c.id=pc.country_id
+          INNER JOIN projects_sites AS ps ON pc.project_id=ps.project_id AND ps.site_id=#{@site.id}
+          INNER JOIN projects AS p ON ps.project_id=p.id #{q_filter}
+          #{filtered_countries_where}
+          ORDER BY title
+        SQL
+        @countries = Country.find_by_sql(sql)
+
+        sql = <<-SQL
+          SELECT DISTINCT
             r.id, r.name AS title,
             CASE WHEN ps.site_id = 1 THEN null ELSE c.name END AS subtitle
           FROM regions AS r
@@ -169,6 +208,40 @@ class SearchController < ApplicationController
           ORDER BY title
         SQL
         @donors = Donor.find_by_sql(sql)
+
+        sql = <<-SQL
+          SELECT DISTINCT a.id, a.name AS title
+          FROM activities AS a
+          INNER JOIN projects_activities AS pa ON a.id=pa.activity_id
+          INNER JOIN projects AS p ON (p.id > 0) #{q_filter}
+          INNER JOIN projects_sites AS ps ON ps.project_id = p.id AND ps.site_id = #{@site.id}
+          #{filtered_activities_where}
+          ORDER BY title
+        SQL
+        @activities = Activity.find_by_sql(sql)
+
+        sql = <<-SQL
+          SELECT DISTINCT d.id, d.name AS title
+          FROM diseases AS d
+          INNER JOIN diseases_projects AS pd ON d.id=pd.disease_id
+          INNER JOIN projects AS p ON (p.id > 0) #{q_filter}
+          INNER JOIN projects_sites AS ps ON ps.project_id = p.id AND ps.site_id = #{@site.id}
+          #{filtered_diseases_where}
+          ORDER BY title
+        SQL
+        @diseases = Disease.find_by_sql(sql)
+
+        sql = <<-SQL
+          SELECT DISTINCT d.id, d.name AS title
+          FROM data_sources AS d
+          INNER JOIN data_sources_projects AS pd ON d.id=pd.data_source_id
+          INNER JOIN projects AS p ON (p.id > 0) #{q_filter}
+          INNER JOIN projects_sites AS ps ON ps.project_id = p.id AND ps.site_id = #{@site.id}
+          #{filtered_data_sources_where}
+          ORDER BY title
+        SQL
+        @data_sources = DataSource.find_by_sql(sql)
+
 
       end
       format.js do
