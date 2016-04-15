@@ -321,7 +321,7 @@ class DonorsController < ApplicationController
                   from ((((
                     projects as p inner join donations as dn on dn.project_id = p.id and dn.donor_id=#{params[:id].sanitize_sql!.to_i})
                     inner join projects_sites as ps on p.id=ps.project_id and ps.site_id=#{@site.id}) inner join countries_projects as cp on cp.project_id=p.id)
-                    inner join projects as prj on ps.project_id=prj.id)
+                    inner join projects as prj on ps.project_id=prj.id
                     inner join countries as c on cp.country_id=c.id)
                     #{category_join}
                     #{organization_condition}
