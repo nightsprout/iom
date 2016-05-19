@@ -10,7 +10,7 @@ class FixRegionLevels < ActiveRecord::Migration
       batch.each do |region|
         connection.execute "UPDATE regions SET level=2 WHERE id=#{region.id}" if region.parent_region_id.present?
       end # batch.each
-    end # Region.where
+    end # Region.find_in_batches
 
     Region.
       select((Region.column_names - ['the_geom', 'the_geom_geojson']).map { |n| "regions.#{n}" } << "parent_regions_regions.level").
@@ -28,7 +28,7 @@ class FixRegionLevels < ActiveRecord::Migration
           connection.execute "UPDATE regions SET level=3 WHERE id=#{region.id}"
         end
       end # batch.each
-    end # Region.where
+    end # Region.find_in_batches
   end
   
   def down
