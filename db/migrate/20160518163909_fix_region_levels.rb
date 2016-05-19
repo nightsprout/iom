@@ -1,9 +1,9 @@
-class FixRegionLevels < ActiveRecord::Migration
+class FixRegionLevelsT < ActiveRecord::Migration
   def up
     connection = ActiveRecord::Base.connection
 
     Region.
-      select((Region.column_names - ['the_geom', 'the_geom_geojson']).map { |n| "regions.#{n}" }).
+      select([:id, :parent_region_id]).
       where(level: 1).
       find_in_batches do |batch|
 
@@ -13,7 +13,7 @@ class FixRegionLevels < ActiveRecord::Migration
     end # Region.find_in_batches
 
     Region.
-      select((Region.column_names - ['the_geom', 'the_geom_geojson']).map { |n| "regions.#{n}" } << "parent_regions_regions.level").
+      select(["regions.id", "regions.parent_region_id", "parent_regions_regions.level"]).
       where(level: 2).
       joins(:parent_region).
       find_in_batches(batch_size: 500) do |batch|
