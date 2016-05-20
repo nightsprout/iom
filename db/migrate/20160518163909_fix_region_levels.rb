@@ -1,4 +1,4 @@
-class FixRegionLevelsT < ActiveRecord::Migration
+class FixRegionLevels < ActiveRecord::Migration
   def up
     connection = ActiveRecord::Base.connection
 
