@@ -280,7 +280,8 @@ SQL
           SELECT (((((( r3.country_id) || '/'::text) || r2.parent_region_id) || '/'::text) || r2.id) || '/'::text) || r3.id AS url
           FROM regions r3
           JOIN regions r2 ON r3.parent_region_id = r2.id
-          WHERE r3.id=#{self.id})"
+          WHERE r3.id=#{self.id})
+          WHERE ur.id=#{self.id}"
       end
       unless sql.blank?
         ActiveRecord::Base.connection.execute(sql)
