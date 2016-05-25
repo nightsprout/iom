@@ -37,7 +37,6 @@
 #
 
 class Project < ActiveRecord::Base
-  include ModelChangesRecorder
 
   belongs_to :primary_organization, :foreign_key => :primary_organization_id, :class_name => 'Organization'
   has_and_belongs_to_many :clusters
