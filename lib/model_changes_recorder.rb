@@ -52,11 +52,11 @@ module ModelChangesRecorder
 
     def valid(changes)
       if changes[:countries].present?
-        changes[:countries] = changes[:countries].map { |c| Country.select(:id, :name).where(id: c.id) }
+        changes[:countries] = changes[:countries].map { |c| Country.select([:id, :name]).where(id: c.id) }
       end
 
       if changes[:regions].present?
-        changes[:regions] = changes[:regions].map { |r| Region.select(:id, :name).where(id: r.id) }
+        changes[:regions] = changes[:regions].map { |r| Region.select([:id, :name]).where(id: r.id) }
       end
 
       associations_changes = Hash[changes.select do |field, values|
