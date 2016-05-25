@@ -20,7 +20,7 @@ class Admin::OrganizationsController < ApplicationController
 
   def create
     @organization = Organization.new(params[:organization])
-    @organization.updated_by = current_user
+#    @organization.updated_by = current_user
     if @organization.save
       flash[:notice] = 'Organization created successfully.'
       redirect_to edit_admin_organization_path(@organization), :flash => {:success => 'Organization has been created successfully'}
@@ -48,7 +48,7 @@ class Admin::OrganizationsController < ApplicationController
     else
       @organization.attributes = params[:organization]
     end
-    @organization.updated_by = current_user
+#    @organization.updated_by = current_user
     if @organization.save
       flash[:notice] = 'Organization updated successfully.'
       @organization.update_data_denormalization
