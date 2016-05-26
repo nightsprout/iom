@@ -98,7 +98,7 @@ class Admin::ProjectsController < Admin::AdminController
   def create
     @project = new_project( project_params )
     @project.intervention_id = nil
-#    @project.updated_by = current_user
+    @project.updated_by = current_user
 
     if @project.save
       flash[:notice] = "Project created! Now you can <a href='#{donations_admin_project_path(@project)}'>provide the donor information</a> for this project."
@@ -127,7 +127,7 @@ class Admin::ProjectsController < Admin::AdminController
     @project = find_project(params[:id])
     @sectors = @project.sectors
     @project.attributes = project_params
-#    @project.updated_by = current_user
+    @project.updated_by = current_user
     if params[:project][:sector_ids].nil? && !@project.sectors.empty?
         @organizations_ids    = organizations_ids
         @countries_iso_codes  = countries_iso_codes

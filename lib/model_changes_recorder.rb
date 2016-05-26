@@ -51,12 +51,28 @@ module ModelChangesRecorder
     end
 
     def valid(changes)
-      if changes[:countries].present?
-        changes[:countries] = changes[:countries].map { |c| Country.select([:id, :name]).where(id: c.id) }
+      if changes[:countries].present?        
+        changes[:countries] = changes[:countries].map do |c|
+          if c.respond_to? :id
+            Country.select([:id, :name]).where(id: c.id)
+          elsif c.respond_to? :map
+            c.map { |e| e.respond_to? :id ? Country.select([:id, :name]).where(id: e.id) : e }
+          else
+            c
+          end
+        end
       end
-
+      
       if changes[:regions].present?
-        changes[:regions] = changes[:regions].map { |r| Region.select([:id, :name]).where(id: r.id) }
+        changes[:regions] = changes[:regions].map do |r|
+          if r.respond_to? :id
+            Region.select([:id, :name]).where(id: r.id)
+          elsif r.respond_to? :map
+            r.map { |e| e.respond_to? :id ? Region.select([:id, :name]).where(id: e.id) : e }
+          else
+            r
+          end
+        end
       end
 
       associations_changes = Hash[changes.select do |field, values|
