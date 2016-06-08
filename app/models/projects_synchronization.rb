@@ -19,7 +19,6 @@ class ProjectsSynchronization < ActiveRecord::Base
   validates_presence_of :projects_file, :on => :create
 
   before_save :process_projects_file_data
-  before_create :save_projects_if_no_errors
   before_update :save_projects_anyway
 
   def valid?(context = nil)
@@ -256,11 +255,6 @@ class ProjectsSynchronization < ActiveRecord::Base
           end
         end
 
-
-        if p.save
-          p.sites << Site.find_by_name("global")
-        end
-
         if ps.present?
           if p.invalid?
             ps.projects_errors += p.errors.full_messages.flatten.map{|msg| "#{msg} on row ##{line}"}
@@ -269,21 +263,15 @@ class ProjectsSynchronization < ActiveRecord::Base
             ps.projects << p
           end
         end
-
-        if p.invalid?
-          Rails.logger.debug "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-          Rails.logger.debug "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-          Rails.logger.debug "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-          Rails.logger.debug "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-          Rails.logger.debug p.errors.full_messages
-          Rails.logger.debug "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-          Rails.logger.debug "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-          Rails.logger.debug "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-          next 
+        
+        if p.save
+          p.sites << Site.find_by_name("global")
         end
-      
+        
       rescue Exception => e
-        Rails.logger.info "Exception: #{e}"
+        Rails.logger.debug "Exception: #{e}"
+        ps.projects_errors << "Unable to update project on row #{line}"
+        ps.project_not_updated << p
         nil
       end
     end
@@ -323,12 +311,6 @@ class ProjectsSynchronization < ActiveRecord::Base
     results = body.map { |row| sync_row.new(*row) }
 
     ProjectsSynchronization.load_project_files( results, self )
-  end
-
-  def save_projects_if_no_errors
-    if projects_errors.blank?
-      projects.each(&:save)
-    end
   end
 
   def save_projects_anyway

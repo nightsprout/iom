@@ -32,7 +32,7 @@ function createUploader() {
               modal_window.find('a.cancel').addClass('ok');
             };
 
-            if (response.success){
+            if (response.projects_not_updated_count == 0){
               modal_window.find('.alert').addClass('ok');
               modal_window.find('h4').text('Great!');
               modal_window.find('p').text(response.projects_updated_count + ' projects updated successfully :-)');
