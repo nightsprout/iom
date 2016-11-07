@@ -61,6 +61,8 @@
           </div>
         <% end %>
 
+        <%= render 'new_partials/aside/organizations_in_this_country', :organizations => @area.organizations(@site) %>
+
         <%= render 'new_partials/aside/donors', :donors => @area.donors(@site) %>
 
         <div class="mod-info">

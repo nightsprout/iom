@@ -1,0 +1,14 @@
+<div class="mod-organizations mod-info">
+  <h3>Organizations in this <%= word_for_geo_context(@area) %></h3>
+  <% unless organizations.empty? %>
+    <ul>
+      <% index = 1 %>
+      <% organizations.each do |organization| %>
+        <li class="<%= (index > 10)? "out" : "" %>"><%= link_to(organization.name.html_safe, organization_path(organization)) %></li>
+        <% index = index + 1 %>
+      <% end %>
+    </ul>
+  <% else %>
+    <p>There are no organizations</p>
+  <% end %>
+</div>

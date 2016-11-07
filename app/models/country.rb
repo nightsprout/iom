@@ -110,12 +110,24 @@ class Country < ActiveRecord::Base
 
     sql="select donors.* from donors
     inner join donations as d on donors.id=d.donor_id
-    inner join projects as p on d.project_id = p.id
+    inner join projects as p on d.project_id=p.id
     inner join projects_sites as ps on d.project_id=ps.project_id and ps.site_id=#{site.id}
     inner join countries_projects as cp on ps.project_id=cp.project_id and cp.country_id=#{self.id}
     #{limit}"
 
     Donor.find_by_sql(sql).uniq
+  end
+
+  def organizations(site, limit = '')
+    limit = "LIMIT #{limit}" if limit.present?
+
+    sql="select organizations.*, * from countries_projects
+         inner join data_denormalization as dd on dd.project_id=countries_projects.project_id and dd.site_id=#{site.id}
+         inner join organizations on organizations.id=dd.organization_id
+         where countries_projects.country_id=#{self.id}
+         #{limit}"
+
+    Organization.find_by_sql(sql).uniq
   end
 
   # to get only id and name
