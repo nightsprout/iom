@@ -123,6 +123,19 @@ class Region < ActiveRecord::Base
     Donor.find_by_sql(sql)
   end
 
+  def organizations(site, limit = '')
+    limit = "LIMIT #{limit}" if limit.present?
+
+    sql="select organizations.*, * from projects_regions
+         inner join data_denormalization as dd on dd.project_id=projects_regions.project_id and dd.site_id=#{site.id}
+         inner join organizations on organizations.id=dd.organization_id
+         where projects_regions.region_id=#{self.id}
+         #{limit}"
+
+    Organization.find_by_sql(sql).uniq
+  end
+
+
   def donors_budget(site)
     amount = 0
     donors(site).each { |donor| amount += donor.donations_amount }
