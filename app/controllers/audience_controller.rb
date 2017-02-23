@@ -69,11 +69,11 @@ class AudienceController < ApplicationController
                extract(year from start_date) as start_year,
                extract(year from end_date) as end_year,
                CASE WHEN count(distinct pa.project_id) > 1 THEN
-                 '#{@carry_on_url}'||r.path
+                 ('#{@carry_on_url}'::character varying)||r.path
                ELSE
                  '/projects/'||array_to_string(array_agg(distinct pa.project_id),'')
                END as url,
-               '#{@carry_on_url}'||r.path as carry_on_url,
+               ('#{@carry_on_url}'::character varying)||r.path as carry_on_url,
                r.code,
               (select count(*) from data_denormalization where regions_ids && ('{'||r.id||'}')::integer[] and site_id=#{@site.id} and level=r.level) as total_in_region
               from regions as r
@@ -91,11 +91,11 @@ class AudienceController < ApplicationController
                        r.center_lon AS lon,
                        r.center_lat AS lat,
                        CASE WHEN count(distinct ps.project_id) > 1 THEN
-                         '#{@carry_on_url}'||r.path
+                         ('#{@carry_on_url}'::character varying)||r.path
                        ELSE
                          '/projects/'||(array_to_string(array_agg(distinct ps.project_id),''))
                        END AS url,
-                         '#{@carry_on_url}'||r.path AS carry_on_url,
+                         ('#{@carry_on_url}'::character varying)||r.path AS carry_on_url,
                        r.code,
                        extract(year from start_date) as start_year,
                        extract(year from end_date) as end_year,
@@ -112,8 +112,8 @@ class AudienceController < ApplicationController
                        c.name as name,
                        c.center_lon AS lon,
                        c.center_lat AS lat,
-                       '#{@carry_on_url}' AS url,
-                       '#{@carry_on_url}' AS carry_on_url,
+                       ('#{@carry_on_url}'::character varying) AS url,
+                       ('#{@carry_on_url}'::character varying) AS carry_on_url,
                        c.code,
                        extract(year from p.start_date) as start_year,
                        extract(year from p.end_date) as end_year,
@@ -135,11 +135,11 @@ class AudienceController < ApplicationController
                  extract(year from start_date) as start_year,
                  extract(year from end_date) as end_year,
                  CASE WHEN count(distinct pa.project_id) > 1 THEN
-                   '#{@carry_on_url}'||r.path
+                   ('#{@carry_on_url}'::character varying)||r.path
                  ELSE
                    '/projects/'||(array_to_string(array_agg(distinct pa.project_id),''))
                  END AS url,
-                 '#{@carry_on_url}'||r.path as carry_on_url,
+                 ('#{@carry_on_url}'::character varying)||r.path as carry_on_url,
                  r.code
                  from projects_regions as pr
                  inner join projects_sites as ps on pr.project_id=ps.project_id and ps.site_id=#{@site.id}
@@ -152,11 +152,11 @@ class AudienceController < ApplicationController
                  extract(year from start_date) as start_year,
                  extract(year from end_date) as end_year,
                  CASE WHEN count(distinct pa.project_id) > 1 THEN
-                   '#{@carry_on_url}'||c.id
+                   ('#{@carry_on_url}'::character varying)||c.id
                  ELSE
                    '/projects/'||array_to_string(array_agg(distinct pa.project_id),'')
                  END as url,
-                '#{@carry_on_url}'||c.id as carry_on_url,
+                ('#{@carry_on_url}'::character varying)||c.id as carry_on_url,
                 c.code,
                 (select count(*) from data_denormalization where countries_ids && ('{'||c.id||'}')::integer[] and site_id=#{@site.id} and level=1) as total_in_region
                 from countries as c
