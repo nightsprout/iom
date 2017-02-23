@@ -414,7 +414,8 @@ define(['underscore', 'backbone', 'pluralize', 'underscoreString'], function(_, 
               '_blank'
             );
           } else {
-            window.location.href = me.url;
+            console.log('window.location.href = \'' + me.url + '\';');
+//            window.location.href = me.url;
           }
         } else {
           var elementOffset = $('.main-content').offset().top - 49;
