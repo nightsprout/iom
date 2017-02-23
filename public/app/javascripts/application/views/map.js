@@ -408,14 +408,18 @@ define(['underscore', 'backbone', 'pluralize', 'underscoreString'], function(_, 
 
         if (me.url !== undefined && me.url !== window.location.pathname + window.location.search) {
 
+          var pathname = me.url;
+          if (!pathname.match(new RegExp('^\/(project|location)'))) {
+            pathname = '/location/' + pathname;
+          }
+          
           if (typeof MAP_EMBED !== 'undefined' && MAP_EMBED) {
             window.open(
-              me.url,
+              pathname,
               '_blank'
             );
-          } else {
-            console.log('window.location.href = \'' + me.url + '\';');
-//            window.location.href = me.url;
+          } else {              
+            window.location.pathname = pathname;
           }
         } else {
           var elementOffset = $('.main-content').offset().top - 49;
