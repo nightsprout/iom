@@ -412,6 +412,9 @@ define(['underscore', 'backbone', 'pluralize', 'underscoreString'], function(_, 
           if (!pathname.match(new RegExp('^\/(project|location)'))) {
             pathname = '/location/' + pathname;
           }
+          if (pathname.match(new RegExp('\\?$'))) {
+            pathname = pathname.slice(0, pathname.length - 1);
+          }
           
           if (typeof MAP_EMBED !== 'undefined' && MAP_EMBED) {
             window.open(
